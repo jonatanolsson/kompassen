@@ -237,7 +237,7 @@ new class extends Component
             <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-700">
                 <!-- Header -->
                 <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6 flex items-center justify-between">
-                    <flux:heading level="2">{{ __('Select WCAG Success Criteria') }}</flux:heading>
+                    <flux:heading level="2">{{ __('Select WCAG Criteria') }}</flux:heading>
                     <button 
                         type="button"
                         wire:click="closeModal"
@@ -254,7 +254,7 @@ new class extends Component
                     <input 
                         wire:model.debounce-500ms="searchQuery"
                         type="text"
-                        placeholder="{{ __('Search criteria') }}..."
+                        placeholder="{{ __('Search criteria...') }}"
                         class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
                     />
                     @if (!empty($searchQuery))
