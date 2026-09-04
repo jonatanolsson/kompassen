@@ -63,47 +63,47 @@ new class extends Component {
 }; ?>
 
 <div>
-    <div class="space-y-4">
-        <!-- Hidden input to store selected criteria for form submission -->
-        @foreach ($selectedCriteria as $id)
-            <input type="hidden" name="wcag_criteria[]" value="{{ $id }}" />
-        @endforeach
+    <!-- Hidden input to store selected criteria for form submission -->
+    @foreach ($selectedCriteria as $id)
+        <input type="hidden" name="wcag_criteria[]" value="{{ $id }}" />
+    @endforeach
 
-        <!-- Button to open modal -->
-        <flux:button 
-            wire:click="$set('open', true)" 
-            variant="ghost"
-        >
-            {{ __('Select WCAG Criteria') }}
-        </flux:button>
+    <!-- Button to open modal -->
+    <flux:button 
+        wire:click="$set('open', true)" 
+        variant="ghost"
+        class="mb-4"
+    >
+        {{ __('Select WCAG Criteria') }}
+    </flux:button>
 
-        @if ($selectedCriteria)
-            <div class="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg">
-                <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
-                    {{ count($selectedCriteria) }} {{ __('criteria selected') }}
-                </flux:text>
-                <div class="space-y-1">
-                    @foreach ($this->getSelectedCriteria() as $criterion)
-                        <div class="flex items-center justify-between bg-white dark:bg-zinc-900 p-2 rounded border border-zinc-200 dark:border-zinc-700">
-                            <flux:text class="text-sm">
-                                {{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}
-                            </flux:text>
-                            <button 
-                                type="button"
-                                wire:click="toggleCriterion('{{ $criterion->id }}')"
-                                class="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                            >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    @endforeach
-                </div>
+    @if ($selectedCriteria)
+        <div class="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg mb-4">
+            <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+                {{ count($selectedCriteria) }} {{ __('criteria selected') }}
+            </flux:text>
+            <div class="space-y-1">
+                @foreach ($this->getSelectedCriteria() as $criterion)
+                    <div class="flex items-center justify-between bg-white dark:bg-zinc-900 p-2 rounded border border-zinc-200 dark:border-zinc-700">
+                        <flux:text class="text-sm">
+                            {{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}
+                        </flux:text>
+                        <button 
+                            type="button"
+                            wire:click="toggleCriterion('{{ $criterion->id }}')"
+                            class="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                        >
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                @endforeach
             </div>
-        @endif
+        </div>
+    @endif
 
-        <!-- Modal -->
+    <!-- Modal -->
         <div 
             x-data="{ open: @js($open) }" 
             x-show="open"
