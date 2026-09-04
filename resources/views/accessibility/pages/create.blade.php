@@ -32,7 +32,7 @@
                 </flux:field>
 
                 <flux:field>
-                    <flux:label>Description</flux:label>
+                    <flux:label>{{ __('Description') }}</flux:label>
                     <flux:textarea 
                         name="description" 
                         placeholder="Add notes about this page..."

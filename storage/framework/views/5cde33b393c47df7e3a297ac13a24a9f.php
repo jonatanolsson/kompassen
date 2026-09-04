@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title><?php echo e($project->name); ?> - Accessibility Report</title>
+        <title><?php echo e($project->name); ?> - <?php echo e(__('Accessibility Report')); ?></title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -112,7 +112,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '2','class' => 'mb-4']); ?>Pages & Services <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '2','class' => 'mb-4']); ?><?php echo e(__('Pages & Services')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -241,7 +241,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'text-sm font-medium mb-3']); ?>Issues on this page: <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'text-sm font-medium mb-3']); ?><?php echo e(__('Issues on this page:')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
 <?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
@@ -309,7 +309,7 @@
                                                                         @click="open = !open"
                                                                         class="w-full flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-sm"
                                                                     >
-                                                                        <span class="font-medium">Screenshots (<?php echo e($issue->attachments->count()); ?>)</span>
+                                                                        <span class="font-medium"><?php echo e(__('Screenshots')); ?> (<?php echo e($issue->attachments->count()); ?>)</span>
                                                                         <svg class="w-4 h-4 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                                         </svg>
@@ -388,7 +388,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '2','class' => 'mb-4']); ?>Project-Wide Issues <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '2','class' => 'mb-4']); ?><?php echo e(__('Project-Wide Issues')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -463,7 +463,7 @@
                                                     @click="open = !open"
                                                     class="w-full flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-sm"
                                                 >
-                                                    <span class="font-medium">Description</span>
+                                                    <span class="font-medium"><?php echo e(__('Description')); ?></span>
                                                     <svg class="w-4 h-4 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                     </svg>
@@ -501,7 +501,7 @@
                                                     @click="open = !open"
                                                     class="w-full flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-sm"
                                                 >
-                                                    <span class="font-medium">Screenshots (<?php echo e($issue->attachments->count()); ?>)</span>
+                                                    <span class="font-medium"><?php echo e(__('Screenshots')); ?> (<?php echo e($issue->attachments->count()); ?>)</span>
                                                     <svg class="w-4 h-4 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                     </svg>
@@ -531,7 +531,7 @@
                                                 @click="open = !open"
                                                 class="w-full flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-sm"
                                             >
-                                                <span class="font-medium">Details</span>
+                                                <span class="font-medium"><?php echo e(__('Details')); ?></span>
                                                 <svg class="w-4 h-4 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                 </svg>
@@ -548,7 +548,7 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['color' => 'zinc']); ?>
-                                                        Difficulty: <?php echo e(Str::title($issue->difficulty)); ?>
+                                                        <?php echo e(__('Difficulty')); ?>: <?php echo e(Str::title($issue->difficulty)); ?>
 
                                                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -570,7 +570,7 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['color' => 'zinc']); ?>
-                                                        Status: <?php echo e(Str::title($issue->status)); ?>
+                                                        <?php echo e(__('Status')); ?>: <?php echo e(Str::title($issue->status)); ?>
 
                                                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -641,7 +641,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '3']); ?>No issues reported yet <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '3']); ?><?php echo e(__('No issues reported yet')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -661,7 +661,8 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'text-zinc-600 dark:text-zinc-400 mt-2']); ?>
-                            This project doesn't have any pages or issues documented yet.
+                            <?php echo e(__('This project does not have any pages or issues documented yet.')); ?>
+
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
@@ -698,7 +699,7 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'text-sm text-zinc-600 dark:text-zinc-400']); ?>
-                        This is a shared accessibility report. Last updated: <?php echo e($project->updated_at->format('Y-m-d H:i')); ?>
+                    <?php echo e(__('This is a shared accessibility report. Last updated: :date', ['date' => $project->updated_at->format('Y-m-d H:i')])); ?>
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

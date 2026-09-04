@@ -5,19 +5,19 @@
     <flux:spacer/>
     <div class="flex gap-2">
         <flux:button href="{{ route('accessibility-reports.download', ['project' => $project, 'report' => $report]) }}" variant="primary" icon="arrow-down-tray">
-            Download PDF
+            {{ __('Download PDF') }}
         </flux:button>
-        <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost" icon="arrow-left">Back to Reports</flux:button>
+        <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost" icon="arrow-left">{{ __('Back to Reports') }}</flux:button>
     </div>
 </flux:header>
 
 <flux:main class="space-y-6">
     <div class="flex justify-end">
-        <form action="{{ route('accessibility-reports.destroy', ['project' => $project, 'report' => $report]) }}" method="POST" onsubmit="return confirm('Are you sure?');" style="display: inline;">
+        <form action="{{ route('accessibility-reports.destroy', ['project' => $project, 'report' => $report]) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure?') }}');" style="display: inline;">
             @csrf
             @method('DELETE')
             <flux:button type="submit" variant="danger" icon="trash">
-                Delete Report
+                {{ __('Delete Report') }}
             </flux:button>
         </form>
     </div>

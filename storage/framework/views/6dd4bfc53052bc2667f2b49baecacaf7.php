@@ -10,7 +10,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '2']); ?>Testing Methodology <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '2']); ?><?php echo e(__('Testing Methodology')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -29,7 +29,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'text-sm text-zinc-600 dark:text-zinc-400']); ?>Tools and methods used to test this project <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'text-sm text-zinc-600 dark:text-zinc-400']); ?><?php echo e(__('Tools and methods used to test this project')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
 <?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
@@ -50,7 +50,8 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['wire:click' => '$set(\'showAddForm\', true)','variant' => 'primary','icon' => 'plus','size' => 'sm']); ?>
-            Add Method
+            <?php echo e(__('Add Method')); ?>
+
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
@@ -84,7 +85,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '3','class' => 'text-base']); ?>Add Testing Method <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '3','class' => 'text-base']); ?><?php echo e(__('Add Testing Method')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -114,7 +115,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>Method / Tool <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?><?php echo e(__('Method / Tool')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal8a84eac5abb8af1e2274971f8640b38f)): ?>
 <?php $attributes = $__attributesOriginal8a84eac5abb8af1e2274971f8640b38f; ?>
@@ -134,15 +135,15 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['wire:model' => 'selectedMethodologyId']); ?>
-                        <option value="">Select a method...</option>
+                        <option value=""><?php echo e(__('Select a method...')); ?></option>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $allMethodologies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category => $methods): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <optgroup label="<?php echo e(match($category) {
-                                'screen_reader' => 'Screen Readers',
-                                'browser' => 'Browsers',
-                                'browser_extension' => 'Browser Extensions',
-                                'device' => 'Devices',
-                                'testing_tool' => 'Testing Tools',
-                                default => ucfirst(str_replace('_', ' ', $category)),
+                                'screen_reader' => __('Screen Readers'),
+                                'browser' => __('Browsers'),
+                                'browser_extension' => __('Browser Extensions'),
+                                'device' => __('Devices'),
+                                'testing_tool' => __('Testing Tools'),
+                                default => __(ucfirst(str_replace('_', ' ', $category))),
                             }); ?>">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $methods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!in_array($method->id, $projectMethodologyIds)): ?>
@@ -202,7 +203,7 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                    <?php if (isset($component)) { $__componentOriginal8a84eac5abb8af1e2274971f8640b38f = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginal8a84eac5abb8af1e2274971f8640b38f = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal8a84eac5abb8af1e2274971f8640b38f = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::label','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::label'); ?>
@@ -211,7 +212,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>Version / Device / Notes <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
+<?php $component->withAttributes([]); ?><?php echo e(__('Version / Device / Notes')); ?> <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::badge.index','data' => ['size' => 'sm','variant' => 'outline']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::badge'); ?>
@@ -220,7 +221,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['size' => 'sm','variant' => 'outline']); ?>Optional <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['size' => 'sm','variant' => 'outline']); ?><?php echo e(__('Optional')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
 <?php $attributes = $__attributesOriginal4cc377eda9b63b796b6668ee7832d023; ?>
@@ -241,14 +242,14 @@
 <?php endif; ?>
                     <?php if (isset($component)) { $__componentOriginal0ee30026125d1a66523211147b00e4dc = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal0ee30026125d1a66523211147b00e4dc = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::textarea','data' => ['wire:model' => 'notes','placeholder' => 'e.g. JAWS 2024, Windows 11 22H2 — or leave blank','rows' => '2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::textarea','data' => ['wire:model' => 'notes','placeholder' => ''.e(__('e.g. JAWS 2024, Windows 11 22H2 — or leave blank')).'','rows' => '2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::textarea'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:model' => 'notes','placeholder' => 'e.g. JAWS 2024, Windows 11 22H2 — or leave blank','rows' => '2']); ?>
+<?php $component->withAttributes(['wire:model' => 'notes','placeholder' => ''.e(__('e.g. JAWS 2024, Windows 11 22H2 — or leave blank')).'','rows' => '2']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0ee30026125d1a66523211147b00e4dc)): ?>
@@ -300,7 +301,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'addMethodology','variant' => 'primary','size' => 'sm']); ?>Add <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['wire:click' => 'addMethodology','variant' => 'primary','size' => 'sm']); ?><?php echo e(__('Add')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
 <?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
@@ -319,7 +320,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => '$set(\'showAddForm\', false)','variant' => 'ghost','size' => 'sm']); ?>Cancel <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['wire:click' => '$set(\'showAddForm\', false)','variant' => 'ghost','size' => 'sm']); ?><?php echo e(__('Cancel')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
 <?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
@@ -383,7 +384,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'text-zinc-500 dark:text-zinc-400']); ?>No testing methods added yet. <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'text-zinc-500 dark:text-zinc-400']); ?><?php echo e(__('No testing methods added yet.')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
 <?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
@@ -422,12 +423,12 @@
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2']); ?>
                         <?php echo e(match($category) {
-                            'screen_reader' => 'Screen Readers',
-                            'browser' => 'Browsers',
-                            'browser_extension' => 'Browser Extensions',
-                            'device' => 'Devices',
-                            'testing_tool' => 'Testing Tools',
-                            default => ucfirst(str_replace('_', ' ', $category)),
+                            'screen_reader' => __('Screen Readers'),
+                            'browser' => __('Browsers'),
+                            'browser_extension' => __('Browser Extensions'),
+                            'device' => __('Devices'),
+                            'testing_tool' => __('Testing Tools'),
+                            default => __(ucfirst(str_replace('_', ' ', $category))),
                         }); ?>
 
                      <?php echo $__env->renderComponent(); ?>
@@ -450,7 +451,7 @@
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($method->pivot->notes): ?>
                                             <div class="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5"><?php echo e($method->pivot->notes); ?></div>
                                         <?php else: ?>
-                                            <div class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 italic">No version/notes specified</div>
+                                        <div class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 italic"><?php echo e(__('No version/notes specified')); ?></div>
                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
                                     <div x-show="editing" class="mt-1">
@@ -458,14 +459,14 @@
                                             type="text"
                                             x-model="notes"
                                             class="w-full text-sm px-2 py-1 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                                            placeholder="e.g. version 2024, Windows 11..."
+                                            placeholder="<?php echo e(__('e.g. version 2024, Windows 11...')); ?>"
                                         />
                                         <div class="flex gap-2 mt-1">
                                             <button
                                                 @click="$wire.updateNotes('<?php echo e($method->id); ?>', notes); editing = false"
                                                 class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                                            >Save</button>
-                                            <button @click="editing = false" class="text-xs text-zinc-500 hover:underline">Cancel</button>
+                                            ><?php echo e(__('Save')); ?></button>
+                                            <button @click="editing = false" class="text-xs text-zinc-500 hover:underline"><?php echo e(__('Cancel')); ?></button>
                                         </div>
                                     </div>
                                 </div>
@@ -492,14 +493,14 @@
 <?php endif; ?>
                                     <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['wire:click' => 'removeMethodology(\''.e($method->id).'\')','wire:confirm' => 'Remove '.e($method->name).' from this project?','icon' => 'trash','size' => 'xs','variant' => 'subtle']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['wire:click' => 'removeMethodology(\''.e($method->id).'\')','wire:confirm' => ''.e(__("Remove :name from this project?", ["name" => $method->name])).'','icon' => 'trash','size' => 'xs','variant' => 'subtle']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'removeMethodology(\''.e($method->id).'\')','wire:confirm' => 'Remove '.e($method->name).' from this project?','icon' => 'trash','size' => 'xs','variant' => 'subtle']); ?>
+<?php $component->withAttributes(['wire:click' => 'removeMethodology(\''.e($method->id).'\')','wire:confirm' => ''.e(__("Remove :name from this project?", ["name" => $method->name])).'','icon' => 'trash','size' => 'xs','variant' => 'subtle']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>

@@ -60,7 +60,8 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['href' => ''.e(route('accessibility-reports.download', ['project' => $project, 'report' => $report])).'','variant' => 'primary','icon' => 'arrow-down-tray']); ?>
-            Download PDF
+            <?php echo e(__('Download PDF')); ?>
+
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
@@ -80,7 +81,7 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('accessibility-reports.index', $project)).'','variant' => 'ghost','icon' => 'arrow-left']); ?>Back to Reports <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['href' => ''.e(route('accessibility-reports.index', $project)).'','variant' => 'ghost','icon' => 'arrow-left']); ?><?php echo e(__('Back to Reports')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
 <?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
@@ -113,7 +114,7 @@
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'space-y-6']); ?>
     <div class="flex justify-end">
-        <form action="<?php echo e(route('accessibility-reports.destroy', ['project' => $project, 'report' => $report])); ?>" method="POST" onsubmit="return confirm('Are you sure?');" style="display: inline;">
+        <form action="<?php echo e(route('accessibility-reports.destroy', ['project' => $project, 'report' => $report])); ?>" method="POST" onsubmit="return confirm('<?php echo e(__('Are you sure?')); ?>');" style="display: inline;">
             <?php echo csrf_field(); ?>
             <?php echo method_field('DELETE'); ?>
             <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
@@ -126,7 +127,8 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['type' => 'submit','variant' => 'danger','icon' => 'trash']); ?>
-                Delete Report
+                <?php echo e(__('Delete Report')); ?>
+
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>

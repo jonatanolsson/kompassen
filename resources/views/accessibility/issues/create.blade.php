@@ -1,20 +1,20 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-4xl mx-auto px-4 py-8">
-            <flux:heading level="1" class="mb-2">Report Issue</flux:heading>
+            <flux:heading level="1" class="mb-2">{{ __('Report Issue') }}</flux:heading>
             <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">
-                Document an accessibility issue found during the audit.
+                {{ __('Document an accessibility issue found during the audit.') }}
             </flux:text>
 
             <form action="{{ route('accessibility-issues.store', $project) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
                 <flux:field>
-                    <flux:label>Issue Title</flux:label>
+                    <flux:label>{{ __('Issue Title') }}</flux:label>
                     <flux:input
                         type="text"
                         name="title"
-                        placeholder="e.g., Missing alt text on product images"
+                        placeholder="{{ __('e.g., Missing alt text on product images') }}"
                         value="{{ old('title') }}"
                         required
                     />
@@ -22,24 +22,24 @@
                 </flux:field>
 
                 <flux:field>
-                    <flux:label>Description</flux:label>
+                    <flux:label>{{ __('Description') }}</flux:label>
                     <flux:textarea
                         name="description"
-                        placeholder="Describe the issue in detail..."
+                        placeholder="{{ __('Describe the issue in detail...') }}"
                         value="{{ old('description') }}"
                     />
                     <flux:error name="description" />
                 </flux:field>
 
                 <flux:field>
-                    <flux:label>Images</flux:label>
+                    <flux:label>{{ __('Images') }}</flux:label>
                     <flux:input type="file" name="attachments[]" multiple accept="image/*" />
                     <flux:error name="attachments" />
                 </flux:field>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:field>
-                        <flux:label>Page/Service</flux:label>
+                        <flux:label>{{ __('Page/Service') }}</flux:label>
                         <flux:select name="page_id">
                             <option value="">Not specific to a page</option>
                             @foreach ($project->pages as $page)
@@ -50,7 +50,7 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Component Area</flux:label>
+                        <flux:label>{{ __('Component Area') }}</flux:label>
                         <flux:input
                             type="text"
                             name="component_area"
@@ -63,32 +63,32 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <flux:field>
-                        <flux:label>Severity</flux:label>
+                        <flux:label>{{ __('Severity') }}</flux:label>
                         <flux:select name="severity" required>
-                            <option value="critical" @selected(old('severity') === 'critical')>Critical</option>
-                            <option value="major" @selected(old('severity') === 'major' || !old('severity'))>Major</option>
-                            <option value="moderate" @selected(old('severity') === 'moderate')>Moderate</option>
-                            <option value="minor" @selected(old('severity') === 'minor')>Minor</option>
+                            <option value="critical" @selected(old('severity') === 'critical')>{{ __('Critical') }}</option>
+                            <option value="major" @selected(old('severity') === 'major' || !old('severity'))>{{ __('Major') }}</option>
+                            <option value="moderate" @selected(old('severity') === 'moderate')>{{ __('Moderate') }}</option>
+                            <option value="minor" @selected(old('severity') === 'minor')>{{ __('Minor') }}</option>
                         </flux:select>
                         <flux:error name="severity" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Difficulty to Fix</flux:label>
+                        <flux:label>{{ __('Difficulty to Fix') }}</flux:label>
                         <flux:select name="difficulty" required>
-                            <option value="easy" @selected(old('difficulty') === 'easy')>Easy</option>
-                            <option value="medium" @selected(old('difficulty') === 'medium' || !old('difficulty'))>Medium</option>
-                            <option value="hard" @selected(old('difficulty') === 'hard')>Hard</option>
+                            <option value="easy" @selected(old('difficulty') === 'easy')>{{ __('Easy') }}</option>
+                            <option value="medium" @selected(old('difficulty') === 'medium' || !old('difficulty'))>{{ __('Medium') }}</option>
+                            <option value="hard" @selected(old('difficulty') === 'hard')>{{ __('Hard') }}</option>
                         </flux:select>
                         <flux:error name="difficulty" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Status</flux:label>
+                        <flux:label>{{ __('Status') }}</flux:label>
                         <flux:select name="status" required>
-                            <option value="open" @selected(old('status') === 'open' || !old('status'))>Open</option>
-                            <option value="resolved" @selected(old('status') === 'resolved')>Resolved</option>
-                            <option value="wont_fix" @selected(old('status') === 'wont_fix')>Won't Fix</option>
+                            <option value="open" @selected(old('status') === 'open' || !old('status'))>{{ __('Open') }}</option>
+                            <option value="resolved" @selected(old('status') === 'resolved')>{{ __('Resolved') }}</option>
+                            <option value="wont_fix" @selected(old('status') === 'wont_fix')>{{ __('Won\'t Fix') }}</option>
                         </flux:select>
                         <flux:error name="status" />
                     </flux:field>
@@ -101,9 +101,9 @@
                 </flux:field>
 
                 <div class="flex gap-4 pt-4">
-                    <flux:button type="submit" variant="primary">Report Issue</flux:button>
+                    <flux:button type="submit" variant="primary">{{ __('Report Issue') }}</flux:button>
                     <a href="{{ route('accessibility-projects.show', $project) }}">
-                        <flux:button variant="ghost">Cancel</flux:button>
+                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                     </a>
                 </div>
             </form>

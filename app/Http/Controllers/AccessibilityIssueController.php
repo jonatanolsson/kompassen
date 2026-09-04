@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccessibilityProject;
+use App\Actions\ResolveAccessibilityIssue;
 use App\Models\AccessibilityIssue;
-use App\Models\AccessibilityIssueAttachment;
+use App\Models\AccessibilityProject;
+use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('update', $project);
 
-        $wcagCriteria = \App\Models\WcagSuccessCriterion::all();
+        $wcagCriteria = WcagSuccessCriterion::all();
 
         return view('accessibility.issues.create', compact('project', 'wcagCriteria'));
     }
@@ -51,7 +52,7 @@ class AccessibilityIssueController extends Controller
 
         $issue = $project->issues()->create($validated);
 
-        if (!empty($validated['wcag_criteria'])) {
+        if (! empty($validated['wcag_criteria'])) {
             $issue->wcagCriteria()->sync($validated['wcag_criteria']);
         }
 
@@ -67,7 +68,7 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('update', $project);
 
-        $wcagCriteria = \App\Models\WcagSuccessCriterion::all();
+        $wcagCriteria = WcagSuccessCriterion::all();
         $selectedCriteria = $issue->wcagCriteria()->pluck('wcag_success_criterion_id')->toArray();
 
         return view('accessibility.issues.edit', compact('project', 'issue', 'wcagCriteria', 'selectedCriteria'));
@@ -93,7 +94,7 @@ class AccessibilityIssueController extends Controller
 
         $issue->update($validated);
 
-        if (!empty($validated['wcag_criteria'])) {
+        if (! empty($validated['wcag_criteria'])) {
             $issue->wcagCriteria()->sync($validated['wcag_criteria']);
         }
 
@@ -122,30 +123,18 @@ class AccessibilityIssueController extends Controller
         $status = request()->input('resolution_status');
         $notes = request()->input('resolution_notes');
 
-        (new \App\Actions\ResolveAccessibilityIssue())($issue, $status, $notes);
+        (new ResolveAccessibilityIssue)($issue, $status, $notes);
 
         $translatedStatus = __($status);
 
         return back()->with('success', __('Issue marked as :status', ['status' => $translatedStatus]));
     }
 
-    public function resolve(AccessibilityProject $project, AccessibilityIssue $issue)
-    {
-        $this->authorize('update', $project);
-
-        $status = request()->input('resolution_status');
-        $notes = request()->input('resolution_notes');
-
-        (new \App\Actions\ResolveAccessibilityIssue())($issue, $status, $notes);
-
-        return back()->with('success', 'Issue marked as ' . Str::title(str_replace('_', ' ', $status)));
-    }
-
     private function storeAttachments(array $files, AccessibilityIssue $issue): void
     {
         foreach ($files as $file) {
-            $filename = \Illuminate\Support\Str::ulid() . '.' . $file->extension();
-            $path = $file->storeAs('accessibility-issues/' . $issue->id, $filename, 'public');
+            $filename = Str::ulid().'.'.$file->extension();
+            $path = $file->storeAs('accessibility-issues/'.$issue->id, $filename, 'public');
 
             $issue->attachments()->create([
                 'filename' => $filename,

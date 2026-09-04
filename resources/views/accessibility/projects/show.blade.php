@@ -7,17 +7,17 @@
                 <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ Str::title($project->status) }}</flux:text>
             </div>
             <div class="flex gap-2">
-                <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="ghost">Preview</flux:button>
+                <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="ghost">{{ __('Preview') }}</flux:button>
                 <flux:modal.trigger name="share-modal">
-                    <flux:button icon="link">Share</flux:button>
+                    <flux:button icon="link">{{ __('Share') }}</flux:button>
                 </flux:modal.trigger>
                 <a href="{{ route('accessibility-projects.edit', $project) }}">
-                    <flux:button variant="outline" icon="pencil">Edit</flux:button>
+                    <flux:button variant="outline" icon="pencil">{{ __('Edit') }}</flux:button>
                 </a>
                 <form action="{{ route('accessibility-projects.destroy', $project) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
-                    <flux:button type="submit" variant="danger" icon="trash" onclick="return confirm('Are you sure?')">Delete</flux:button>
+                    <flux:button type="submit" variant="danger" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
                 </form>
             </div>
         </div>
@@ -34,15 +34,15 @@
         <!-- Pages Section -->
         <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
-                <flux:heading level="2">Pages</flux:heading>
+                <flux:heading level="2">{{ __('Pages') }}</flux:heading>
                 <a href="{{ route('accessibility-pages.create', $project) }}">
-                    <flux:button variant="primary" icon="plus" size="sm">Add Page</flux:button>
+                    <flux:button variant="primary" icon="plus" size="sm">{{ __('Add Page') }}</flux:button>
                 </a>
             </div>
 
             @if ($project->pages->isEmpty())
                 <flux:card class="p-8 text-center">
-                    <flux:text class="text-zinc-600 dark:text-zinc-400">No pages added yet.</flux:text>
+                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No pages added yet.') }}</flux:text>
                 </flux:card>
             @else
                 <div class="space-y-3">
@@ -56,12 +56,12 @@
                             </div>
                             <div class="flex gap-2">
                                 <a href="{{ route('accessibility-pages.edit', [$project, $page]) }}">
-                                    <flux:button variant="ghost" size="sm" icon="pencil">Edit</flux:button>
+                                <flux:button variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
                                 </a>
                                 <form action="{{ route('accessibility-pages.destroy', [$project, $page]) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('Are you sure?')">Delete</flux:button>
+                                <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
                                 </form>
                             </div>
                         </flux:card>
@@ -75,15 +75,15 @@
         <!-- Issues Section -->
         <div>
             <div class="flex items-center justify-between mb-4">
-                <flux:heading level="2">Issues</flux:heading>
+            <flux:heading level="2">{{ __('Issues') }}</flux:heading>
                 <a href="{{ route('accessibility-issues.create', $project) }}">
-                    <flux:button variant="primary" icon="plus" size="sm">Report Issue</flux:button>
+                <flux:button variant="primary" icon="plus" size="sm">{{ __('Report Issue') }}</flux:button>
                 </a>
             </div>
 
             @if ($project->issues->isEmpty())
                 <flux:card class="p-8 text-center">
-                    <flux:text class="text-zinc-600 dark:text-zinc-400">No issues reported yet.</flux:text>
+                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No issues reported yet.') }}</flux:text>
                 </flux:card>
             @else
                 <div class="space-y-3">
@@ -101,15 +101,32 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <a href="{{ route('accessibility-issues.show', [$project, $issue]) }}">
-                                        <flux:button variant="ghost" size="sm" icon="eye">View</flux:button>
+                                    <flux:button variant="ghost" size="sm" icon="eye">{{ __('View') }}</flux:button>
                                     </a>
                                     <a href="{{ route('accessibility-issues.edit', [$project, $issue]) }}">
-                                        <flux:button variant="ghost" size="sm" icon="pencil">Edit</flux:button>
+                                    <flux:button variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
                                     </a>
+
+                                    <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="resolution_status" value="" />
+                                        <input type="hidden" name="resolution_notes" value="" />
+                                        <flux:button type="button" variant="primary" size="sm" icon="check" onclick="submitResolution('fixed', 'resolve-fixed-{{ $issue->id }}')">{{ __('Mark as fixed') }}</flux:button>
+                                    </form>
+
+                                    <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="resolution_status" value="" />
+                                        <input type="hidden" name="resolution_notes" value="" />
+                                        <flux:button type="button" variant="danger" size="sm" icon="x-mark" onclick="submitResolution('wontfix', 'resolve-wontfix-{{ $issue->id }}')">{{ __('Mark as wontfix') }}</flux:button>
+                                    </form>
+
                                     <form action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('Are you sure?')">Delete</flux:button>
+                                    <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
                                     </form>
                                 </div>
                             </div>
@@ -130,7 +147,7 @@
 <!-- Share Modal -->
 <flux:modal name="share-modal" class="md:w-96">
     <div class="space-y-6">
-        <flux:heading level="2">Share Project</flux:heading>
+        <flux:heading level="2">{{ __('Share Project') }}</flux:heading>
 
         <flux:separator />
 
@@ -139,7 +156,7 @@
             @csrf
             <div class="space-y-4">
                 <flux:field>
-                    <flux:label>Expiration Date (Optional)</flux:label>
+                    <flux:label>{{ __('Expiration Date (Optional)') }}</flux:label>
                     <flux:input 
                         type="date" 
                         name="expires_at"
@@ -148,7 +165,7 @@
                     <flux:error name="expires_at" />
                 </flux:field>
 
-                <flux:button type="submit" variant="primary" class="w-full">Create Share Link</flux:button>
+                <flux:button type="submit" variant="primary" class="w-full">{{ __('Create Share Link') }}</flux:button>
             </div>
         </form>
 
@@ -156,7 +173,7 @@
 
         <!-- Existing Share Links -->
         <div>
-            <flux:heading level="3" class="mb-4">Active Share Links</flux:heading>
+            <flux:heading level="3" class="mb-4">{{ __('Active Share Links') }}</flux:heading>
             @if ($project->shareLinks->count() > 0)
                 <div class="space-y-3 max-h-64 overflow-y-auto">
                     @foreach ($project->shareLinks as $link)
@@ -168,7 +185,7 @@
                                     </div>
                                     @if ($link->expires_at)
                                         <div class="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-                                            Expires: {{ $link->expires_at->format('Y-m-d H:i') }}
+                                        {{ __('Expires') }}: {{ $link->expires_at->format('Y-m-d H:i') }}
                                         </div>
                                     @endif
                                 </div>
@@ -181,7 +198,7 @@
                                         variant="subtle"
                                     />
                                     <flux:button 
-                                        x-on:click="navigator.clipboard.writeText('{{ route('projects.shared', $link->token) }}').then(() => $flux.toast({ text: 'Copied!', variant: 'success' }))" 
+                                        x-on:click="navigator.clipboard.writeText('{{ route('projects.shared', $link->token) }}').then(() => $flux.toast({ text: '{{ __('Copied!') }}', variant: 'success' }))" 
                                         icon="document-duplicate" 
                                         size="sm"
                                         variant="subtle"
@@ -204,5 +221,17 @@
         </div>
     </div>
 </flux:modal>
+
+<script>
+    function submitResolution(status, formId) {
+        if (!confirm('{{ __('Are you sure you want to change resolution status?') }}')) return false;
+        const notes = prompt('{{ __('Add resolution notes (optional)') }}');
+        const form = document.getElementById(formId);
+        if (!form) return false;
+        form.querySelector('input[name="resolution_status"]').value = status;
+        form.querySelector('input[name="resolution_notes"]').value = notes ? notes : '';
+        form.submit();
+    }
+</script>
 
 </x-app-layout>

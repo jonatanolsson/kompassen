@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable(['number', 'level', 'name_en', 'name_sv', 'description_en', 'description_sv', 'url'])]
 class WcagSuccessCriterion extends Model
@@ -24,7 +25,7 @@ class WcagSuccessCriterion extends Model
         parent::boot();
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = \Illuminate\Support\Str::ulid();
+                $model->{$model->getKeyName()} = Str::ulid();
             }
         });
     }
@@ -43,6 +44,13 @@ class WcagSuccessCriterion extends Model
     {
         return $this->hasMany(WcagCriterionExample::class, 'wcag_success_criterion_id')
             ->orderBy('sort_order')
+            ->orderBy('created_at');
+    }
+
+    public function relatedResources(): HasMany
+    {
+        return $this->hasMany(WcagRelatedResource::class, 'wcag_success_criterion_id')
+            ->orderBy('order')
             ->orderBy('created_at');
     }
 

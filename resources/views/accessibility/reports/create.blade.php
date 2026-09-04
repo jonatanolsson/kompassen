@@ -25,7 +25,7 @@
             </flux:field>
 
             <div class="flex gap-3 justify-end">
-                <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost">Cancel</flux:button>
+                <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost">{{ __('Cancel') }}</flux:button>
                 <flux:button type="submit" variant="primary">Generate Report</flux:button>
             </div>
         </form>
