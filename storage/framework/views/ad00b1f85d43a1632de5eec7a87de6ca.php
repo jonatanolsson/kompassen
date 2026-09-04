@@ -411,8 +411,6 @@ use Livewire\Volt\Component;
                                             </div>
                                         </div>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                        </div>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                             <?php else: ?>
                                 <div class="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg text-center border border-zinc-200 dark:border-zinc-700">

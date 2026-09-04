@@ -375,8 +375,6 @@ new class extends Component
                                             </div>
                                         </div>
                                     @endif
-                                        </div>
-                                    @endif
                                 </div>
                             @else
                                 <div class="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg text-center border border-zinc-200 dark:border-zinc-700">
