@@ -1,7 +1,6 @@
 <?php
 
 use Livewire\Volt\Component;
-use Livewire\Attributes\Computed;
 use App\Models\WcagSuccessCriterion;
 
 ?>
@@ -125,14 +124,14 @@ use App\Models\WcagSuccessCriterion;
                 <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
                     <?php if (isset($component)) { $__componentOriginal26c546557cdc09040c8dd00b2090afd0 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal26c546557cdc09040c8dd00b2090afd0 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::input.index','data' => ['wire:model.live' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::input.index','data' => ['wire:model.debounce500ms' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:model.live' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']); ?>
+<?php $component->withAttributes(['wire:model.debounce-500ms' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal26c546557cdc09040c8dd00b2090afd0)): ?>
@@ -154,7 +153,7 @@ use App\Models\WcagSuccessCriterion;
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'text-xs text-zinc-500 dark:text-zinc-400 mt-2']); ?>
-                            <?php echo e(count($this->wcagCriteria)); ?> <?php echo e(__('criteria found')); ?>
+                            <?php echo e(count($this->wcagCriteria())); ?> <?php echo e(__('criteria found')); ?>
 
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -197,7 +196,7 @@ use App\Models\WcagSuccessCriterion;
 <?php unset($__componentOriginal0638ebfbd490c7a414275d493e14cb4e); ?>
 <?php endif; ?>
                             <div class="space-y-2 max-h-96 overflow-y-auto">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $this->wcagCriteria->groupBy(fn ($c) => explode('.', $c->number)[0]); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $principle => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $this->wcagCriteria()->groupBy(fn ($c) => explode('.', $c->number)[0]); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $principle => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <div class="mb-4">
                                         <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">
                                             <?php echo e(__('Principle')); ?> <?php echo e($principle); ?>

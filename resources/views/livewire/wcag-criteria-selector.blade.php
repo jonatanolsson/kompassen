@@ -1,7 +1,6 @@
 <?php
 
 use Livewire\Volt\Component;
-use Livewire\Attributes\Computed;
 use App\Models\WcagSuccessCriterion;
 
 new class extends Component {
@@ -12,6 +11,8 @@ new class extends Component {
     public ?string $selectedDetailId = null;
 
     public string $searchQuery = '';
+
+    private $cachedCriteria = null;
 
     public function mount(?array $initialSelectedCriteria = null): void
     {
@@ -43,6 +44,11 @@ new class extends Component {
         $this->selectedCriteria = array_diff($this->selectedCriteria, [$id]);
     }
 
+    public function updateSearch(string $query): void
+    {
+        $this->searchQuery = $query;
+    }
+
     public function getSelectedCriteria()
     {
         return WcagSuccessCriterion::whereIn('id', $this->selectedCriteria)->orderBy('number')->get();
@@ -57,7 +63,6 @@ new class extends Component {
         return WcagSuccessCriterion::with('relatedResources')->find($this->selectedDetailId);
     }
 
-    #[Computed]
     public function wcagCriteria()
     {
         if (empty($this->searchQuery)) {
@@ -143,14 +148,14 @@ new class extends Component {
                 <!-- Search Bar -->
                 <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
                     <flux:input 
-                        wire:model.live="searchQuery"
+                        wire:model.debounce-500ms="searchQuery"
                         type="text"
                         placeholder="{{ __('Search criteria') }}..."
                         class="w-full"
                     />
                     @if (!empty($searchQuery))
                         <flux:text class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                            {{ count($this->wcagCriteria) }} {{ __('criteria found') }}
+                            {{ count($this->wcagCriteria()) }} {{ __('criteria found') }}
                         </flux:text>
                     @endif
                 </div>
@@ -164,7 +169,7 @@ new class extends Component {
                                 {{ __('Criteria') }}
                             </flux:text>
                             <div class="space-y-2 max-h-96 overflow-y-auto">
-                                @forelse ($this->wcagCriteria->groupBy(fn ($c) => explode('.', $c->number)[0]) as $principle => $group)
+                                @forelse ($this->wcagCriteria()->groupBy(fn ($c) => explode('.', $c->number)[0]) as $principle => $group)
                                     <div class="mb-4">
                                         <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">
                                             {{ __('Principle') }} {{ $principle }}
