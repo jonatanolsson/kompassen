@@ -122,49 +122,17 @@ use App\Models\WcagSuccessCriterion;
 
                 <!-- Search Bar -->
                 <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
-                    <?php if (isset($component)) { $__componentOriginal26c546557cdc09040c8dd00b2090afd0 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal26c546557cdc09040c8dd00b2090afd0 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::input.index','data' => ['wire:model.debounce500ms' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::input'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:model.debounce-500ms' => 'searchQuery','type' => 'text','placeholder' => ''.e(__('Search criteria')).'...','class' => 'w-full']); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal26c546557cdc09040c8dd00b2090afd0)): ?>
-<?php $attributes = $__attributesOriginal26c546557cdc09040c8dd00b2090afd0; ?>
-<?php unset($__attributesOriginal26c546557cdc09040c8dd00b2090afd0); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal26c546557cdc09040c8dd00b2090afd0)): ?>
-<?php $component = $__componentOriginal26c546557cdc09040c8dd00b2090afd0; ?>
-<?php unset($__componentOriginal26c546557cdc09040c8dd00b2090afd0); ?>
-<?php endif; ?>
+                    <input 
+                        wire:model.debounce-500ms="searchQuery"
+                        type="text"
+                        placeholder="<?php echo e(__('Search criteria')); ?>..."
+                        class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
+                    />
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($searchQuery)): ?>
-                        <?php if (isset($component)) { $__componentOriginal0638ebfbd490c7a414275d493e14cb4e = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::text','data' => ['class' => 'text-xs text-zinc-500 dark:text-zinc-400 mt-2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::text'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['class' => 'text-xs text-zinc-500 dark:text-zinc-400 mt-2']); ?>
+                        <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                             <?php echo e(count($this->wcagCriteria())); ?> <?php echo e(__('criteria found')); ?>
 
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
-<?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
-<?php unset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
-<?php $component = $__componentOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
-<?php unset($__componentOriginal0638ebfbd490c7a414275d493e14cb4e); ?>
-<?php endif; ?>
+                        </div>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
 

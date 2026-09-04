@@ -147,16 +147,16 @@ new class extends Component {
 
                 <!-- Search Bar -->
                 <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
-                    <flux:input 
+                    <input 
                         wire:model.debounce-500ms="searchQuery"
                         type="text"
                         placeholder="{{ __('Search criteria') }}..."
-                        class="w-full"
+                        class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
                     />
                     @if (!empty($searchQuery))
-                        <flux:text class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                        <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                             {{ count($this->wcagCriteria()) }} {{ __('criteria found') }}
-                        </flux:text>
+                        </div>
                     @endif
                 </div>
 
