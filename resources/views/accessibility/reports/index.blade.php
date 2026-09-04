@@ -15,8 +15,8 @@
 
     @if ($reports->isEmpty())
         <flux:card class="text-center py-12">
-            <flux:icon name="document-text" class="w-12 h-12 mx-auto mb-4 text-gray-400"/>
-            <p class="text-gray-600">No reports generated yet.</p>
+            <flux:icon name="document-text" class="w-12 h-12 mx-auto mb-4 text-zinc-400"/>
+            <p class="text-zinc-600 dark:text-zinc-400">No reports generated yet.</p>
             <flux:button href="{{ route('accessibility-reports.create', $project) }}" variant="primary" class="mt-4">
                 Generate First Report
             </flux:button>

@@ -22,7 +22,7 @@
         </form>
     </div>
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700">
+    <div class="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700">
         {!! $report->html_content !!}
     </div>
 </flux:main>

@@ -1,19 +1,18 @@
 <?php
 
-use App\Livewire\Dashboard;
-use App\Livewire\AppSettings;
-use App\Livewire\WcagKnowledgeBase;
-use App\Livewire\AccessibilityIssueForm;
-use App\Http\Controllers\AccessibilityProjectController;
-use App\Http\Controllers\AccessibilityPageController;
-use App\Http\Controllers\AccessibilityIssueController;
 use App\Http\Controllers\AccessibilityIssueAttachmentController;
+use App\Http\Controllers\AccessibilityIssueController;
+use App\Http\Controllers\AccessibilityPageController;
+use App\Http\Controllers\AccessibilityProjectController;
 use App\Http\Controllers\AccessibilityReportController;
+use App\Http\Controllers\GuestProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectShareLinkController;
-use App\Http\Controllers\GuestProjectController;
-use App\Models\AccessibilityProject;
+use App\Livewire\AppSettings;
+use App\Livewire\Dashboard;
+use App\Livewire\WcagKnowledgeBase;
 use App\Models\AccessibilityIssue;
+use App\Models\AccessibilityProject;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -101,10 +100,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-pages.destroy');
 
     // Issues within projects
-    Route::get('accessibility-projects/{project}/issues/create', function (AccessibilityProject $project) {
-        $this->authorize('create', [AccessibilityIssue::class, $project]);
-        return view('accessibility.issues.create', ['project' => $project]);
-    })->name('accessibility-issues.create');
+    Route::get('accessibility-projects/{project}/issues/create', [AccessibilityIssueController::class, 'create'])
+        ->name('accessibility-issues.create');
     Route::post('accessibility-projects/{project}/issues', [AccessibilityIssueController::class, 'store'])
         ->name('accessibility-issues.store');
     Route::get('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'show'])
@@ -120,6 +117,10 @@ Route::middleware(['auth'])->group(function () {
     // Issue attachments
     Route::delete('accessibility-projects/{project}/issues/{issue}/attachments/{attachment}', [AccessibilityIssueAttachmentController::class, 'destroy'])
         ->name('accessibility-issue-attachments.destroy');
+
+    // Issue resolution
+    Route::patch('accessibility-projects/{project}/issues/{issue}/resolve', [AccessibilityIssueController::class, 'resolve'])
+        ->name('accessibility-issues.resolve');
 });
 
 require __DIR__.'/auth.php';

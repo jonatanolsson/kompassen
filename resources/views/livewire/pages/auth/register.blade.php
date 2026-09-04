@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,9 @@ new #[Layout('layouts.guest')] class extends Component
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        $team = Team::create(['name' => $validated['name'].'\'s Team']);
+        $validated['team_id'] = $team->id;
 
         event(new Registered($user = User::create($validated)));
 

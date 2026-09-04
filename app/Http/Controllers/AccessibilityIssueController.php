@@ -7,6 +7,7 @@ use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityIssueAttachment;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AccessibilityIssueController extends Controller
 {
@@ -111,7 +112,33 @@ class AccessibilityIssueController extends Controller
         $issue->delete();
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Issue deleted successfully.');
+            ->with('success', __('Issue deleted successfully.'));
+    }
+
+    public function resolve(AccessibilityProject $project, AccessibilityIssue $issue)
+    {
+        $this->authorize('update', $project);
+
+        $status = request()->input('resolution_status');
+        $notes = request()->input('resolution_notes');
+
+        (new \App\Actions\ResolveAccessibilityIssue())($issue, $status, $notes);
+
+        $translatedStatus = __($status);
+
+        return back()->with('success', __('Issue marked as :status', ['status' => $translatedStatus]));
+    }
+
+    public function resolve(AccessibilityProject $project, AccessibilityIssue $issue)
+    {
+        $this->authorize('update', $project);
+
+        $status = request()->input('resolution_status');
+        $notes = request()->input('resolution_notes');
+
+        (new \App\Actions\ResolveAccessibilityIssue())($issue, $status, $notes);
+
+        return back()->with('success', 'Issue marked as ' . Str::title(str_replace('_', ' ', $status)));
     }
 
     private function storeAttachments(array $files, AccessibilityIssue $issue): void

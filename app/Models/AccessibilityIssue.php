@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;

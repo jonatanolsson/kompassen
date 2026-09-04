@@ -1,0 +1,19 @@
+{
+  "Accessibility Report": "Tillgänglighetsrapport",
+  "Pages & Services": "Sidor & tjänster",
+  "Issues on this page:": "Problem på denna sida:",
+  "Screenshots": "Skärmdumpar",
+  "Project-Wide Issues": "Projektövergripande problem",
+  "Description": "Beskrivning",
+  "Details": "Detaljer",
+  "Difficulty": "Svårighetsgrad",
+  "Status": "Status",
+  "No issues reported yet": "Inga problem rapporterade ännu",
+  "This project does not have any pages or issues documented yet.": "Detta projekt har inga sidor eller problem dokumenterade ännu.",
+  "This is a shared accessibility report. Last updated: :date": "Detta är en delad tillgänglighetsrapport. Senast uppdaterad: :date",
+  "Issue deleted successfully.": "Problemet raderades.",
+  "Issue marked as :status": "Problemet markerades som :status",
+  "fixed": "Åtgärdad",
+  "wontfix": "Kommer inte åtgärdas",
+  "open": "Öppen"
+}
