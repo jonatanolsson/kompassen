@@ -56,9 +56,9 @@
                             name="target_wcag_level" 
                             required
                         >
-                            <option value="A" {{ old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : '' }}>WCAG 2.1 Level A</option>
-                            <option value="AA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : '' }}>WCAG 2.1 Level AA</option>
-                            <option value="AAA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : '' }}>WCAG 2.1 Level AAA</option>
+                            <option value="A" {{ old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level A') }}</option>
+                            <option value="AA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level AA') }}</option>
+                            <option value="AAA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level AAA') }}</option>
                         </flux:select>
                         <flux:error name="target_wcag_level" />
                     </flux:field>
@@ -69,9 +69,9 @@
                             name="status" 
                             required
                         >
-                            <option value="planning" {{ old('status', $project->status) === 'planning' ? 'selected' : '' }}>Planning</option>
-                            <option value="in_progress" {{ old('status', $project->status) === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed" {{ old('status', $project->status) === 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="planning" {{ old('status', $project->status) === 'planning' ? 'selected' : '' }}>{{ __('Planning') }}</option>
+                            <option value="in_progress" {{ old('status', $project->status) === 'in_progress' ? 'selected' : '' }}>{{ __('In Progress') }}</option>
+                            <option value="completed" {{ old('status', $project->status) === 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
                         </flux:select>
                         <flux:error name="status" />
                     </flux:field>

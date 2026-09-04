@@ -41,7 +41,7 @@
                     <flux:field>
                         <flux:label>{{ __('Page/Service') }}</flux:label>
                         <flux:select name="page_id">
-                            <option value="">Not specific to a page</option>
+                            <option value="">{{ __('Not specific to a page') }}</option>
                             @foreach ($project->pages as $page)
                                 <option value="{{ $page->id }}" @selected(old('page_id') === $page->id)>{{ $page->name }}</option>
                             @endforeach
@@ -95,7 +95,7 @@
                 </div>
 
                 <flux:field>
-                    <flux:label>WCAG Success Criteria</flux:label>
+                <flux:label>{{ __('WCAG Success Criteria') }}</flux:label>
                     @livewire('wcag-criteria-selector')
                     <flux:error name="wcag_criteria" />
                 </flux:field>

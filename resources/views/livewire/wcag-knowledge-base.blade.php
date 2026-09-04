@@ -167,14 +167,14 @@
                                 <flux:field>
                                     <flux:label>{{ __('Language') }}</flux:label>
                                     <flux:select wire:model="exampleCodeLanguage">
-                                        <option value="html">HTML</option>
-                                        <option value="css">CSS</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="jsx">JSX / React</option>
-                                        <option value="vue">Vue</option>
-                                        <option value="php">PHP</option>
-                                        <option value="blade">Blade</option>
-                                        <option value="aria">ARIA</option>
+                                        <option value="html">{{ __('HTML') }}</option>
+                                        <option value="css">{{ __('CSS') }}</option>
+                                        <option value="javascript">{{ __('JavaScript') }}</option>
+                                        <option value="jsx">{{ __('JSX / React') }}</option>
+                                        <option value="vue">{{ __('Vue') }}</option>
+                                        <option value="php">{{ __('PHP') }}</option>
+                                        <option value="blade">{{ __('Blade') }}</option>
+                                        <option value="aria">{{ __('ARIA') }}</option>
                                     </flux:select>
                                 </flux:field>
                             </div>

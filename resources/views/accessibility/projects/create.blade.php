@@ -43,10 +43,10 @@
                             name="target_wcag_level" 
                             required
                         >
-                            <option value="">Select a level</option>
-                            <option value="A" {{ old('target_wcag_level') === 'A' ? 'selected' : '' }}>WCAG 2.1 Level A</option>
-                            <option value="AA" {{ old('target_wcag_level') === 'AA' ? 'selected' : '' }}>WCAG 2.1 Level AA</option>
-                            <option value="AAA" {{ old('target_wcag_level') === 'AAA' ? 'selected' : '' }}>WCAG 2.1 Level AAA</option>
+                            <option value="">{{ __('Select a level') }}</option>
+                            <option value="A" {{ old('target_wcag_level') === 'A' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level A') }}</option>
+                            <option value="AA" {{ old('target_wcag_level') === 'AA' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level AA') }}</option>
+                            <option value="AAA" {{ old('target_wcag_level') === 'AAA' ? 'selected' : '' }}>{{ __('WCAG 2.1 Level AAA') }}</option>
                         </flux:select>
                         <flux:error name="target_wcag_level" />
                     </flux:field>

@@ -129,5 +129,20 @@
     "Accessibility Projects": "Tillgänglighetsprojekt",
     "Manage your website accessibility audits": "Hantera dina tillgänglighetsgranskningar",
     "Remove current logo": "Ta bort nuvarande logotyp",
-    "Create Share Link": "Skapa delningslänk"
+    "Create Share Link": "Skapa delningslänk",
+    "Select a level": "Välj en nivå",
+    "WCAG 2.1 Level A": "WCAG 2.1 Nivå A",
+    "WCAG 2.1 Level AA": "WCAG 2.1 Nivå AA",
+    "WCAG 2.1 Level AAA": "WCAG 2.1 Nivå AAA",
+    "Planning": "Planering",
+    "In Progress": "Pågående",
+    "Completed": "Avslutad",
+    "HTML": "HTML",
+    "CSS": "CSS",
+    "JavaScript": "JavaScript",
+    "JSX \/ React": "JSX \/ React",
+    "Vue": "Vue",
+    "PHP": "PHP",
+    "Blade": "Blade",
+    "ARIA": "ARIA"
 }
