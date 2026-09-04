@@ -7,8 +7,11 @@ use Livewire\Volt\Component;
 
 <div>
     <!-- Hidden input to store selected criteria for form submission -->
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $selectedCriteria; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <input type="hidden" name="wcag_criteria[]" value="<?php echo e($id); ?>" />
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $selectedCriteria; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <input type="hidden" name="wcag_criteria[]" value="<?php echo e($item['id']); ?>" />
+        <input type="hidden" name="wcag_failure_types[<?php echo e($item['id']); ?>]" value="<?php echo e($item['failure_type'] ?? ''); ?>" />
+        <input type="hidden" name="wcag_comments[<?php echo e($item['id']); ?>]" value="<?php echo e($item['comment'] ?? ''); ?>" />
+        <input type="hidden" name="wcag_code_snippets[<?php echo e($item['id']); ?>]" value="<?php echo e($item['code_snippet'] ?? ''); ?>" />
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Button to open modal -->
@@ -447,6 +450,100 @@ use Livewire\Volt\Component;
                         class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
                     >
                         <?php echo e(__('Done')); ?>
+
+                    </button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <!-- Failure Details Modal -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showFailureModal && $failureModalCriterionId): ?>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
+
+            <!-- Modal Content -->
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+                <!-- Header -->
+                <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
+                            <?php echo e(__('Add Failure Details')); ?>
+
+                        </h2>
+                        <button 
+                            type="button"
+                            wire:click="closeFailureModal"
+                            class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 focus:outline-none"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="p-6 space-y-4">
+                    <!-- Failure Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            <?php echo e(__('Failure Type')); ?>
+
+                        </label>
+                        <input 
+                            type="text"
+                            wire:model="failureType"
+                            placeholder="<?php echo e(__('E.g., F3, F13, or custom description')); ?>"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        />
+                    </div>
+
+                    <!-- Comment -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            <?php echo e(__('Comment')); ?>
+
+                        </label>
+                        <textarea 
+                            wire:model="failureComment"
+                            placeholder="<?php echo e(__('Describe why/how this criterion fails')); ?>"
+                            rows="3"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        ></textarea>
+                    </div>
+
+                    <!-- Code Snippet -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            <?php echo e(__('Code Snippet')); ?> <span class="text-xs text-zinc-500">(<?php echo e(__('optional')); ?>)</span>
+                        </label>
+                        <textarea 
+                            wire:model="failureCodeSnippet"
+                            placeholder="<?php echo e(__('Example code that fails')); ?>"
+                            rows="3"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
+                    <button 
+                        type="button"
+                        wire:click="closeFailureModal"
+                        class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
+                    >
+                        <?php echo e(__('Cancel')); ?>
+
+                    </button>
+                    <button 
+                        type="button"
+                        wire:click="saveFailureDetails"
+                        class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition font-semibold"
+                    >
+                        <?php echo e(__('Confirm & Add')); ?>
 
                     </button>
                 </div>

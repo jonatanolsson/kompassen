@@ -77,5 +77,15 @@
   "Related Resources": "Relaterade resurser",
   "View on W3C": "Visa på W3C",
   "Select a criterion to view details": "Välj ett kriterium för att visa detaljer",
-  "Done": "Klart"
+  "Done": "Klart",
+  "Add Failure Details": "Lägg till feldetaljer",
+  "Failure Type": "Feltyp",
+  "E.g., F3, F13, or custom description": "T.ex. F3, F13 eller anpassad beskrivning",
+  "Comment": "Kommentar",
+  "Describe why/how this criterion fails": "Beskriv varför/hur detta kriterium misslyckas",
+  "Code Snippet": "Kodavsnitt",
+  "optional": "valfritt",
+  "Example code that fails": "Exempel på kod som misslyckas",
+  "Cancel": "Avbryt",
+  "Confirm & Add": "Bekräfta och lägg till"
 }

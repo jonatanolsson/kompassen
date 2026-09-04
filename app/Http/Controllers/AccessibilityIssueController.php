@@ -88,6 +88,9 @@ class AccessibilityIssueController extends Controller
             'status' => 'required|in:open,resolved,wont_fix',
             'wcag_criteria' => 'nullable|array',
             'wcag_criteria.*' => 'exists:wcag_success_criteria,id',
+            'wcag_failure_types' => 'nullable|array',
+            'wcag_comments' => 'nullable|array',
+            'wcag_code_snippets' => 'nullable|array',
             'attachments' => 'nullable|array',
             'attachments.*' => 'image|mimes:jpeg,png,gif,webp|max:5120',
         ]);
@@ -95,7 +98,15 @@ class AccessibilityIssueController extends Controller
         $issue->update($validated);
 
         if (! empty($validated['wcag_criteria'])) {
-            $issue->wcagCriteria()->sync($validated['wcag_criteria']);
+            $syncData = [];
+            foreach ($validated['wcag_criteria'] as $criterionId) {
+                $syncData[$criterionId] = [
+                    'failure_type' => $validated['wcag_failure_types'][$criterionId] ?? null,
+                    'comment' => $validated['wcag_comments'][$criterionId] ?? null,
+                    'code_snippet' => $validated['wcag_code_snippets'][$criterionId] ?? null,
+                ];
+            }
+            $issue->wcagCriteria()->sync($syncData);
         }
 
         if ($request->hasFile('attachments')) {

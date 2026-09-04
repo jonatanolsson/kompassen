@@ -13,6 +13,16 @@ new class extends Component
 
     public string $searchQuery = '';
 
+    public bool $showFailureModal = false;
+
+    public ?string $failureModalCriterionId = null;
+
+    public string $failureType = '';
+
+    public string $failureComment = '';
+
+    public string $failureCodeSnippet = '';
+
     private $cachedCriteria = null;
 
     public function mount(?array $initialSelectedCriteria = null): void
@@ -30,29 +40,112 @@ new class extends Component
     public function closeModal(): void
     {
         $this->open = false;
+        $this->resetFailureModal();
+    }
+
+    public function openFailureModal(string $criterionId): void
+    {
+        $this->failureModalCriterionId = $criterionId;
+        $this->showFailureModal = true;
+
+        // Pre-fill if already selected
+        $existing = $this->getSelectedCriterionDetails($criterionId);
+        if ($existing) {
+            $this->failureType = $existing['failure_type'] ?? '';
+            $this->failureComment = $existing['comment'] ?? '';
+            $this->failureCodeSnippet = $existing['code_snippet'] ?? '';
+        } else {
+            $this->resetFailureFields();
+        }
+    }
+
+    public function closeFailureModal(): void
+    {
+        $this->showFailureModal = false;
+        $this->resetFailureModal();
+    }
+
+    public function resetFailureModal(): void
+    {
+        $this->failureModalCriterionId = null;
+        $this->resetFailureFields();
+    }
+
+    private function resetFailureFields(): void
+    {
+        $this->failureType = '';
+        $this->failureComment = '';
+        $this->failureCodeSnippet = '';
+    }
+
+    public function saveFailureDetails(): void
+    {
+        if (! $this->failureModalCriterionId) {
+            return;
+        }
+
+        // Add or update criterion with details
+        $criterionId = $this->failureModalCriterionId;
+        $key = array_search($criterionId, array_column($this->selectedCriteria, 'id'));
+
+        if ($key === false) {
+            // New criterion
+            $this->selectedCriteria[] = [
+                'id' => $criterionId,
+                'failure_type' => $this->failureType,
+                'comment' => $this->failureComment,
+                'code_snippet' => $this->failureCodeSnippet,
+            ];
+        } else {
+            // Update existing
+            $this->selectedCriteria[$key] = [
+                'id' => $criterionId,
+                'failure_type' => $this->failureType,
+                'comment' => $this->failureComment,
+                'code_snippet' => $this->failureCodeSnippet,
+            ];
+        }
+
+        $this->closeFailureModal();
     }
 
     public function selectCriterion(string $id): void
     {
-        if (! in_array($id, $this->selectedCriteria)) {
-            $this->selectedCriteria[] = $id;
-        }
-        $this->selectedDetailId = null;
+        $this->openFailureModal($id);
     }
 
     public function removeCriterion(string $id): void
     {
-        $this->selectedCriteria = array_diff($this->selectedCriteria, [$id]);
+        $this->selectedCriteria = array_filter(
+            $this->selectedCriteria,
+            fn ($c) => $c['id'] !== $id
+        );
+        $this->selectedCriteria = array_values($this->selectedCriteria);
     }
 
-    public function updateSearch(string $query): void
+    private function getSelectedCriterionDetails(string $id): ?array
     {
-        $this->searchQuery = $query;
+        foreach ($this->selectedCriteria as $criterion) {
+            if ($criterion['id'] === $id) {
+                return $criterion;
+            }
+        }
+
+        return null;
+    }
+
+    public function getSelectedCriteriaIds(): array
+    {
+        return array_map(fn ($c) => $c['id'], $this->selectedCriteria);
     }
 
     public function getSelectedCriteria()
     {
-        return WcagSuccessCriterion::whereIn('id', $this->selectedCriteria)->orderBy('number')->get();
+        $ids = $this->getSelectedCriteriaIds();
+
+        return WcagSuccessCriterion::whereIn('id', $ids)
+            ->orderBy('number')
+            ->get();
     }
 
     public function getDetailCriterion()
@@ -84,8 +177,11 @@ new class extends Component
 
 <div>
     <!-- Hidden input to store selected criteria for form submission -->
-    @foreach ($selectedCriteria as $id)
-        <input type="hidden" name="wcag_criteria[]" value="{{ $id }}" />
+    @foreach ($selectedCriteria as $item)
+        <input type="hidden" name="wcag_criteria[]" value="{{ $item['id'] }}" />
+        <input type="hidden" name="wcag_failure_types[{{ $item['id'] }}]" value="{{ $item['failure_type'] ?? '' }}" />
+        <input type="hidden" name="wcag_comments[{{ $item['id'] }}]" value="{{ $item['comment'] ?? '' }}" />
+        <input type="hidden" name="wcag_code_snippets[{{ $item['id'] }}]" value="{{ $item['code_snippet'] ?? '' }}" />
     @endforeach
 
     <!-- Button to open modal -->
@@ -299,6 +395,95 @@ new class extends Component
                         class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
                     >
                         {{ __('Done') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Failure Details Modal -->
+    @if ($showFailureModal && $failureModalCriterionId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
+
+            <!-- Modal Content -->
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+                <!-- Header -->
+                <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
+                            {{ __('Add Failure Details') }}
+                        </h2>
+                        <button 
+                            type="button"
+                            wire:click="closeFailureModal"
+                            class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 focus:outline-none"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="p-6 space-y-4">
+                    <!-- Failure Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            {{ __('Failure Type') }}
+                        </label>
+                        <input 
+                            type="text"
+                            wire:model="failureType"
+                            placeholder="{{ __('E.g., F3, F13, or custom description') }}"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        />
+                    </div>
+
+                    <!-- Comment -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            {{ __('Comment') }}
+                        </label>
+                        <textarea 
+                            wire:model="failureComment"
+                            placeholder="{{ __('Describe why/how this criterion fails') }}"
+                            rows="3"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        ></textarea>
+                    </div>
+
+                    <!-- Code Snippet -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                            {{ __('Code Snippet') }} <span class="text-xs text-zinc-500">({{ __('optional') }})</span>
+                        </label>
+                        <textarea 
+                            wire:model="failureCodeSnippet"
+                            placeholder="{{ __('Example code that fails') }}"
+                            rows="3"
+                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
+                    <button 
+                        type="button"
+                        wire:click="closeFailureModal"
+                        class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
+                    >
+                        {{ __('Cancel') }}
+                    </button>
+                    <button 
+                        type="button"
+                        wire:click="saveFailureDetails"
+                        class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition font-semibold"
+                    >
+                        {{ __('Confirm & Add') }}
                     </button>
                 </div>
             </div>

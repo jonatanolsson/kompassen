@@ -45,7 +45,8 @@ class AccessibilityIssue extends Model
             'accessibility_issue_wcag_criterion',
             'accessibility_issue_id',
             'wcag_success_criterion_id'
-        );
+        )->withPivot('failure_type', 'comment', 'code_snippet', 'screenshot_path')
+            ->withTimestamps();
     }
 
     public function attachments(): HasMany
