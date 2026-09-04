@@ -197,19 +197,26 @@ new class extends Component
     @if ($selectedCriteria)
         <div class="mt-4 flex flex-wrap gap-2">
             @foreach ($this->getSelectedCriteria() as $criterion)
-                <flux:badge variant="primary" class="flex items-center gap-2 px-3 py-1.5">
-                    <span>{{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}</span>
+                <div class="group relative">
+                    <button
+                        type="button"
+                        wire:click="openFailureModal('{{ $criterion->id }}')"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition cursor-pointer"
+                        title="{{ __('Click to edit') }}"
+                    >
+                        <span>{{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}</span>
+                    </button>
                     <button 
                         type="button"
                         wire:click="removeCriterion('{{ $criterion->id }}')"
-                        class="ml-1 text-white hover:text-zinc-100 focus:outline-none"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
                         title="{{ __('Remove') }}"
                     >
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                </flux:badge>
+                </div>
             @endforeach
         </div>
     @endif
@@ -408,7 +415,7 @@ new class extends Component
             <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
 
             <!-- Modal Content -->
-            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
                 <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
                     <div class="flex items-center justify-between">
@@ -450,7 +457,7 @@ new class extends Component
                         <textarea 
                             wire:model="failureComment"
                             placeholder="{{ __('Describe why/how this criterion fails') }}"
-                            rows="3"
+                            rows="6"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                         ></textarea>
                     </div>
@@ -463,7 +470,7 @@ new class extends Component
                         <textarea 
                             wire:model="failureCodeSnippet"
                             placeholder="{{ __('Example code that fails') }}"
-                            rows="3"
+                            rows="8"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
                         ></textarea>
                     </div>

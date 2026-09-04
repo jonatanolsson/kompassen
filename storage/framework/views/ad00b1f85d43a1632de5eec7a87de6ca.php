@@ -42,37 +42,26 @@ use Livewire\Volt\Component;
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($selectedCriteria): ?>
         <div class="mt-4 flex flex-wrap gap-2">
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $this->getSelectedCriteria(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $criterion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::badge.index','data' => ['variant' => 'primary','class' => 'flex items-center gap-2 px-3 py-1.5']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::badge'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['variant' => 'primary','class' => 'flex items-center gap-2 px-3 py-1.5']); ?>
-                    <span><?php echo e($criterion->number); ?> — <?php echo e($criterion->name_sv ?? $criterion->name_en); ?></span>
+                <div class="group relative">
+                    <button
+                        type="button"
+                        wire:click="openFailureModal('<?php echo e($criterion->id); ?>')"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition cursor-pointer"
+                        title="<?php echo e(__('Click to edit')); ?>"
+                    >
+                        <span><?php echo e($criterion->number); ?> — <?php echo e($criterion->name_sv ?? $criterion->name_en); ?></span>
+                    </button>
                     <button 
                         type="button"
                         wire:click="removeCriterion('<?php echo e($criterion->id); ?>')"
-                        class="ml-1 text-white hover:text-zinc-100 focus:outline-none"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
                         title="<?php echo e(__('Remove')); ?>"
                     >
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $attributes = $__attributesOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $component = $__componentOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__componentOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
+                </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -464,7 +453,7 @@ use Livewire\Volt\Component;
             <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
 
             <!-- Modal Content -->
-            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
                 <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
                     <div class="flex items-center justify-between">
@@ -509,7 +498,7 @@ use Livewire\Volt\Component;
                         <textarea 
                             wire:model="failureComment"
                             placeholder="<?php echo e(__('Describe why/how this criterion fails')); ?>"
-                            rows="3"
+                            rows="6"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                         ></textarea>
                     </div>
@@ -522,7 +511,7 @@ use Livewire\Volt\Component;
                         <textarea 
                             wire:model="failureCodeSnippet"
                             placeholder="<?php echo e(__('Example code that fails')); ?>"
-                            rows="3"
+                            rows="8"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
                         ></textarea>
                     </div>
