@@ -36,32 +36,32 @@ new class extends Component
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
     <div>
-        <flux:heading level="2" size="sm">Update Password</flux:heading>
-        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">Use a long, random password to keep your account secure.</flux:text>
+        <flux:heading level="2" size="sm">{{ __('Update Password') }}</flux:heading>
+        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Use a long, random password to keep your account secure.') }}</flux:text>
     </div>
 
     <div class="sm:col-span-2">
         <form wire:submit="updatePassword" class="space-y-6">
             <flux:field>
-                <flux:label>Current Password</flux:label>
+                <flux:label>{{ __('Current Password') }}</flux:label>
                 <flux:input wire:model="current_password" type="password" autocomplete="current-password" />
                 <flux:error name="current_password" />
             </flux:field>
 
             <flux:field>
-                <flux:label>New Password</flux:label>
+                <flux:label>{{ __('New Password') }}</flux:label>
                 <flux:input wire:model="password" type="password" autocomplete="new-password" />
                 <flux:error name="password" />
             </flux:field>
 
             <flux:field>
-                <flux:label>Confirm Password</flux:label>
+                <flux:label>{{ __('Confirm Password') }}</flux:label>
                 <flux:input wire:model="password_confirmation" type="password" autocomplete="new-password" />
                 <flux:error name="password_confirmation" />
             </flux:field>
 
             <div class="flex items-center gap-3 pt-2">
-                <flux:button type="submit" variant="primary">Save</flux:button>
+                <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
                 <span x-data="{ show: false }" x-show="show" x-on:password-updated.window="show = true; setTimeout(() => show = false, 2500)" class="text-sm text-green-600 dark:text-green-400">
                     Saved.
                 </span>

@@ -54,20 +54,20 @@ new class extends Component
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
     <div>
-        <flux:heading level="2" size="sm">Profile Information</flux:heading>
-        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">Update your name and email address.</flux:text>
+        <flux:heading level="2" size="sm">{{ __('Profile Information') }}</flux:heading>
+        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Update your name and email address.') }}</flux:text>
     </div>
 
     <div class="sm:col-span-2">
         <form wire:submit="updateProfileInformation" class="space-y-6">
             <flux:field>
-                <flux:label>Name</flux:label>
+                <flux:label>{{ __('Name') }}</flux:label>
                 <flux:input wire:model="name" type="text" required autofocus autocomplete="name" />
                 <flux:error name="name" />
             </flux:field>
 
             <flux:field>
-                <flux:label>Email</flux:label>
+                <flux:label>{{ __('Email') }}</flux:label>
                 <flux:input wire:model="email" type="email" required autocomplete="username" />
                 <flux:error name="email" />
 

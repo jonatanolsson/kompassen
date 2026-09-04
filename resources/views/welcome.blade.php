@@ -94,7 +94,7 @@
                             <flux:avatar src="https://ui-avatars.com/api/?name=Kompassen&background=667eea&color=fff" size="lg" />
                             <div class="flex flex-col justify-center font-medium">
                                 <div class="text-lg text-white">{{ config('app.name') }}</div>
-                                <div class="text-zinc-300">Web Accessibility Auditing</div>
+                                <div class="text-zinc-300">{{ __('Web Accessibility Auditing') }}</div>
                             </div>
                         </div>
                     </div>

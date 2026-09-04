@@ -24,7 +24,7 @@
 
         @if ($project->description)
             <flux:card class="mb-8 p-6">
-                <flux:heading level="3" class="mb-2">Description</flux:heading>
+                <flux:heading level="3" class="mb-2">{{ __('Description') }}</flux:heading>
                 <flux:text>{{ $project->description }}</flux:text>
             </flux:card>
         @endif

@@ -10,7 +10,7 @@
 
             <div class="space-y-6">
                 <flux:field>
-                    <flux:label>Page Name</flux:label>
+                    <flux:label>{{ __('Page Name') }}</flux:label>
                     <flux:input 
                         type="text" 
                         name="name" 
@@ -21,7 +21,7 @@
                 </flux:field>
 
                 <flux:field>
-                    <flux:label>Page URL</flux:label>
+                    <flux:label>{{ __('Page URL') }}</flux:label>
                     <flux:input 
                         type="url" 
                         name="url" 

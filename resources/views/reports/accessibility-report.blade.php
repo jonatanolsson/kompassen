@@ -220,19 +220,19 @@
             <div class="summary" role="region" aria-label="Report Summary">
                 <div class="stat">
                     <div class="stat-value">{{ $issues->count() }}</div>
-                    <div class="stat-label">Total Issues</div>
+                    <div class="stat-label">{{ __('Total Issues') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">{{ $counts['critical'] ?? 0 }}</div>
-                    <div class="stat-label">Critical</div>
+                    <div class="stat-label">{{ __('Critical') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">{{ $counts['major'] ?? 0 }}</div>
-                    <div class="stat-label">Major</div>
+                    <div class="stat-label">{{ __('Major') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">{{ $project->target_wcag_level }}</div>
-                    <div class="stat-label">Target Level</div>
+                    <div class="stat-label">{{ __('Target Level') }}</div>
                 </div>
             </div>
 
@@ -253,7 +253,7 @@
                                     <p class="criterion-description">{{ $wcagGroup['sc']->description }}</p>
                                 @endif
                             @else
-                                <h2 class="criterion-header">Other Issues</h2>
+                                <h2 class="criterion-header">{{ __('Other Issues') }}</h2>
                             @endif
 
                             <ul class="issue-list" role="list">
@@ -273,7 +273,7 @@
                             </ul>
                         </section>
                     @empty
-                        <p style="color: #6b7280; text-align: center; padding: 40px 0;">No issues found in this project.</p>
+                    <p style="color: #6b7280; text-align: center; padding: 40px 0;">{{ __('No issues found in this project.') }}</p>
                     @endforelse
                 </div>
             </section>

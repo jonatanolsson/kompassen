@@ -1008,14 +1008,14 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['wire:model' => 'exampleCodeLanguage']); ?>
-                                        <option value="html">HTML</option>
-                                        <option value="css">CSS</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="jsx">JSX / React</option>
-                                        <option value="vue">Vue</option>
-                                        <option value="php">PHP</option>
-                                        <option value="blade">Blade</option>
-                                        <option value="aria">ARIA</option>
+                                        <option value="html"><?php echo e(__('HTML')); ?></option>
+                                        <option value="css"><?php echo e(__('CSS')); ?></option>
+                                        <option value="javascript"><?php echo e(__('JavaScript')); ?></option>
+                                        <option value="jsx"><?php echo e(__('JSX / React')); ?></option>
+                                        <option value="vue"><?php echo e(__('Vue')); ?></option>
+                                        <option value="php"><?php echo e(__('PHP')); ?></option>
+                                        <option value="blade"><?php echo e(__('Blade')); ?></option>
+                                        <option value="aria"><?php echo e(__('ARIA')); ?></option>
                                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala467913f9ff34913553be64599ec6e92)): ?>

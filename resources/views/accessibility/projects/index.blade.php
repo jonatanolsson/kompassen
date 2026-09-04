@@ -13,7 +13,7 @@
 
             @if ($projects->isEmpty())
                 <flux:card class="p-12 text-center">
-                    <flux:text class="text-zinc-600 dark:text-zinc-400">No projects yet. Create one to get started.</flux:text>
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No projects yet. Create one to get started.') }}</flux:text>
                 </flux:card>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

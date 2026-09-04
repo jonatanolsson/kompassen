@@ -384,9 +384,9 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['name' => 'target_wcag_level','required' => true]); ?>
-                            <option value="A" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : ''); ?>>WCAG 2.1 Level A</option>
-                            <option value="AA" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : ''); ?>>WCAG 2.1 Level AA</option>
-                            <option value="AAA" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : ''); ?>>WCAG 2.1 Level AAA</option>
+                            <option value="A" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : ''); ?>><?php echo e(__('WCAG 2.1 Level A')); ?></option>
+                            <option value="AA" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : ''); ?>><?php echo e(__('WCAG 2.1 Level AA')); ?></option>
+                            <option value="AAA" <?php echo e(old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : ''); ?>><?php echo e(__('WCAG 2.1 Level AAA')); ?></option>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala467913f9ff34913553be64599ec6e92)): ?>
@@ -467,9 +467,9 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['name' => 'status','required' => true]); ?>
-                            <option value="planning" <?php echo e(old('status', $project->status) === 'planning' ? 'selected' : ''); ?>>Planning</option>
-                            <option value="in_progress" <?php echo e(old('status', $project->status) === 'in_progress' ? 'selected' : ''); ?>>In Progress</option>
-                            <option value="completed" <?php echo e(old('status', $project->status) === 'completed' ? 'selected' : ''); ?>>Completed</option>
+                            <option value="planning" <?php echo e(old('status', $project->status) === 'planning' ? 'selected' : ''); ?>><?php echo e(__('Planning')); ?></option>
+                            <option value="in_progress" <?php echo e(old('status', $project->status) === 'in_progress' ? 'selected' : ''); ?>><?php echo e(__('In Progress')); ?></option>
+                            <option value="completed" <?php echo e(old('status', $project->status) === 'completed' ? 'selected' : ''); ?>><?php echo e(__('Completed')); ?></option>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala467913f9ff34913553be64599ec6e92)): ?>
