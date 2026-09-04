@@ -215,7 +215,7 @@
                 </div>
             @else
                 <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">
-                    No active share links yet. Create one above.
+                    {{ __('No active share links yet. Create one above.') }}
                 </flux:text>
             @endif
         </div>

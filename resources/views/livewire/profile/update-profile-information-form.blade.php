@@ -74,26 +74,26 @@ new class extends Component
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                     <flux:callout color="amber" icon="exclamation-triangle" class="mt-2">
                         <flux:callout.text>
-                            Your email address is unverified.
+                        {{ __('Your email address is unverified.') }}
                             <flux:button variant="ghost" size="sm" wire:click.prevent="sendVerification" class="underline p-0">
-                                Re-send verification email
+                            {{ __('Re-send verification email') }}
                             </flux:button>
                         </flux:callout.text>
                     </flux:callout>
 
                     @if (session('status') === 'verification-link-sent')
                         <flux:callout color="green" icon="check-circle" class="mt-2">
-                            <flux:callout.text>A new verification link has been sent to your email address.</flux:callout.text>
+                            <flux:callout.text>{{ __('A new verification link has been sent to your email address.') }}</flux:callout.text>
                         </flux:callout>
                     @endif
                 @endif
             </flux:field>
 
             <div class="flex items-center gap-3 pt-2">
-                <flux:button type="submit" variant="primary">Save</flux:button>
-                <flux:text size="sm" x-data x-show="false" wire:loading.class.remove="hidden" wire:loading wire:target="updateProfileInformation" class="text-zinc-500">Saving…</flux:text>
+                <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
+                <flux:text size="sm" x-data x-show="false" wire:loading.class.remove="hidden" wire:loading wire:target="updateProfileInformation" class="text-zinc-500">{{ __('Saving…') }}</flux:text>
                 <span x-data="{ show: false }" x-show="show" x-on:profile-updated.window="show = true; setTimeout(() => show = false, 2500)" class="text-sm text-green-600 dark:text-green-400">
-                    Saved.
+                    {{ __('Saved.') }}
                 </span>
             </div>
         </form>

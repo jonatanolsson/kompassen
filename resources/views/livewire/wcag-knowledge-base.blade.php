@@ -160,7 +160,7 @@
                                 <div class="sm:col-span-2">
                                     <flux:field>
                                         <flux:label>{{ __('Code Snippet') }}</flux:label>
-                                        <flux:textarea wire:model="exampleCode" rows="5" class="font-mono text-sm" placeholder="<button>Click me</button>" />
+                                        <flux:textarea wire:model="exampleCode" rows="5" class="font-mono text-sm" placeholder="{{ __('<button>Click me</button>') }}" />
                                         <flux:error name="exampleCode" />
                                     </flux:field>
                                 </div>

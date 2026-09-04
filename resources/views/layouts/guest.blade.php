@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="mb-6 italic font-base text-2xl xl:text-3xl text-white">
-                        Professional WCAG accessibility auditing and reporting tools.
+                        {{ __('Professional WCAG accessibility auditing and reporting tools.') }}
                     </div>
 
                     <div class="flex gap-4">

@@ -220,19 +220,19 @@
             <div class="summary" role="region" aria-label="Report Summary">
                 <div class="stat">
                     <div class="stat-value"><?php echo e($issues->count()); ?></div>
-                    <div class="stat-label">Total Issues</div>
+                    <div class="stat-label"><?php echo e(__('Total Issues')); ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-value"><?php echo e($counts['critical'] ?? 0); ?></div>
-                    <div class="stat-label">Critical</div>
+                    <div class="stat-label"><?php echo e(__('Critical')); ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-value"><?php echo e($counts['major'] ?? 0); ?></div>
-                    <div class="stat-label">Major</div>
+                    <div class="stat-label"><?php echo e(__('Major')); ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-value"><?php echo e($project->target_wcag_level); ?></div>
-                    <div class="stat-label">Target Level</div>
+                    <div class="stat-label"><?php echo e(__('Target Level')); ?></div>
                 </div>
             </div>
 
@@ -253,7 +253,7 @@
                                     <p class="criterion-description"><?php echo e($wcagGroup['sc']->description); ?></p>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <?php else: ?>
-                                <h2 class="criterion-header">Other Issues</h2>
+                                <h2 class="criterion-header"><?php echo e(__('Other Issues')); ?></h2>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                             <ul class="issue-list" role="list">
@@ -274,7 +274,7 @@
                             </ul>
                         </section>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <p style="color: #6b7280; text-align: center; padding: 40px 0;">No issues found in this project.</p>
+                    <p style="color: #6b7280; text-align: center; padding: 40px 0;"><?php echo e(__('No issues found in this project.')); ?></p>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </section>

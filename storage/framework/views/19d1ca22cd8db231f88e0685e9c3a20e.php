@@ -412,7 +412,7 @@
 <?php endif; ?>
                             <div class="flex flex-col justify-center font-medium">
                                 <div class="text-lg text-white"><?php echo e(config('app.name')); ?></div>
-                                <div class="text-zinc-300">Web Accessibility Auditing</div>
+                                <div class="text-zinc-300"><?php echo e(__('Web Accessibility Auditing')); ?></div>
                             </div>
                         </div>
                     </div>
