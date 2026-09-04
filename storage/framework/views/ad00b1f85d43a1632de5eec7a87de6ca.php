@@ -1,7 +1,7 @@
 <?php
 
-use Livewire\Volt\Component;
 use App\Models\WcagSuccessCriterion;
+use Livewire\Volt\Component;
 
 ?>
 

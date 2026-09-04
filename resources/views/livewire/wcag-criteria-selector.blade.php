@@ -1,9 +1,10 @@
 <?php
 
-use Livewire\Volt\Component;
 use App\Models\WcagSuccessCriterion;
+use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     public bool $open = false;
 
     public array $selectedCriteria = [];
