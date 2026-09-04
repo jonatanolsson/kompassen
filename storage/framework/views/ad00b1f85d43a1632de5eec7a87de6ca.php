@@ -332,7 +332,7 @@ use Livewire\Volt\Component;
 <?php endif; ?>
                                             <div class="space-y-2">
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $failures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $failure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                                                    <div class="bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700">
                                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($failure->code): ?>
                                                             <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
@@ -354,12 +354,12 @@ use Livewire\Volt\Component;
 <?php unset($__componentOriginal4cc377eda9b63b796b6668ee7832d023); ?>
 <?php endif; ?>
                                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                                        <p class="text-xs font-semibold text-red-900 dark:text-red-100">
+                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                                             <?php echo e($failure->title_sv ?? $failure->title_en); ?>
 
                                                         </p>
                                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($failure->description_sv || $failure->description_en): ?>
-                                                            <p class="text-xs text-red-800 dark:text-red-200 mt-1">
+                                                            <p class="text-xs text-zinc-700 dark:text-zinc-400 mt-1">
                                                                 <?php echo e($failure->description_sv ?? $failure->description_en); ?>
 
                                                             </p>
@@ -402,13 +402,15 @@ use Livewire\Volt\Component;
 <?php endif; ?>
                                             <div class="space-y-2">
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $links; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $link): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                                        <a href="<?php echo e($link->url); ?>" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-blue-700 dark:text-blue-300 hover:underline">
+                                                    <a href="<?php echo e($link->url); ?>" target="_blank" rel="noopener noreferrer" class="block bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition">
+                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                                             <?php echo e($link->title_sv ?? $link->title_en); ?> →
-                                                        </a>
-                                                    </div>
+                                                        </p>
+                                                    </a>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </div>
+                                        </div>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>

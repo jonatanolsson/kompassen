@@ -335,15 +335,15 @@ new class extends Component
                                             </flux:text>
                                             <div class="space-y-2">
                                                 @foreach ($failures as $failure)
-                                                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                                                    <div class="bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700">
                                                         @if ($failure->code)
                                                             <flux:badge class="mb-2" variant="danger">{{ $failure->code }}</flux:badge>
                                                         @endif
-                                                        <p class="text-xs font-semibold text-red-900 dark:text-red-100">
+                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                                             {{ $failure->title_sv ?? $failure->title_en }}
                                                         </p>
                                                         @if ($failure->description_sv || $failure->description_en)
-                                                            <p class="text-xs text-red-800 dark:text-red-200 mt-1">
+                                                            <p class="text-xs text-zinc-700 dark:text-zinc-400 mt-1">
                                                                 {{ $failure->description_sv ?? $failure->description_en }}
                                                             </p>
                                                         @endif
@@ -366,13 +366,15 @@ new class extends Component
                                             </flux:text>
                                             <div class="space-y-2">
                                                 @foreach ($links as $link)
-                                                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-blue-700 dark:text-blue-300 hover:underline">
+                                                    <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition">
+                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                                             {{ $link->title_sv ?? $link->title_en }} →
-                                                        </a>
-                                                    </div>
+                                                        </p>
+                                                    </a>
                                                 @endforeach
                                             </div>
+                                        </div>
+                                    @endif
                                         </div>
                                     @endif
                                 </div>
