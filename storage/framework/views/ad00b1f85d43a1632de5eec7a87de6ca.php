@@ -91,7 +91,7 @@ use Livewire\Volt\Component;
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['level' => '2']); ?><?php echo e(__('Select WCAG Success Criteria')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['level' => '2']); ?><?php echo e(__('Select WCAG Criteria')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9)): ?>
 <?php $attributes = $__attributesOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
@@ -101,15 +101,26 @@ use Livewire\Volt\Component;
 <?php $component = $__componentOriginale0fd5b6a0986beffac17a0a103dfd7b9; ?>
 <?php unset($__componentOriginale0fd5b6a0986beffac17a0a103dfd7b9); ?>
 <?php endif; ?>
-                    <button 
-                        type="button"
-                        wire:click="closeModal"
-                        class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 focus:outline-none"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['variant' => 'ghost','icon' => 'x-mark','size' => 'sm','wire:click' => 'closeModal','class' => 'text-zinc-400']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'ghost','icon' => 'x-mark','size' => 'sm','wire:click' => 'closeModal','class' => 'text-zinc-400']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
+<?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
+<?php unset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
+<?php $component = $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
+<?php unset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
+<?php endif; ?>
                 </div>
 
                 <!-- Search Bar -->
@@ -117,7 +128,7 @@ use Livewire\Volt\Component;
                     <input 
                         wire:model.debounce-500ms="searchQuery"
                         type="text"
-                        placeholder="<?php echo e(__('Search criteria')); ?>..."
+                        placeholder="<?php echo e(__('Search criteria...')); ?>"
                         class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
                     />
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($searchQuery)): ?>
@@ -283,14 +294,28 @@ use Livewire\Volt\Component;
 
                                         </p>
                                         <div class="mt-4">
-                                            <button 
-                                                type="button"
-                                                wire:click="selectCriterion('<?php echo e($detail->id); ?>')"
-                                                class="w-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-800 px-4 py-2 rounded-lg font-semibold text-sm transition"
-                                            >
+                                            <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['type' => 'button','wire:click' => 'selectCriterion(\''.e($detail->id).'\')','variant' => 'primary','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'button','wire:click' => 'selectCriterion(\''.e($detail->id).'\')','variant' => 'primary','class' => 'w-full']); ?>
                                                 <?php echo e(__('Add to Selection')); ?>
 
-                                            </button>
+                                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
+<?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
+<?php unset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
+<?php $component = $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
+<?php unset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
+<?php endif; ?>
                                         </div>
                                     </div>
 

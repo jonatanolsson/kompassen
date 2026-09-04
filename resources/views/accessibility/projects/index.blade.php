@@ -3,11 +3,11 @@
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <flux:heading level="1">Accessibility Projects</flux:heading>
-                    <flux:text class="text-zinc-600 dark:text-zinc-400">Manage your website accessibility audits</flux:text>
+                    <flux:heading level="1">{{ __('Accessibility Projects') }}</flux:heading>
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Manage your website accessibility audits') }}</flux:text>
                 </div>
                 <a href="{{ route('accessibility-projects.create') }}">
-                    <flux:button variant="primary" icon="plus">New Project</flux:button>
+                    <flux:button variant="primary" icon="plus">{{ __('New Project') }}</flux:button>
                 </a>
             </div>
 

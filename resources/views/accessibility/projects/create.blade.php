@@ -1,20 +1,20 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-2xl mx-auto px-4 py-8">
-            <flux:heading level="1" class="mb-2">Create Project</flux:heading>
-            <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">Start a new accessibility audit by creating a project.</flux:text>
+            <flux:heading level="1" class="mb-2">{{ __('Create Project') }}</flux:heading>
+            <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">{{ __('Start a new accessibility audit by creating a project.') }}</flux:text>
 
             <form action="{{ route('accessibility-projects.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="space-y-6">
                     <flux:field>
-                        <flux:label>Project Name</flux:label>
+                        <flux:label>{{ __('Project Name') }}</flux:label>
                         <flux:input 
                             type="text" 
                             name="name" 
                             value="{{ old('name') }}"
-                            placeholder="e.g., Company Website Audit"
+                            placeholder="{{ __('e.g., Company Website Audit') }}"
                             required
                         />
                         <flux:error name="name" />
@@ -31,9 +31,9 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Client Logo</flux:label>
+                        <flux:label>{{ __('Client Logo') }}</flux:label>
                         <flux:input type="file" name="client_logo" accept="image/*" />
-                        <flux:description>Optional. Shown on reports for this project. PNG, SVG or JPG, max 2 MB.</flux:description>
+                        <flux:description>{{ __('Optional. Shown on reports for this project. PNG, SVG or JPG, max 2 MB.') }}</flux:description>
                         <flux:error name="client_logo" />
                     </flux:field>
 
@@ -62,9 +62,9 @@
                     </flux:field>
 
                     <div class="flex gap-4 pt-4">
-                        <flux:button type="submit" variant="primary">Create Project</flux:button>
+                        <flux:button type="submit" variant="primary">{{ __('Create Project') }}</flux:button>
                         <a href="{{ route('accessibility-projects.index') }}">
-                            <flux:button variant="ghost">Cancel</flux:button>
+                            <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                         </a>
                     </div>
                 </div>
