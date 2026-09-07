@@ -280,5 +280,10 @@
     "&ZeroWidthSpace;": "",
     "#": "#",
     "Customer": "Kund",
-    "{!! $issue->description !!}": "{!! $issue->description !!}"
+    "{!! $issue->description !!}": "{!! $issue->description !!}",
+    "View": "Visa",
+    "Are you sure?": "Är du säker?",
+    "Issues": "Problem",
+    "Pages": "Sidor",
+    "Knowledge Base": "Kunskapsdatabas"
 }
