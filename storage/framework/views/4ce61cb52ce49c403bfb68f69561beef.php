@@ -239,7 +239,7 @@
             <section class="content" role="main">
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($scope): ?>
                     <section class="scope" aria-label="Audit Scope">
-                        <h2 class="scope-title">Scope</h2>
+                        <h2 class="scope-title"><?php echo e(__('Scope')); ?></h2>
                         <p><?php echo e($scope); ?></p>
                     </section>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>

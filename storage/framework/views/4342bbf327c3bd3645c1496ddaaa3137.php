@@ -81,7 +81,7 @@ if ($variant !== 'bare') {
 ?>
 
 <div <?php echo e($attributes->class($classes)); ?> data-flux-timeline-indicator>
-    <div data-flux-timeline-baseline class="opacity-0 [:where(&)]:text-sm" aria-hidden="true">&ZeroWidthSpace;</div>
+    <div data-flux-timeline-baseline class="opacity-0 [:where(&)]:text-sm" aria-hidden="true"><?php echo e(__('&ZeroWidthSpace;')); ?></div>
 
     <div>
         <?php echo e($slot); ?>
