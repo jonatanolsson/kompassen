@@ -65,10 +65,6 @@ new #[Layout('layouts.guest')] class extends Component
 
         <flux:button variant="primary" type="submit" class="w-full">
             {{ __('Email Password Reset Link') }}
-        </flux:button>
-    </form>
-
-    <flux:subheading class="text-center mt-8">
-        <flux:link href="{{ route('login') }}" wire:navigate>{{ __('Back to login') }}</flux:link>
+        </flux:button> {{ __('') }} <flux:link href="{{ route('login') }}" wire:navigate>{{ __('Back to login') }}</flux:link>
     </flux:subheading>
 </div>
