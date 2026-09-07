@@ -113,7 +113,7 @@
                             <div class="flex items-start gap-3">
                                 <span class="font-bold text-blue-600 dark:text-blue-400 min-w-fit">{{ $criterion->number }}</span>
                                 <div class="flex-1">
-                                    <flux:heading level="4" class="text-sm">{{ $criterion->name_en }}</flux:heading>
+                                    <flux:heading level="4" class="text-sm">{{ $criterion->name_sv ?? $criterion->name_en }}</flux:heading>
                                     <flux:text class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('Level') }} {{ Str::upper($criterion->level) }}</flux:text>
                                 </div>
                             </div>

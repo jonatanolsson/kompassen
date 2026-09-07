@@ -52,10 +52,10 @@ test('dashboard displays navigation sidebar', function () {
 
     $response
         ->assertOk()
-        ->assertSee('Dashboard')
-        ->assertSee('Accessibility')
-        ->assertSee('Profile')
-        ->assertSee('Logout');
+        ->assertSee(__('Dashboard'))
+        ->assertSee(__('Accessibility'))
+        ->assertSee(__('Profile'))
+        ->assertSee(__('Logout'));
 });
 
 test('users can logout', function () {
@@ -66,9 +66,8 @@ test('users can logout', function () {
     $response = $this->get('/dashboard');
 
     // Verify the logout button is present
-    $response->assertSee('Logout');
+    $response->assertSee(__('Logout'));
 
     // Verify user is still authenticated after viewing the page
     $this->assertAuthenticated();
 });
-

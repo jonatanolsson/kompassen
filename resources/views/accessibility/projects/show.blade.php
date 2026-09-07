@@ -99,34 +99,52 @@
                                         <flux:badge color="zinc">{{ Str::title($issue->status) }}</flux:badge>
                                     </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    <a href="{{ route('accessibility-issues.show', [$project, $issue]) }}">
-                                    <flux:button variant="ghost" size="sm" icon="eye">{{ __('View') }}</flux:button>
-                                    </a>
-                                    <a href="{{ route('accessibility-issues.edit', [$project, $issue]) }}">
-                                    <flux:button variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
-                                    </a>
+                                <div class="flex gap-2 items-center">
+                                    <flux:dropdown align="end">
+                                        <flux:button variant="subtle" size="sm" icon="ellipsis-vertical" />
 
-                                    <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
+                                        <flux:menu>
+                                            <flux:menu.item href="{{ route('accessibility-issues.show', [$project, $issue]) }}" icon="eye" wire:navigate>
+                                                {{ __('View') }}
+                                            </flux:menu.item>
+
+                                            <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil" wire:navigate>
+                                                {{ __('Edit') }}
+                                            </flux:menu.item>
+
+                                            <flux:menu.item as="button" icon="check" onclick="document.getElementById('resolve-fixed-{{ $issue->id }}').submit()">
+                                                {{ __('Mark as fixed') }}
+                                            </flux:menu.item>
+
+                                            <flux:menu.item as="button" icon="x-mark" class="text-red-600" onclick="document.getElementById('resolve-wontfix-{{ $issue->id }}').submit()">
+                                                {{ __('Mark as wontfix') }}
+                                            </flux:menu.item>
+
+                                            <flux:menu.separator />
+
+                                            <flux:menu.item as="button" icon="trash" variant="danger" onclick="if(confirm('{{ __('Are you sure?') }}')){ document.getElementById('destroy-{{ $issue->id }}').submit(); }">
+                                                {{ __('Delete') }}
+                                            </flux:menu.item>
+                                        </flux:menu>
+                                    </flux:dropdown>
+
+                                    <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="hidden" name="resolution_status" value="" />
+                                        <input type="hidden" name="resolution_status" value="fixed" />
                                         <input type="hidden" name="resolution_notes" value="" />
-                                        <flux:button type="button" variant="primary" size="sm" icon="check" onclick="submitResolution('fixed', 'resolve-fixed-{{ $issue->id }}')">{{ __('Mark as fixed') }}</flux:button>
                                     </form>
 
-                                    <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
+                                    <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="hidden" name="resolution_status" value="" />
+                                        <input type="hidden" name="resolution_status" value="wontfix" />
                                         <input type="hidden" name="resolution_notes" value="" />
-                                        <flux:button type="button" variant="danger" size="sm" icon="x-mark" onclick="submitResolution('wontfix', 'resolve-wontfix-{{ $issue->id }}')">{{ __('Mark as wontfix') }}</flux:button>
                                     </form>
 
-                                    <form action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="inline">
+                                    <form id="destroy-{{ $issue->id }}" action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="hidden">
                                         @csrf
                                         @method('DELETE')
-                                    <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
                                     </form>
                                 </div>
                             </div>

@@ -30,7 +30,7 @@
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="flex items-center gap-2 min-w-0">
                                         <span class="font-mono font-semibold shrink-0">{{ $criterion->number }}</span>
-                                        <span class="truncate">{{ $criterion->name_en }}</span>
+                                        <span class="truncate">{{ $criterion->name_sv ?? $criterion->name_en }}</span>
                                     </span>
                                     <div class="flex items-center gap-1 shrink-0">
                                         @if ($criterion->examples_count > 0)
@@ -69,11 +69,11 @@
                                         {{ __('Level') }} {{ $criterion->level }}
                                     </flux:badge>
                                 </div>
-                                <flux:heading>{{ $criterion->name_en }}</flux:heading>
+                                <flux:heading>{{ $criterion->name_sv ?? $criterion->name_en }}</flux:heading>
                                 @if ($criterion->name_sv !== $criterion->name_en)
                                     <flux:subheading>{{ $criterion->name_sv }}</flux:subheading>
                                 @endif
-                                <flux:text size="sm" class="mt-3 text-zinc-600 dark:text-zinc-400">{{ $criterion->description_en }}</flux:text>
+                                <flux:text size="sm" class="mt-3 text-zinc-600 dark:text-zinc-400">{{ $criterion->description_sv ?? $criterion->description_en }}</flux:text>
                             </div>
                             @if ($criterion->url)
                                 <flux:button href="{{ $criterion->url }}" target="_blank" size="sm" variant="ghost" icon-trailing="arrow-top-right-on-square">

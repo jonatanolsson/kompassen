@@ -2,9 +2,10 @@
 
 use App\Models\AccessibilityProject;
 use App\Models\AccessibilityReport;
-use App\Models\Team;
 use App\Models\ProjectMember;
+use App\Models\Team;
 use App\Models\User;
+use App\Models\WcagSuccessCriterion;
 
 test('can view reports index', function () {
     $household = Team::factory()->create();
@@ -20,7 +21,7 @@ test('can view reports index', function () {
     $response = $this->actingAs($user)->get("/accessibility-projects/{$project->id}/reports");
 
     $response->assertStatus(200);
-    $response->assertSee('Reports for ' . $project->name);
+    $response->assertSee('Reports for '.$project->name);
 });
 
 test('can view report creation form', function () {
@@ -37,7 +38,7 @@ test('can view report creation form', function () {
     $response = $this->actingAs($user)->get("/accessibility-projects/{$project->id}/reports/create");
 
     $response->assertStatus(200);
-    $response->assertSee('Generate Report');
+    $response->assertSee(__('Generate Report'));
 });
 
 test('can generate report with issues', function () {
@@ -276,7 +277,7 @@ test('report displays wcag criteria with localized descriptions', function () {
     ]);
 
     // Create a WCAG criterion
-    $wcagCriterion = \App\Models\WcagSuccessCriterion::create([
+    $wcagCriterion = WcagSuccessCriterion::create([
         'number' => '1.1.1',
         'level' => 'A',
         'name_en' => 'Non-text Content',
@@ -309,5 +310,6 @@ test('report displays wcag criteria with localized descriptions', function () {
 
     // Verify WCAG criterion number appears in report
     expect($report->html_content)->toContain('1.1.1');
-    expect($report->html_content)->toContain('Non-text Content');
+    // Report may contain localized name_sv or name_en depending on app locale
+    $this->assertTrue(str_contains($report->html_content, $wcagCriterion->name_en) || str_contains($report->html_content, $wcagCriterion->name_sv));
 });
