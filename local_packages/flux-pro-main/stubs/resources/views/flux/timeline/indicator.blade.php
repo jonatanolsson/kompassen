@@ -50,7 +50,7 @@ if ($variant !== 'bare') {
 @endphp
 
 <div {{ $attributes->class($classes) }} data-flux-timeline-indicator>
-    <div data-flux-timeline-baseline class="opacity-0 [:where(&)]:text-sm" aria-hidden="true">&ZeroWidthSpace;</div>
+    <div data-flux-timeline-baseline class="opacity-0 [:where(&)]:text-sm" aria-hidden="true">{{ __('&ZeroWidthSpace;') }}</div>
 
     <div>
         {{ $slot }}

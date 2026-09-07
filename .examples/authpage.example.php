@@ -15,11 +15,11 @@
                         </svg>
                     </div>
 
-                    <span class="text-xl font-semibold text-zinc-800 dark:text-white">flux</span>
+                    <span class="text-xl font-semibold text-zinc-800 dark:text-white">{{ __('flux') }}</span>
                 </a>
             </div>
 
-            <flux:heading class="text-center" size="xl">Welcome back</flux:heading>
+            <flux:heading class="text-center" size="xl">{{ __('Welcome back') }}</flux:heading>
 
             <div class="space-y-4">
                 <flux:button class="w-full">
@@ -60,9 +60,9 @@
 
                 <flux:field>
                     <div class="mb-3 flex justify-between">
-                        <flux:label>Password</flux:label>
+                        <flux:label>{{ __('Password') }}</flux:label>
 
-                        <flux:link href="#" variant="subtle" class="text-sm">Forgot password?</flux:link>
+                        <flux:link href="#" variant="subtle" class="text-sm">{{ __('Forgot password?') }}</flux:link>
                     </div>
 
                     <flux:input type="password" placeholder="Your password" />
@@ -70,11 +70,11 @@
 
                 <flux:checkbox label="Remember me for 30 days" />
 
-                <flux:button variant="primary" class="w-full">Log in</flux:button>
+                <flux:button variant="primary" class="w-full">{{ __('Log in') }}</flux:button>
             </div>
 
             <flux:subheading class="text-center">
-                First time around here? <flux:link href="#">Sign up for free</flux:link>
+                First time around here? <flux:link href="#">{{ __('Sign up for free') }}</flux:link>
             </flux:subheading>
         </div>
     </div>
@@ -97,8 +97,8 @@
                 <flux:avatar src="https://fluxui.dev/img/demo/caleb.png" size="xl" />
 
                 <div class="flex flex-col justify-center font-medium">
-                    <div class="text-lg">Caleb Porzio</div>
-                    <div class="text-zinc-300">Creator of Livewire</div>
+                    <div class="text-lg">{{ __('Caleb Porzio') }}</div>
+                    <div class="text-zinc-300">{{ __('Creator of Livewire') }}</div>
                 </div>
             </div>
         </div>

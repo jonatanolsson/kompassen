@@ -14,23 +14,23 @@
         <flux:sidebar.search placeholder="Search..." />
 
         <flux:sidebar.nav>
-            <flux:sidebar.item icon="home" href="#" current>Home</flux:sidebar.item>
-            <flux:sidebar.item icon="inbox" badge="12" href="#">Inbox</flux:sidebar.item>
-            <flux:sidebar.item icon="document-text" href="#">Documents</flux:sidebar.item>
-            <flux:sidebar.item icon="calendar" href="#">Calendar</flux:sidebar.item>
+            <flux:sidebar.item icon="home" href="#" current>{{ __('Home') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="inbox" badge="12" href="#">{{ __('Inbox') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="document-text" href="#">{{ __('Documents') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="calendar" href="#">{{ __('Calendar') }}</flux:sidebar.item>
 
             <flux:sidebar.group expandable heading="Favorites" class="grid">
-                <flux:sidebar.item href="#">Marketing site</flux:sidebar.item>
-                <flux:sidebar.item href="#">Android app</flux:sidebar.item>
-                <flux:sidebar.item href="#">Brand guidelines</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Marketing site') }}</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Android app') }}</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Brand guidelines') }}</flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
         <flux:sidebar.spacer />
 
         <flux:sidebar.nav>
-            <flux:sidebar.item icon="cog-6-tooth" href="#">Settings</flux:sidebar.item>
-            <flux:sidebar.item icon="information-circle" href="#">Help</flux:sidebar.item>
+            <flux:sidebar.item icon="cog-6-tooth" href="#">{{ __('Settings') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="information-circle" href="#">{{ __('Help') }}</flux:sidebar.item>
         </flux:sidebar.nav>
 
         <flux:dropdown position="top" align="start" class="max-lg:hidden">
@@ -38,13 +38,13 @@
 
             <flux:menu>
                 <flux:menu.radio.group>
-                    <flux:menu.radio checked>Olivia Martin</flux:menu.radio>
-                    <flux:menu.radio>Truly Delta</flux:menu.radio>
+                    <flux:menu.radio checked>{{ __('Olivia Martin') }}</flux:menu.radio>
+                    <flux:menu.radio>{{ __('Truly Delta') }}</flux:menu.radio>
                 </flux:menu.radio.group>
 
                 <flux:menu.separator />
 
-                <flux:menu.item icon="arrow-right-start-on-rectangle">Logout</flux:menu.item>
+                <flux:menu.item icon="arrow-right-start-on-rectangle">{{ __('Logout') }}</flux:menu.item>
             </flux:menu>
         </flux:dropdown>
     </flux:sidebar>
@@ -58,14 +58,14 @@
     </flux:header>
 
     <flux:main container class="max-w-xl lg:max-w-3xl">
-        <flux:heading size="xl">Settings</flux:heading>
+        <flux:heading size="xl">{{ __('Settings') }}</flux:heading>
 
         <flux:separator variant="subtle" class="my-8" />
 
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
             <div class="w-80">
-                <flux:heading size="lg">Profile</flux:heading>
-                <flux:subheading>This is how others will see you on the site.</flux:subheading>
+                <flux:heading size="lg">{{ __('Profile') }}</flux:heading>
+                <flux:subheading>{{ __('This is how others will see you on the site.') }}</flux:subheading>
             </div>
 
             <div class="flex-1 space-y-6">
@@ -91,7 +91,7 @@
                 />
 
                 <div class="flex justify-end">
-                    <flux:button type="submit" variant="primary">Save profile</flux:button>
+                    <flux:button type="submit" variant="primary">{{ __('Save profile') }}</flux:button>
                 </div>
             </div>
         </div>
@@ -100,8 +100,8 @@
 
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
             <div class="w-80">
-                <flux:heading size="lg">Preferences</flux:heading>
-                <flux:subheading>Customize your layout and notification preferences.</flux:subheading>
+                <flux:heading size="lg">{{ __('Preferences') }}</flux:heading>
+                <flux:subheading>{{ __('Customize your layout and notification preferences.') }}</flux:subheading>
             </div>
 
             <div class="flex-1 space-y-6">
@@ -121,7 +121,7 @@
                 </flux:radio.group>
 
                 <div class="flex justify-end">
-                    <flux:button type="submit" variant="primary">Save preferences</flux:button>
+                    <flux:button type="submit" variant="primary">{{ __('Save preferences') }}</flux:button>
                 </div>
             </div>
         </div>
@@ -130,8 +130,8 @@
 
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 pb-10">
             <div class="w-80">
-                <flux:heading size="lg">Email notifications</flux:heading>
-                <flux:subheading>Choose which emails you'd like to get from us.</flux:subheading>
+                <flux:heading size="lg">{{ __('Email notifications') }}</flux:heading>
+                <flux:subheading>{{ __('Choose which emails you\'d like to get from us.') }}</flux:subheading>
             </div>
 
             <div class="flex-1 space-y-6">

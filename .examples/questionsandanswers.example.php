@@ -7,9 +7,9 @@
         <flux:brand href="#" logo="https://fluxui.dev/img/demo/dark-mode-logo.png" name="Acme Inc." class="max-lg:hidden! hidden dark:flex" />
 
         <flux:navbar class="-mb-px max-lg:hidden">
-            <flux:navbar.item href="#">Questions</flux:navbar.item>
-            <flux:navbar.item href="#">Leaderboard</flux:navbar.item>
-            <flux:navbar.item href="#">Announcements</flux:navbar.item>
+            <flux:navbar.item href="#">{{ __('Questions') }}</flux:navbar.item>
+            <flux:navbar.item href="#">{{ __('Leaderboard') }}</flux:navbar.item>
+            <flux:navbar.item href="#">{{ __('Announcements') }}</flux:navbar.item>
         </flux:navbar>
 
         <flux:spacer />
@@ -20,7 +20,7 @@
                 <div class="absolute -bottom-px -right-px rounded-full size-2 border-2 border-red-50 dark:border-red-950 bg-red-600 dark:bg-red-500"></div>
             </div>
 
-            <div class="text-sm font-medium text-red-600 dark:text-white">Live</div>
+            <div class="text-sm font-medium text-red-600 dark:text-white">{{ __('Live') }}</div>
         </div>
 
         <flux:separator vertical variant="subtle" class="my-4 mx-3"/>
@@ -35,7 +35,7 @@
                             <flux:avatar src="https://fluxui.dev/img/demo/teej.png" size="sm" class="shrink-0" />
 
                             <div class="grid flex-1 text-left text-sm leading-tight">
-                                <span class="truncate font-semibold">John Doe</span>
+                                <span class="truncate font-semibold">{{ __('John Doe') }}</span>
                                 <span class="truncate text-xs">john@doe.com</span>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item href="/settings/profile" icon="cog">Settings</flux:menu.item>
+                    <flux:menu.item href="/settings/profile" icon="cog">{{ __('Settings') }}</flux:menu.item>
                 </flux:menu.radio.group>
 
                 <flux:menu.separator />
@@ -98,9 +98,9 @@
         <div class="sm:border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
             <div class="max-w-7xl px-6 sm:px-8 py-3 mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
                 <div class="max-sm:hidden flex items-baseline gap-3">
-                    <flux:heading size="lg" class="text-lg">Questions</flux:heading>
+                    <flux:heading size="lg" class="text-lg">{{ __('Questions') }}</flux:heading>
 
-                    <flux:text>77</flux:text>
+                    <flux:text>{{ __('77') }}</flux:text>
                 </div>
 
                 <flux:spacer />
@@ -114,9 +114,9 @@
                             </flux:select.button>
                         </x-slot>
 
-                        <flux:select.option value="all" selected>All</flux:select.option>
-                        <flux:select.option value="unapproved">Unapproved</flux:select.option>
-                        <flux:select.option value="approved">Approved</flux:select.option>
+                        <flux:select.option value="all" selected>{{ __('All') }}</flux:select.option>
+                        <flux:select.option value="unapproved">{{ __('Unapproved') }}</flux:select.option>
+                        <flux:select.option value="approved">{{ __('Approved') }}</flux:select.option>
                     </flux:select>
 
                     <flux:select variant="listbox" class="sm:max-w-fit">
@@ -127,13 +127,13 @@
                             </flux:select.button>
                         </x-slot>
 
-                        <flux:select.option value="popular" selected>Most popular</flux:select.option>
-                        <flux:select.option value="newest">Newest</flux:select.option>
-                        <flux:select.option value="oldest">Oldest</flux:select.option>
+                        <flux:select.option value="popular" selected>{{ __('Most popular') }}</flux:select.option>
+                        <flux:select.option value="newest">{{ __('Newest') }}</flux:select.option>
+                        <flux:select.option value="oldest">{{ __('Oldest') }}</flux:select.option>
                     </flux:select>
                 </div>
 
-                <flux:button icon="pencil-square" size="sm" variant="primary">New question</flux:button>
+                <flux:button icon="pencil-square" size="sm" variant="primary">{{ __('New question') }}</flux:button>
             </div>
         </div>
 
@@ -148,19 +148,19 @@
 
                     <div class="flex flex-col gap-0.5 sm:gap-2 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-2">
-                            <flux:heading>John Doe</flux:heading>
+                            <flux:heading>{{ __('John Doe') }}</flux:heading>
 
-                            <flux:badge color="lime" size="sm" icon="check-badge" inset="top bottom">Moderator</flux:badge>
+                            <flux:badge color="lime" size="sm" icon="check-badge" inset="top bottom">{{ __('Moderator') }}</flux:badge>
                         </div>
 
-                        <flux:text class="text-sm">2 days ago</flux:text>
+                        <flux:text class="text-sm">{{ __('2 days ago') }}</flux:text>
                     </div>
                 </div>
 
                 <div class="min-h-2 sm:min-h-1"></div>
 
                 <div class="pl-8">
-                    <flux:text variant="strong">What is the best way to learn Laravel?</flux:text>
+                    <flux:text variant="strong">{{ __('What is the best way to learn Laravel?') }}</flux:text>
 
                     <div class="min-h-2"></div>
 
@@ -168,15 +168,15 @@
                         <flux:button wire:click="$js.optimisticVote($el)" variant="ghost" size="sm" inset="left" class="flex items-center gap-2" :loading="false">
                             <flux:icon.hand-thumb-up name="hand-thumb-up" variant="outline" class="size-4 text-zinc-400 [&_path]:stroke-[2.25]" />
 
-                            <flux:text class="text-sm text-zinc-500 dark:text-zinc-400 tabular-nums">12</flux:text>
+                            <flux:text class="text-sm text-zinc-500 dark:text-zinc-400 tabular-nums">{{ __('12') }}</flux:text>
                         </flux:button>
 
                         <flux:dropdown>
                             <flux:button icon="ellipsis-horizontal" variant="subtle" size="sm" />
 
                             <flux:menu class="min-w-0">
-                                <flux:menu.item icon="pencil-square">Edit</flux:menu.item>
-                                <flux:menu.item variant="danger" icon="trash">Delete</flux:menu.item>
+                                <flux:menu.item icon="pencil-square">{{ __('Edit') }}</flux:menu.item>
+                                <flux:menu.item variant="danger" icon="trash">{{ __('Delete') }}</flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     </div>
@@ -189,23 +189,23 @@
 
                     <div class="flex flex-col gap-0.5 sm:gap-2 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-2">
-                            <flux:heading>Sarah Smith</flux:heading>
+                            <flux:heading>{{ __('Sarah Smith') }}</flux:heading>
                         </div>
 
-                        <flux:text class="text-sm">3 days ago</flux:text>
+                        <flux:text class="text-sm">{{ __('3 days ago') }}</flux:text>
                     </div>
                 </div>
 
                 <div class="min-h-2 sm:min-h-1"></div>
 
                 <div class="pl-8">
-                    <flux:text variant="strong">I'm trying to learn Laravel, but I'm not sure where to start. Any advice?</flux:text>
+                    <flux:text variant="strong">{{ __('I\'m trying to learn Laravel, but I\'m not sure where to start. Any advice?') }}</flux:text>
 
                     <div class="min-h-2"></div>
 
                     <div class="flex items-center gap-2">
-                        <flux:button size="sm">Approve</flux:button>
-                        <flux:button size="sm" variant="filled" class="text-red-600! dark:text-red-500!">Delete</flux:button>
+                        <flux:button size="sm">{{ __('Approve') }}</flux:button>
+                        <flux:button size="sm" variant="filled" class="text-red-600! dark:text-red-500!">{{ __('Delete') }}</flux:button>
                     </div>
                 </div>
             </div>
@@ -216,17 +216,17 @@
 
                     <div class="flex flex-col gap-0.5 sm:gap-2 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-2">
-                            <flux:heading>Jane Doe</flux:heading>
+                            <flux:heading>{{ __('Jane Doe') }}</flux:heading>
                         </div>
 
-                        <flux:text class="text-sm">4 days ago</flux:text>
+                        <flux:text class="text-sm">{{ __('4 days ago') }}</flux:text>
                     </div>
                 </div>
 
                 <div class="min-h-2 sm:min-h-1"></div>
 
                 <div class="pl-8">
-                    <flux:text variant="strong">Where can I find the best tutorials for Laravel?</flux:text>
+                    <flux:text variant="strong">{{ __('Where can I find the best tutorials for Laravel?') }}</flux:text>
 
                     <div class="min-h-2"></div>
 
@@ -234,15 +234,15 @@
                         <flux:button wire:click="$js.optimisticVote($el)" variant="ghost" size="sm" inset="left" class="flex items-center gap-2" :loading="false">
                             <flux:icon.hand-thumb-up name="hand-thumb-up" variant="solid" class="size-4 text-accent-content" data-animate-wiggle />
 
-                            <flux:text class="text-sm text-accent-content tabular-nums">92</flux:text>
+                            <flux:text class="text-sm text-accent-content tabular-nums">{{ __('92') }}</flux:text>
                         </flux:button>
 
                         <flux:dropdown>
                             <flux:button icon="ellipsis-horizontal" variant="subtle" size="sm" />
 
                             <flux:menu class="min-w-0">
-                                <flux:menu.item icon="pencil-square">Edit</flux:menu.item>
-                                <flux:menu.item variant="danger" icon="trash">Delete</flux:menu.item>
+                                <flux:menu.item icon="pencil-square">{{ __('Edit') }}</flux:menu.item>
+                                <flux:menu.item variant="danger" icon="trash">{{ __('Delete') }}</flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     </div>
@@ -255,17 +255,17 @@
 
                     <div class="flex flex-col gap-0.5 sm:gap-2 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-2">
-                            <flux:heading>Samantha Doe</flux:heading>
+                            <flux:heading>{{ __('Samantha Doe') }}</flux:heading>
                         </div>
 
-                        <flux:text class="text-sm">5 days ago</flux:text>
+                        <flux:text class="text-sm">{{ __('5 days ago') }}</flux:text>
                     </div>
                 </div>
 
                 <div class="min-h-2 sm:min-h-1"></div>
 
                 <div class="pl-8">
-                    <flux:text variant="strong">When is the best time to use Tailwind CSS?</flux:text>
+                    <flux:text variant="strong">{{ __('When is the best time to use Tailwind CSS?') }}</flux:text>
 
                     <div class="min-h-2"></div>
 
@@ -273,15 +273,15 @@
                         <flux:button wire:click="$js.optimisticVote($el)" variant="ghost" size="sm" inset="left" class="flex items-center gap-2" :loading="false">
                             <flux:icon.hand-thumb-up name="hand-thumb-up" variant="solid" class="size-4 text-accent-content" data-animate-wiggle />
 
-                            <flux:text class="text-sm text-accent-content tabular-nums">100</flux:text>
+                            <flux:text class="text-sm text-accent-content tabular-nums">{{ __('100') }}</flux:text>
                         </flux:button>
 
                         <flux:dropdown>
                             <flux:button icon="ellipsis-horizontal" variant="subtle" size="sm" />
 
                             <flux:menu class="min-w-0">
-                                <flux:menu.item icon="pencil-square">Edit</flux:menu.item>
-                                <flux:menu.item variant="danger" icon="trash">Delete</flux:menu.item>
+                                <flux:menu.item icon="pencil-square">{{ __('Edit') }}</flux:menu.item>
+                                <flux:menu.item variant="danger" icon="trash">{{ __('Delete') }}</flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     </div>

@@ -7,22 +7,22 @@
 
         <flux:navbar class="max-lg:hidden">
             <flux:dropdown>
-                <flux:navbar.item icon:trailing="chevron-down">Recent</flux:navbar.item>
+                <flux:navbar.item icon:trailing="chevron-down">{{ __('Recent') }}</flux:navbar.item>
 
                 <flux:navmenu>
-                    <flux:navbar.item href="#">Projects</flux:navbar.item>
-                    <flux:navbar.item href="#">Tasks</flux:navbar.item>
-                    <flux:navbar.item href="#">Files</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Projects') }}</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Tasks') }}</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Files') }}</flux:navbar.item>
                 </flux:navmenu>
             </flux:dropdown>
 
             <flux:dropdown>
-                <flux:navbar.item icon:trailing="chevron-down">Starred</flux:navbar.item>
+                <flux:navbar.item icon:trailing="chevron-down">{{ __('Starred') }}</flux:navbar.item>
 
                 <flux:navmenu>
-                    <flux:navbar.item href="#">Users</flux:navbar.item>
-                    <flux:navbar.item href="#">Events</flux:navbar.item>
-                    <flux:navbar.item href="#">Products</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Users') }}</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Events') }}</flux:navbar.item>
+                    <flux:navbar.item href="#">{{ __('Products') }}</flux:navbar.item>
                 </flux:navmenu>
             </flux:dropdown>
         </flux:navbar>
@@ -51,47 +51,47 @@
         </flux:sidebar.header>
 
         <flux:sidebar.nav>
-            <flux:sidebar.item icon="home" href="#" current>Home</flux:sidebar.item>
-            <flux:sidebar.item icon="inbox" badge="12" href="#">Inbox</flux:sidebar.item>
-            <flux:sidebar.item icon="document-text" href="#">Documents</flux:sidebar.item>
-            <flux:sidebar.item icon="calendar" href="#">Calendar</flux:sidebar.item>
+            <flux:sidebar.item icon="home" href="#" current>{{ __('Home') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="inbox" badge="12" href="#">{{ __('Inbox') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="document-text" href="#">{{ __('Documents') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="calendar" href="#">{{ __('Calendar') }}</flux:sidebar.item>
 
             <flux:sidebar.group expandable heading="Favorites" class="grid">
-                <flux:sidebar.item href="#">Marketing site</flux:sidebar.item>
-                <flux:sidebar.item href="#">Android app</flux:sidebar.item>
-                <flux:sidebar.item href="#">Brand guidelines</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Marketing site') }}</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Android app') }}</flux:sidebar.item>
+                <flux:sidebar.item href="#">{{ __('Brand guidelines') }}</flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
         <flux:sidebar.spacer />
 
         <flux:sidebar.nav>
-            <flux:sidebar.item icon="cog-6-tooth" href="#">Settings</flux:sidebar.item>
-            <flux:sidebar.item icon="information-circle" href="#">Help</flux:sidebar.item>
+            <flux:sidebar.item icon="cog-6-tooth" href="#">{{ __('Settings') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="information-circle" href="#">{{ __('Help') }}</flux:sidebar.item>
         </flux:sidebar.nav>
     </flux:sidebar>
 
     <flux:main>
         <div class="flex flex-col md:flex-row gap-6 justify-between md:items-center mb-6">
             <flux:breadcrumbs>
-                <flux:breadcrumbs.item href="#" divider="slash">Acme Inc.</flux:breadcrumbs.item>
-                <flux:breadcrumbs.item href="#" divider="slash">iOS App V2</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item href="#" divider="slash">{{ __('Acme Inc.') }}</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item href="#" divider="slash">{{ __('iOS App V2') }}</flux:breadcrumbs.item>
             </flux:breadcrumbs>
 
             <div class="flex gap-4">
                 <flux:dropdown position="bottom" align="end">
-                    <flux:button size="sm" variant="filled" icon:trailing="chevron-down">Filters</flux:button>
+                    <flux:button size="sm" variant="filled" icon:trailing="chevron-down">{{ __('Filters') }}</flux:button>
 
                     <flux:menu>
-                        <flux:menu.item>Archive</flux:menu.item>
-                        <flux:menu.item>Delete</flux:menu.item>
+                        <flux:menu.item>{{ __('Archive') }}</flux:menu.item>
+                        <flux:menu.item>{{ __('Delete') }}</flux:menu.item>
                     </flux:menu>
                 </flux:dropdown>
 
                 <flux:tabs variant="segmented" size="sm" class="-my-px h-auto! max-md:hidden">
-                    <flux:tab name="board" selected>Board</flux:tab>
-                    <flux:tab name="list">List</flux:tab>
-                    <flux:tab name="timeline">Timeline</flux:tab>
+                    <flux:tab name="board" selected>{{ __('Board') }}</flux:tab>
+                    <flux:tab name="list">{{ __('List') }}</flux:tab>
+                    <flux:tab name="timeline">{{ __('Timeline') }}</flux:tab>
                 </flux:tabs>
 
                 <flux:separator vertical class="my-2" />
@@ -101,10 +101,10 @@
                         <flux:avatar size="sm" tooltip name="{{ $item }}" src="https://i.pravatar.cc/100?img={{ $loop->index + 12 }}" />
                     @endforeach
 
-                    <flux:avatar size="sm">3+</flux:avatar>
+                    <flux:avatar size="sm">{{ __('3+') }}</flux:avatar>
                 </flux:avatar.group>
 
-                <flux:button variant="filled" size="sm">Invite</flux:button>
+                <flux:button variant="filled" size="sm">{{ __('Invite') }}</flux:button>
             </div>
         </div>
 
@@ -116,7 +116,7 @@
                             <div class="px-4 py-4 flex justify-between items-start">
                                 <div>
                                     <flux:heading>{{ $column['title'] }}</flux:heading>
-                                    <flux:subheading class="mb-0!">11 tasks</flux:subheading>
+                                    <flux:subheading class="mb-0!">{{ __('11 tasks') }}</flux:subheading>
                                 </div>
                                 <flux:button variant="subtle" icon="ellipsis-horizontal" size="sm" />
                             </div>
@@ -133,7 +133,7 @@
                                 @endforeach
                             </div>
                             <div class="px-2 py-2">
-                                <flux:button variant="subtle" icon="plus" size="sm" class="w-full justify-start!">New task</flux:button>
+                                <flux:button variant="subtle" icon="plus" size="sm" class="w-full justify-start!">{{ __('New task') }}</flux:button>
                             </div>
                         </div>
                     </div>
