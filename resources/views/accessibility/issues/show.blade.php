@@ -59,10 +59,7 @@
         @if ($issue->description)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>
-                <flux:card class="p-6">
-                    <x-user-content :content="$issue->description" />
-                </flux:card>
-            </div>
+                <flux:card class="p-6"> {{ __('description" />') }} </div>
         @endif
 
         <!-- Images -->
