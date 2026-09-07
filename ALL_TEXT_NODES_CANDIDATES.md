@@ -1,0 +1,90 @@
+# Candidate text nodes for translation/wrapping
+
+- NO | 'getLocale()) }}">' | resources/views/welcome.blade.php
+- NO | 'getLocale()) }}">' | resources/views/shared-project/show.blade.php
+- NO | 'name }}' | resources/views/shared-project/show.blade.php
+- NO | 'title }}' | resources/views/shared-project/show.blade.php
+- NO | 'description), 100) }}' | resources/views/shared-project/show.blade.php
+- NO | 'attachments->count() }})' | resources/views/shared-project/show.blade.php
+- NO | 'count() > 0)' | resources/views/shared-project/show.blade.php
+- NO | 'description" />' | resources/views/shared-project/show.blade.php
+- NO | 'pages->count() === 0 && $projectWideIssues->count() === 0)' | resources/views/shared-project/show.blade.php
+- NO | "$project->updated_at->format('Y-m-d H:i')]) }}" | resources/views/shared-project/show.blade.php
+- NO | 'getLocale()) }}">' | resources/views/components/app-layout.blade.php
+- NO | 'user()->name }}">' | resources/views/components/app-layout.blade.php
+- NO | 'false])' | resources/views/components/text-input.blade.php
+- NO | "orderBy('number')\n            ->get();\n    }\n}; ?>" | resources/views/livewire/wcag-criteria-selector.blade.php
+- NO | 'number }}' | resources/views/livewire/wcag-criteria-selector.blade.php
+- NO | 'code }}' | resources/views/livewire/wcag-criteria-selector.blade.php
+- NO | 'url)' | resources/views/livewire/wcag-criteria-selector.blade.php
+- NO | 'id, $projectMethodologyIds))' | resources/views/livewire/project-methodologies.blade.php
+- NO | 'pivot->notes ?? \'\') }">' | resources/views/livewire/project-methodologies.blade.php
+- NO | 'name }}' | resources/views/livewire/project-methodologies.blade.php
+- NO | 'pivot->notes }}' | resources/views/livewire/project-methodologies.blade.php
+- NO | 'auth()->user()->name]) }}' | resources/views/livewire/dashboard.blade.php
+- NO | 'number }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'name_sv ?? $criterion->name_en }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'examples_count }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'name_sv }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'description_sv ?? $criterion->description_en }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'examples->count() }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'title }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'id }}\')" />' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'id }}\')" wire:confirm="Delete this example?" />' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'description" />' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | "code_language ?? 'html' }}" | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'code_snippet }}' | resources/views/livewire/wcag-knowledge-base.blade.php
+- YES | 'Click me' | resources/views/livewire/wcag-knowledge-base.blade.php
+- NO | 'getLocale()) }}">' | resources/views/layouts/guest.blade.php
+- NO | 'getLocale()) }}">' | resources/views/layouts/app.blade.php
+- NO | 'user()->name }}">' | resources/views/layouts/app.blade.php
+- NO | 'team->name }}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'count() }}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'target_wcag_level }}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'description }}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'title }}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'description !!}' | resources/views/reports/accessibility-report.blade.php
+- NO | 'name }}' | resources/views/accessibility/projects/index.blade.php
+- NO | 'description, 100) }}' | resources/views/accessibility/projects/index.blade.php
+- NO | 'target_wcag_level }}' | resources/views/accessibility/projects/index.blade.php
+- NO | 'description) }}' | resources/views/accessibility/projects/edit.blade.php
+- NO | 'audit_date?->format(\'Y-m-d\')) }}"\n                        />' | resources/views/accessibility/projects/edit.blade.php
+- NO | 'name }}' | resources/views/accessibility/projects/show.blade.php
+- NO | 'description }}' | resources/views/accessibility/projects/show.blade.php
+- NO | 'url }}' | resources/views/accessibility/projects/show.blade.php
+- NO | 'title }}' | resources/views/accessibility/projects/show.blade.php
+- NO | 'status) }}' | resources/views/accessibility/projects/show.blade.php
+- NO | 'description) }}' | resources/views/accessibility/issues/edit.blade.php
+- NO | 'component_area) }}"\n                            />' | resources/views/accessibility/issues/edit.blade.php
+- NO | "$selectedCriteria ?? []], key('wcag-selector-'.$issue->id))" | resources/views/accessibility/issues/edit.blade.php
+- NO | 'title }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'status) }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'difficulty) }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'description" />' | resources/views/accessibility/issues/show.blade.php
+- NO | 'original_filename }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'page->name }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'component_area }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'number }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'name_sv ?? $criterion->name_en }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'level) }}' | resources/views/accessibility/issues/show.blade.php
+- NO | "created_at->format('Y-m-d H:i') }}" | resources/views/accessibility/issues/show.blade.php
+- NO | "updated_at->format('Y-m-d H:i') }}" | resources/views/accessibility/issues/show.blade.php
+- NO | 'id }}' | resources/views/accessibility/issues/show.blade.php
+- NO | 'url) }}"\n                    />' | resources/views/accessibility/pages/edit.blade.php
+- NO | 'description) }}' | resources/views/accessibility/pages/edit.blade.php
+- NO | '$project->name]) }}' | resources/views/accessibility/reports/index.blade.php
+- NO | 'title }}' | resources/views/accessibility/reports/index.blade.php
+- NO | 'total_issues }} issues' | resources/views/accessibility/reports/index.blade.php
+- NO | 'creator->name }}' | resources/views/accessibility/reports/index.blade.php
+- NO | "created_at->format('M d, Y') }}" | resources/views/accessibility/reports/index.blade.php
+- NO | '$project->name]) }}' | resources/views/accessibility/reports/create.blade.php
+- NO | 'title }}' | resources/views/accessibility/reports/show.blade.php
+- NO | '{!! $report->html_content !!}' | resources/views/accessibility/reports/show.blade.php
+- NO | "redirect('/', navigate: true);\n    }\n}; ?>" | resources/views/livewire/layout/navigation.blade.php
+- NO | 'user()->email }}' | resources/views/livewire/layout/navigation.blade.php
+- NO | "dispatch('password-updated');\n    }\n}; ?>" | resources/views/livewire/profile/update-password-form.blade.php
+- YES | 'Saved.' | resources/views/livewire/profile/update-password-form.blade.php
+- NO | 'user()->hasVerifiedEmail())' | resources/views/livewire/profile/update-profile-information-form.blade.php
+- NO | "redirectRoute('login', navigate: true);\n    }\n}; ?>" | resources/views/livewire/pages/auth/reset-password.blade.php
+- NO | "redirect('/', navigate: true);\n    }\n}; ?>" | resources/views/livewire/pages/auth/verify-email.blade.php
+- NO | 'getLocale()) }}">' | resources/views/components/layouts/app.blade.php

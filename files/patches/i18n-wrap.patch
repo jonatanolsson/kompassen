@@ -1,0 +1,8 @@
+# Removed unsafe auto-generated patch
+# Reason: patch contained incorrect replacement inside Blade expression
+# Example removed: "{!! $issue-> {{ __('description !!}') }}"
+# Action taken: deleted unsafe patch and replaced with this notice.
+# Next steps:
+# - Use ALL_TEXT_NODES_FULL_REPORT.md / ALL_TEXT_NODES_CANDIDATES.md to review candidate strings.
+# - I can generate safe per-file patches that exclude any Blade expressions ({{ }}, {!! !!}}) and only wrap literal text nodes.
+# - Confirm if you want: (A) manual review list, (B) safe per-directory patch generation, (C) full automated wrap (not recommended).
