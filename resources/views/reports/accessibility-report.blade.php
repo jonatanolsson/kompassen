@@ -239,7 +239,7 @@
             <section class="content" role="main">
                 @if ($scope)
                     <section class="scope" aria-label="Audit Scope">
-                        <h2 class="scope-title">Scope</h2>
+                        <h2 class="scope-title">{{ __('Scope') }}</h2>
                         <p>{{ $scope }}</p>
                     </section>
                 @endif

@@ -103,6 +103,8 @@
     "Critical": "Kritiska",
     "Major": "Stora",
     "Target Level": "Målnivå",
+    "Target WCAG Level": "Mål WCAG-nivå",
+    "Audit Date": "Granskningsdatum",
     "Scope": "Omfång",
     "Other Issues": "Övriga problem",
     "No issues found in this project.": "Inga problem hittades i detta projekt.",

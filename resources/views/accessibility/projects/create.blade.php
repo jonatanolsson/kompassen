@@ -38,7 +38,7 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Target WCAG Level</flux:label>
+                        <flux:label>{{ __('Target WCAG Level') }}</flux:label>
                         <flux:select 
                             name="target_wcag_level" 
                             required
@@ -52,7 +52,7 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Audit Date</flux:label>
+                        <flux:label>{{ __('Audit Date') }}</flux:label>
                         <flux:input 
                             type="date" 
                             name="audit_date" 
