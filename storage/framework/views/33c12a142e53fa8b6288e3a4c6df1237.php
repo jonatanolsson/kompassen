@@ -920,14 +920,14 @@
 <?php endif; ?>
                                         <?php if (isset($component)) { $__componentOriginal0ee30026125d1a66523211147b00e4dc = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal0ee30026125d1a66523211147b00e4dc = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::textarea','data' => ['wire:model' => 'exampleCode','rows' => '5','class' => 'font-mono text-sm','placeholder' => '<button>Click me</button>']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::textarea','data' => ['wire:model' => 'exampleCode','rows' => '5','class' => 'font-mono text-sm','placeholder' => ''.e(__('<button>Click me</button>')).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::textarea'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:model' => 'exampleCode','rows' => '5','class' => 'font-mono text-sm','placeholder' => '<button>Click me</button>']); ?>
+<?php $component->withAttributes(['wire:model' => 'exampleCode','rows' => '5','class' => 'font-mono text-sm','placeholder' => ''.e(__('<button>Click me</button>')).'']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0ee30026125d1a66523211147b00e4dc)): ?>

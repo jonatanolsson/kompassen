@@ -1,149 +1,146 @@
 # Tagged text nodes
-Generated: Mon Sep  7 08:18:18 2026 UTC
+Generated: Mon Sep  7 08:19:29 2026 UTC
 
 ## Tagged entries (format: file:line: text -> tag)
 
 # All text nodes from Blade/Volt views
-Generated: mån  7 sep. 2026 08:17:07 UTC
+Generated: mån  7 sep. 2026 08:19:17 UTC
 
 ## Views (resources/views)
-:163: Click me
-:269: {!! $issue->description !!}
+resources/views/livewire/wcag-knowledge-base.blade.php:163: Click me -> content
+resources/views/reports/accessibility-report.blade.php:269: {!! $issue->description !!} -> translate
 
 ## Examples & local packages (.examples, local_packages)
-:10: Questions
-:10: Recent
-:100: Caleb Porzio
-:101: Creator of Livewire
-:101: Questions
-:103: 77
-:103: Preferences
-:104: 3+
-:104: Customize your layout and notification preferences.
-:107: Invite
-:11: Leaderboard
-:115: View invoice
-:116: Refund
-:117: All
-:117: Archive
-:118: Unapproved
-:119: 11 tasks
-:119: Approved
-:12: Announcements
-:124: Save preferences
-:13: Projects
-:130: Most popular
-:131: Newest
-:132: Oldest
-:133: Email notifications
-:134: Choose which emails you'd like to get from us.
-:136: New question
-:136: New task
-:14: Tasks
-:15: Files
-:151: John Doe
-:153: Moderator
-:156: 2 days ago
-:163: What is the best way to learn Laravel?
-:17: Dashboard
-:17: Home
-:171: 12
-:178: Edit
-:179: Delete
-:18: flux
-:18: Inbox
-:18: Orders
-:19: Catalog
-:19: Documents
-:192: Sarah Smith
-:195: 3 days ago
-:20: Calendar
-:20: Configuration
-:20: Starred
-:202: I'm trying to learn Laravel, but I'm not sure where to start. Any advice?
-:207: Approve
-:208: Delete
-:219: Jane Doe
-:22: Welcome back
-:222: 4 days ago
-:229: Where can I find the best tutorials for Laravel?
-:23: Live
-:23: Marketing site
-:23: Users
-:237: 92
-:24: Android app
-:24: Events
-:244: Edit
-:245: Delete
-:25: Brand guidelines
-:25: Products
-:258: Samantha Doe
-:261: 5 days ago
-:268: When is the best time to use Tailwind CSS?
-:276: 100
-:283: Edit
-:284: Delete
-:29: Last 7 days
-:30: Last 14 days
-:31: Last 30 days
-:32: Last 60 days
-:32: Settings
-:33: Help
-:33: Last 90 days
-:36: compared to
-:38: John Doe
-:39: Previous period
-:40: Same period last year
-:41: Last month
-:41: Olivia Martin
-:42: Last quarter
-:42: Truly Delta
-:43: Last 6 months
-:44: Last 12 months
-:47: Logout
-:48: Settings
-:51: Filter by:
-:53: Amount
-:54: Home
-:54: Status
-:55: Inbox
-:55: More filters...
-:56: Documents
-:57: Calendar
-:6: Dashboard
-:60: Marketing site
-:61: Android app
-:61: Settings
-:62: Brand guidelines
-:63: Password
-:65: Forgot password?
-:67: Profile
-:68: This is how others will see you on the site.
-:69: Settings
-:7: Orders
-:70: Help
-:73: Log in
-:77: Acme Inc.
-:77: Sign up for free
-:78: iOS App V2
-:8: Catalog
-:83: Filters
-:86: Archive
-:86: ID
-:87: Date
-:87: Delete
-:88: Status
-:89: Customer
-:9: Configuration
-:90: Purchase
-:91: Revenue
-:92: Board
-:93: List
-:94: Save profile
-:94: Timeline
-:163: #
-:214: #
-:53: &ZeroWidthSpace;
-
-## Summary counts
-Views text nodes: 136
+.examples/authpage.example.php:100: Caleb Porzio -> stub
+.examples/authpage.example.php:101: Creator of Livewire -> stub
+.examples/authpage.example.php:18: flux -> stub
+.examples/authpage.example.php:22: Welcome back -> stub
+.examples/authpage.example.php:63: Password -> stub
+.examples/authpage.example.php:65: Forgot password? -> stub
+.examples/authpage.example.php:73: Log in -> stub
+.examples/authpage.example.php:77: Sign up for free -> stub
+.examples/kanbanboard.example.php:10: Recent -> stub
+.examples/kanbanboard.example.php:104: 3+ -> stub
+.examples/kanbanboard.example.php:107: Invite -> stub
+.examples/kanbanboard.example.php:119: 11 tasks -> stub
+.examples/kanbanboard.example.php:13: Projects -> stub
+.examples/kanbanboard.example.php:136: New task -> stub
+.examples/kanbanboard.example.php:14: Tasks -> stub
+.examples/kanbanboard.example.php:15: Files -> stub
+.examples/kanbanboard.example.php:20: Starred -> stub
+.examples/kanbanboard.example.php:23: Users -> stub
+.examples/kanbanboard.example.php:24: Events -> stub
+.examples/kanbanboard.example.php:25: Products -> stub
+.examples/kanbanboard.example.php:54: Home -> stub
+.examples/kanbanboard.example.php:55: Inbox -> stub
+.examples/kanbanboard.example.php:56: Documents -> stub
+.examples/kanbanboard.example.php:57: Calendar -> stub
+.examples/kanbanboard.example.php:60: Marketing site -> stub
+.examples/kanbanboard.example.php:61: Android app -> stub
+.examples/kanbanboard.example.php:62: Brand guidelines -> stub
+.examples/kanbanboard.example.php:69: Settings -> stub
+.examples/kanbanboard.example.php:70: Help -> stub
+.examples/kanbanboard.example.php:77: Acme Inc. -> stub
+.examples/kanbanboard.example.php:78: iOS App V2 -> stub
+.examples/kanbanboard.example.php:83: Filters -> stub
+.examples/kanbanboard.example.php:86: Archive -> stub
+.examples/kanbanboard.example.php:87: Delete -> stub
+.examples/kanbanboard.example.php:92: Board -> stub
+.examples/kanbanboard.example.php:93: List -> stub
+.examples/kanbanboard.example.php:94: Timeline -> stub
+.examples/questionsandanswers.example.php:10: Questions -> stub
+.examples/questionsandanswers.example.php:101: Questions -> stub
+.examples/questionsandanswers.example.php:103: 77 -> stub
+.examples/questionsandanswers.example.php:11: Leaderboard -> stub
+.examples/questionsandanswers.example.php:117: All -> stub
+.examples/questionsandanswers.example.php:118: Unapproved -> stub
+.examples/questionsandanswers.example.php:119: Approved -> stub
+.examples/questionsandanswers.example.php:12: Announcements -> stub
+.examples/questionsandanswers.example.php:130: Most popular -> stub
+.examples/questionsandanswers.example.php:131: Newest -> stub
+.examples/questionsandanswers.example.php:132: Oldest -> stub
+.examples/questionsandanswers.example.php:136: New question -> stub
+.examples/questionsandanswers.example.php:151: John Doe -> stub
+.examples/questionsandanswers.example.php:153: Moderator -> stub
+.examples/questionsandanswers.example.php:156: 2 days ago -> stub
+.examples/questionsandanswers.example.php:163: What is the best way to learn Laravel? -> stub
+.examples/questionsandanswers.example.php:171: 12 -> stub
+.examples/questionsandanswers.example.php:178: Edit -> stub
+.examples/questionsandanswers.example.php:179: Delete -> stub
+.examples/questionsandanswers.example.php:192: Sarah Smith -> stub
+.examples/questionsandanswers.example.php:195: 3 days ago -> stub
+.examples/questionsandanswers.example.php:202: I'm trying to learn Laravel, but I'm not sure where to start. Any advice? -> stub
+.examples/questionsandanswers.example.php:207: Approve -> stub
+.examples/questionsandanswers.example.php:208: Delete -> stub
+.examples/questionsandanswers.example.php:219: Jane Doe -> stub
+.examples/questionsandanswers.example.php:222: 4 days ago -> stub
+.examples/questionsandanswers.example.php:229: Where can I find the best tutorials for Laravel? -> stub
+.examples/questionsandanswers.example.php:23: Live -> stub
+.examples/questionsandanswers.example.php:237: 92 -> stub
+.examples/questionsandanswers.example.php:244: Edit -> stub
+.examples/questionsandanswers.example.php:245: Delete -> stub
+.examples/questionsandanswers.example.php:258: Samantha Doe -> stub
+.examples/questionsandanswers.example.php:261: 5 days ago -> stub
+.examples/questionsandanswers.example.php:268: When is the best time to use Tailwind CSS? -> stub
+.examples/questionsandanswers.example.php:276: 100 -> stub
+.examples/questionsandanswers.example.php:283: Edit -> stub
+.examples/questionsandanswers.example.php:284: Delete -> stub
+.examples/questionsandanswers.example.php:38: John Doe -> stub
+.examples/questionsandanswers.example.php:48: Settings -> stub
+.examples/salesdashboard.example.php:115: View invoice -> stub
+.examples/salesdashboard.example.php:116: Refund -> stub
+.examples/salesdashboard.example.php:117: Archive -> stub
+.examples/salesdashboard.example.php:17: Dashboard -> stub
+.examples/salesdashboard.example.php:18: Orders -> stub
+.examples/salesdashboard.example.php:19: Catalog -> stub
+.examples/salesdashboard.example.php:20: Configuration -> stub
+.examples/salesdashboard.example.php:29: Last 7 days -> stub
+.examples/salesdashboard.example.php:30: Last 14 days -> stub
+.examples/salesdashboard.example.php:31: Last 30 days -> stub
+.examples/salesdashboard.example.php:32: Last 60 days -> stub
+.examples/salesdashboard.example.php:33: Last 90 days -> stub
+.examples/salesdashboard.example.php:36: compared to -> stub
+.examples/salesdashboard.example.php:39: Previous period -> stub
+.examples/salesdashboard.example.php:40: Same period last year -> stub
+.examples/salesdashboard.example.php:41: Last month -> stub
+.examples/salesdashboard.example.php:42: Last quarter -> stub
+.examples/salesdashboard.example.php:43: Last 6 months -> stub
+.examples/salesdashboard.example.php:44: Last 12 months -> stub
+.examples/salesdashboard.example.php:51: Filter by: -> stub
+.examples/salesdashboard.example.php:53: Amount -> stub
+.examples/salesdashboard.example.php:54: Status -> stub
+.examples/salesdashboard.example.php:55: More filters... -> stub
+.examples/salesdashboard.example.php:6: Dashboard -> stub
+.examples/salesdashboard.example.php:7: Orders -> stub
+.examples/salesdashboard.example.php:8: Catalog -> stub
+.examples/salesdashboard.example.php:86: ID -> stub
+.examples/salesdashboard.example.php:87: Date -> stub
+.examples/salesdashboard.example.php:88: Status -> stub
+.examples/salesdashboard.example.php:89: Customer -> stub
+.examples/salesdashboard.example.php:9: Configuration -> stub
+.examples/salesdashboard.example.php:90: Purchase -> stub
+.examples/salesdashboard.example.php:91: Revenue -> stub
+.examples/settingspage.example.php:103: Preferences -> stub
+.examples/settingspage.example.php:104: Customize your layout and notification preferences. -> stub
+.examples/settingspage.example.php:124: Save preferences -> stub
+.examples/settingspage.example.php:133: Email notifications -> stub
+.examples/settingspage.example.php:134: Choose which emails you'd like to get from us. -> stub
+.examples/settingspage.example.php:17: Home -> stub
+.examples/settingspage.example.php:18: Inbox -> stub
+.examples/settingspage.example.php:19: Documents -> stub
+.examples/settingspage.example.php:20: Calendar -> stub
+.examples/settingspage.example.php:23: Marketing site -> stub
+.examples/settingspage.example.php:24: Android app -> stub
+.examples/settingspage.example.php:25: Brand guidelines -> stub
+.examples/settingspage.example.php:32: Settings -> stub
+.examples/settingspage.example.php:33: Help -> stub
+.examples/settingspage.example.php:41: Olivia Martin -> stub
+.examples/settingspage.example.php:42: Truly Delta -> stub
+.examples/settingspage.example.php:47: Logout -> stub
+.examples/settingspage.example.php:61: Settings -> stub
+.examples/settingspage.example.php:67: Profile -> stub
+.examples/settingspage.example.php:68: This is how others will see you on the site. -> stub
+.examples/settingspage.example.php:94: Save profile -> stub
+local_packages/flux-pro-main/stubs/resources/views/flux/calendar/index.blade.php:163: # -> stub
+local_packages/flux-pro-main/stubs/resources/views/flux/date-picker/index.blade.php:214: # -> stub
+local_packages/flux-pro-main/stubs/resources/views/flux/timeline/indicator.blade.php:53: &ZeroWidthSpace; -> stub

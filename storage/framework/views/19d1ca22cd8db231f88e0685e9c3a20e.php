@@ -386,7 +386,8 @@
                         </div>
 
                         <div class="mb-6 italic font-base text-2xl xl:text-3xl text-white leading-relaxed">
-                            Comprehensive WCAG accessibility audits and professional reporting for your web applications.
+                            <?php echo e(__('Comprehensive WCAG accessibility audits and professional reporting for your web applications.')); ?>
+
                         </div>
 
                         <div class="flex gap-4">

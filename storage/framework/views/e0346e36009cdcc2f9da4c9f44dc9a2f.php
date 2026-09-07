@@ -223,7 +223,8 @@ use Livewire\Volt\Component;
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                            Your email address is unverified.
+                        <?php echo e(__('Your email address is unverified.')); ?>
+
                             <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['variant' => 'ghost','size' => 'sm','wire:click.prevent' => 'sendVerification','class' => 'underline p-0']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -234,7 +235,8 @@ use Livewire\Volt\Component;
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['variant' => 'ghost','size' => 'sm','wire:click.prevent' => 'sendVerification','class' => 'underline p-0']); ?>
-                                Re-send verification email
+                            <?php echo e(__('Re-send verification email')); ?>
+
                              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
@@ -286,7 +288,7 @@ use Livewire\Volt\Component;
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>A new verification link has been sent to your email address. <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?><?php echo e(__('A new verification link has been sent to your email address.')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal16e285112e6431fda7b3d6f23c122381)): ?>
 <?php $attributes = $__attributesOriginal16e285112e6431fda7b3d6f23c122381; ?>
@@ -329,7 +331,7 @@ use Livewire\Volt\Component;
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'submit','variant' => 'primary']); ?>Save <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['type' => 'submit','variant' => 'primary']); ?><?php echo e(__('Save')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
 <?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
@@ -348,7 +350,7 @@ use Livewire\Volt\Component;
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['size' => 'sm','x-data' => true,'x-show' => 'false','wire:loading.class.remove' => 'hidden','wire:loading' => true,'wire:target' => 'updateProfileInformation','class' => 'text-zinc-500']); ?>Saving… <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['size' => 'sm','x-data' => true,'x-show' => 'false','wire:loading.class.remove' => 'hidden','wire:loading' => true,'wire:target' => 'updateProfileInformation','class' => 'text-zinc-500']); ?><?php echo e(__('Saving…')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
 <?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
@@ -359,7 +361,8 @@ use Livewire\Volt\Component;
 <?php unset($__componentOriginal0638ebfbd490c7a414275d493e14cb4e); ?>
 <?php endif; ?>
                 <span x-data="{ show: false }" x-show="show" x-on:profile-updated.window="show = true; setTimeout(() => show = false, 2500)" class="text-sm text-green-600 dark:text-green-400">
-                    Saved.
+                    <?php echo e(__('Saved.')); ?>
+
                 </span>
             </div>
         </form>

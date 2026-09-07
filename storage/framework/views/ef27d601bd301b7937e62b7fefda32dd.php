@@ -1106,7 +1106,8 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'text-sm text-zinc-600 dark:text-zinc-400']); ?>
-                    No active share links yet. Create one above.
+                    <?php echo e(__('No active share links yet. Create one above.')); ?>
+
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
