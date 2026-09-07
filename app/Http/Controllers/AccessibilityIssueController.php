@@ -6,8 +6,10 @@ use App\Actions\ResolveAccessibilityIssue;
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
+use App\Services\IssueExporter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 
 class AccessibilityIssueController extends Controller
@@ -139,6 +141,61 @@ class AccessibilityIssueController extends Controller
         $translatedStatus = __($status);
 
         return back()->with('success', __('Issue marked as :status', ['status' => $translatedStatus]));
+    }
+
+    public function assign(AccessibilityProject $project, AccessibilityIssue $issue)
+    {
+        $this->authorize('update', $project);
+
+        $validated = request()->validate([
+            'assigned_to' => 'nullable|exists:users,id',
+        ]);
+
+        $issue->update([
+            'assigned_to' => $validated['assigned_to'],
+            'assigned_at' => $validated['assigned_to'] ? now() : null,
+        ]);
+
+        $assigneeName = $validated['assigned_to']
+            ? $issue->assignedTo->name
+            : __('Unassigned');
+
+        return back()->with('success', __('Issue assigned to :name', ['name' => $assigneeName]));
+    }
+
+    public function export(AccessibilityProject $project, AccessibilityIssue $issue): Response
+    {
+        $this->authorize('update', $project);
+
+        $format = request()->query('format', 'json');
+        $exporter = new IssueExporter($issue);
+        $content = $exporter->export($format);
+
+        $filename = Str::slug($issue->title).'.'.$this->getFileExtension($format);
+
+        return response($content)
+            ->header('Content-Type', $this->getContentType($format))
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    private function getFileExtension(string $format): string
+    {
+        return match ($format) {
+            'json' => 'json',
+            'markdown' => 'md',
+            'csv' => 'csv',
+            default => 'json',
+        };
+    }
+
+    private function getContentType(string $format): string
+    {
+        return match ($format) {
+            'json' => 'application/json',
+            'markdown' => 'text/markdown',
+            'csv' => 'text/csv',
+            default => 'application/json',
+        };
     }
 
     private function storeAttachments(array $files, AccessibilityIssue $issue): void

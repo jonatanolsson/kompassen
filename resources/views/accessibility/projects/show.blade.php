@@ -83,74 +83,143 @@
 
             @if ($project->issues->isEmpty())
                 <flux:card class="p-8 text-center">
-                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No issues reported yet.') }}</flux:text>
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No issues reported yet.') }}</flux:text>
                 </flux:card>
             @else
-                <div class="space-y-3">
-                    @foreach ($project->issues as $issue)
-                        <flux:card class="p-4">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <flux:heading level="4" class="mb-2">{{ $issue->title }}</flux:heading>
-                                    <div class="flex gap-2 mb-3">
-                                        <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : 'green')">
-                                            {{ Str::title($issue->severity) }}
-                                        </flux:badge>
-                                        <flux:badge color="zinc">{{ Str::title($issue->status) }}</flux:badge>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 items-center">
-                                    <flux:dropdown align="end">
-                                        <flux:button variant="subtle" size="sm" icon="ellipsis-vertical" />
-
-                                        <flux:menu>
-                                            <flux:menu.item href="{{ route('accessibility-issues.show', [$project, $issue]) }}" icon="eye" wire:navigate>
-                                                {{ __('View') }}
-                                            </flux:menu.item>
-
-                                            <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil" wire:navigate>
-                                                {{ __('Edit') }}
-                                            </flux:menu.item>
-
-                                            <flux:menu.item as="button" icon="check" onclick="document.getElementById('resolve-fixed-{{ $issue->id }}').submit()">
-                                                {{ __('Mark as fixed') }}
-                                            </flux:menu.item>
-
-                                            <flux:menu.item as="button" icon="x-mark" class="text-red-600" onclick="document.getElementById('resolve-wontfix-{{ $issue->id }}').submit()">
-                                                {{ __('Mark as wontfix') }}
-                                            </flux:menu.item>
-
-                                            <flux:menu.separator />
-
-                                            <flux:menu.item as="button" icon="trash" variant="danger" onclick="if(confirm('{{ __('Are you sure?') }}')){ document.getElementById('destroy-{{ $issue->id }}').submit(); }">
-                                                {{ __('Delete') }}
-                                            </flux:menu.item>
-                                        </flux:menu>
-                                    </flux:dropdown>
-
-                                    <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="resolution_status" value="fixed" />
-                                        <input type="hidden" name="resolution_notes" value="" />
-                                    </form>
-
-                                    <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="resolution_status" value="wontfix" />
-                                        <input type="hidden" name="resolution_notes" value="" />
-                                    </form>
-
-                                    <form id="destroy-{{ $issue->id }}" action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="hidden">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-                                </div>
-                            </div>
-                        </flux:card>
-                    @endforeach
+                <div class="mb-4 flex items-center justify-between">
+                    <div class="flex gap-2 items-center">
+                        <flux:input id="issue-search" placeholder="{{ __('Search issues...') }}" class="max-w-sm" />
+                        <flux:select wire:model="filterSeverity" class="w-40">
+                            <option value="">{{ __('All severities') }}</option>
+                            <option value="critical">{{ __('Critical') }}</option>
+                            <option value="major">{{ __('Major') }}</option>
+                            <option value="moderate">{{ __('Moderate') }}</option>
+                            <option value="minor">{{ __('Minor') }}</option>
+                        </flux:select>
+                        <flux:select wire:model="filterStatus" class="w-40">
+                            <option value="">{{ __('All statuses') }}</option>
+                            <option value="open">{{ __('Open') }}</option>
+                            <option value="resolved">{{ __('Resolved') }}</option>
+                            <option value="wont_fix">{{ __('Won\'t Fix') }}</option>
+                        </flux:select>
+                    </div>
                 </div>
+
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column></flux:table.column>
+                        <flux:table.column>{{ __('ID') }}</flux:table.column>
+                        <flux:table.column>{{ __('Title') }}</flux:table.column>
+                        <flux:table.column>{{ __('Severity') }}</flux:table.column>
+                        <flux:table.column>{{ __('Status') }}</flux:table.column>
+                        <flux:table.column>{{ __('Page/Component') }}</flux:table.column>
+                        <flux:table.column>{{ __('WCAG') }}</flux:table.column>
+                        <flux:table.column>{{ __('Created') }}</flux:table.column>
+                        <flux:table.column>{{ __('Actions') }}</flux:table.column>
+                    </flux:table.columns>
+
+                    <flux:table.rows>
+                    @foreach ($project->issues as $issue)
+                        <flux:table.row data-issue-row data-issue-id="{{ $issue->id }}" data-title="{{ Str::lower(e($issue->title)) }}" data-desc="{{ Str::lower(e(strip_tags($issue->description))) }}" data-page="{{ $issue->page ? Str::lower(e($issue->page->name)) : '' }}" data-wcag="{{ $issue->wcagCriteria->pluck('number')->join(' ') }}">
+                            <flux:table.cell class="pr-2">
+                                <button type="button" onclick="toggleIssueDetails('{{ $issue->id }}', this)" aria-expanded="false" aria-controls="issue-details-{{ $issue->id }}" class="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500/30" aria-label="{{ __('Toggle details') }}">
+                                    <flux:icon icon="chevron-down" class="w-4 h-4 transition-transform duration-150" />
+                                </button>
+                            </flux:table.cell>
+
+                            <flux:table.cell class="font-mono text-xs">{{ Str::substr($issue->id, 0, 8) }}</flux:table.cell>
+
+                            <flux:table.cell>
+                                <div class="font-medium">{{ $issue->title }}</div>
+                                <div class="text-xs text-zinc-500 mt-1">{{ Str::limit(strip_tags($issue->description), 100) }}</div>
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : 'green')">{{ __(Str::title($issue->severity)) }}</flux:badge>
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                <flux:badge color="zinc">{{ __(Str::title($issue->status)) }}</flux:badge>
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                @if ($issue->page)
+                                    <flux:link href="{{ route('accessibility-pages.edit', [$project, $issue->page]) }}" class="text-sm">{{ $issue->page->name }}</flux:link>
+                                @elseif($issue->component_area)
+                                    <flux:text class="text-sm">{{ $issue->component_area }}</flux:text>
+                                @else
+                                    <flux:text class="text-sm text-zinc-500">{{ __('Not specific to a page') }}</flux:text>
+                                @endif
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                <div class="flex items-center gap-1">
+                                    @foreach ($issue->wcagCriteria->take(3) as $criterion)
+                                        <flux:badge size="sm" color="zinc">{{ $criterion->number }}</flux:badge>
+                                    @endforeach
+                                    @if ($issue->wcagCriteria->count() > 3)
+                                        <flux:badge size="sm" color="zinc">+{{ $issue->wcagCriteria->count() - 3 }}</flux:badge>
+                                    @endif
+                                </div>
+                            </flux:table.cell>
+
+                            <flux:table.cell>{{ $issue->created_at->format('Y-m-d') }}</flux:table.cell>
+
+                            <flux:table.cell class="flex gap-2 items-center">
+                                <flux:dropdown align="end">
+                                    <flux:button variant="subtle" size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('accessibility-issues.show', [$project, $issue]) }}" icon="eye" wire:navigate>{{ __('View') }}</flux:menu.item>
+                                        <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:menu.item>
+                                        <flux:menu.item as="button" icon="check" onclick="document.getElementById('resolve-fixed-{{ $issue->id }}').submit()">{{ __('Mark as fixed') }}</flux:menu.item>
+                                        <flux:menu.item as="button" icon="x-mark" class="text-red-600" onclick="document.getElementById('resolve-wontfix-{{ $issue->id }}').submit()">{{ __('Mark as wontfix') }}</flux:menu.item>
+                                        <flux:menu.separator />
+                                        <flux:menu.item as="button" icon="trash" variant="danger" onclick="if(confirm('{{ __('Are you sure?') }}')){ document.getElementById('destroy-{{ $issue->id }}').submit(); }">{{ __('Delete') }}</flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+
+                                <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('PATCH')<input type="hidden" name="resolution_status" value="fixed" /><input type="hidden" name="resolution_notes" value="" /></form>
+                                <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('PATCH')<input type="hidden" name="resolution_status" value="wontfix" /><input type="hidden" name="resolution_notes" value="" /></form>
+                                <form id="destroy-{{ $issue->id }}" action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
+                            </flux:table.cell>
+                        </flux:table.row>
+
+                        <flux:table.row id="issue-details-{{ $issue->id }}" data-issue-details="{{ $issue->id }}" role="region" aria-label="{{ __('Issue details') }}" class="bg-zinc-50 dark:bg-zinc-800 hidden">
+                            <flux:table.cell colspan="9">
+                                <div class="p-4">
+                                    <div class="mb-3 text-sm text-zinc-700 dark:text-zinc-300">{!! nl2br(e($issue->description)) !!}</div>
+
+                                    @if ($issue->wcagCriteria->isNotEmpty())
+                                        <div class="mb-3">
+                                            <div class="text-xs font-semibold mb-2">{{ __('WCAG Criteria') }}</div>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach ($issue->wcagCriteria as $c)
+                                                    <div class="flex items-center gap-2 p-2 bg-white dark:bg-zinc-700 rounded">
+                                                        <flux:badge size="sm" color="zinc">{{ $c->number }}</flux:badge>
+                                                        <div class="text-sm">{{ $c->name }}</div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if (isset($issue->relatedResources) && $issue->relatedResources->isNotEmpty())
+                                        <div>
+                                            <div class="text-xs font-semibold mb-2">{{ __('Related resources') }}</div>
+                                            <ul class="list-disc list-inside text-sm">
+                                                @foreach ($issue->relatedResources as $res)
+                                                    <li><a href="{{ $res->url }}" target="_blank" class="text-blue-600">{{ $res->title }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
+                            </flux:table.cell>
+                        </flux:table.row>
+                        </tbody>
+                    @endforeach
+                    </flux:table.rows>
+                </flux:table>
             @endif
         </div>
 
@@ -250,6 +319,65 @@
         form.querySelector('input[name="resolution_notes"]').value = notes ? notes : '';
         form.submit();
     }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('issue-search');
+    if (!input) return;
+
+    const rows = Array.from(document.querySelectorAll('[data-issue-row]'));
+    let timer;
+
+    // Ensure rows visible on load (handle accidental hidden state)
+    rows.forEach((r) => r.classList.remove('hidden'));
+
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const q = input.value.trim().toLowerCase();
+
+        rows.forEach((row) => {
+                const title = row.getAttribute('data-title') || '';
+                const desc = row.getAttribute('data-desc') || '';
+                const page = row.getAttribute('data-page') || '';
+                const wcag = row.getAttribute('data-wcag') || '';
+                const id = row.getAttribute('data-issue-id');
+
+                const match = q === '' || title.includes(q) || desc.includes(q) || page.includes(q) || wcag.includes(q);
+
+            // Use tailwind hidden class to avoid interfering with Alpine inline styles
+            if (!match) {
+                row.classList.add('hidden');
+            } else {
+                row.classList.remove('hidden');
+            }
+
+            const details = document.getElementById('issue-details-' + id);
+            if (details) {
+                if (!match) details.classList.add('hidden');
+                else details.classList.remove('hidden');
+            }
+            });
+        }, 150);
+    });
+
+    // Toggle function for expand/collapse
+    window.toggleIssueDetails = function(id, btn) {
+        const details = document.getElementById('issue-details-' + id);
+        if (!details) return;
+        const open = details.classList.toggle('hidden') ? false : true;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+        // rotate icon inside button
+        const icon = btn.querySelector('svg');
+        if (icon) {
+            if (open) icon.classList.add('transform', 'rotate-180');
+            else icon.classList.remove('transform', 'rotate-180');
+        }
+    }
+});
 </script>
 
 </x-app-layout>

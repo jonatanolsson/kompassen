@@ -17,6 +17,11 @@
                     <flux:button variant="outline" icon="pencil">{{ __('Edit') }}</flux:button>
                 </a>
 
+                <!-- Export Issue -->
+                <flux:modal.trigger name="export-issue-modal">
+                    <flux:button icon="arrow-up-tray">{{ __('Export') }}</flux:button>
+                </flux:modal.trigger>
+
                 <!-- Mark as fixed -->
                 <form id="resolve-fixed-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
                     @csrf
@@ -98,6 +103,25 @@
                     <flux:text>{{ $issue->component_area }}</flux:text>
                 </flux:card>
             @endif
+
+            <!-- Assignee -->
+            <flux:card class="p-4">
+                <flux:heading level="3" class="text-sm mb-2">{{ __('Assigned To') }}</flux:heading>
+                @if ($issue->assignedTo)
+                    <div class="flex items-center justify-between">
+                        <flux:text>{{ $issue->assignedTo->name }}</flux:text>
+                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="PUT" class="inline">
+                            @csrf
+                            <input type="hidden" name="assigned_to" value="">
+                            <flux:button type="submit" variant="ghost" size="sm" icon="x-mark">
+                                {{ __('Unassign') }}
+                            </flux:button>
+                        </form>
+                    </div>
+                @else
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
+                @endif
+            </flux:card>
         </div>
 
         <!-- WCAG Criteria -->
@@ -139,4 +163,8 @@
         </div>
     </div>
 </div>
+
+<!-- Export Modal Component -->
+<livewire:export-issue-modal :project="$project" :issue="$issue" />
+
 </x-app-layout>

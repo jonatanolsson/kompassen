@@ -113,6 +113,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-issues.update');
     Route::delete('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'destroy'])
         ->name('accessibility-issues.destroy');
+    Route::put('accessibility-projects/{project}/issues/{issue}/assign', [AccessibilityIssueController::class, 'assign'])
+        ->name('accessibility-issues.assign');
+    Route::get('accessibility-projects/{project}/issues/{issue}/export', [AccessibilityIssueController::class, 'export'])
+        ->name('accessibility-issues.export');
 
     // Issue attachments
     Route::delete('accessibility-projects/{project}/issues/{issue}/attachments/{attachment}', [AccessibilityIssueAttachmentController::class, 'destroy'])

@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'assigned_to', 'assigned_at'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;
@@ -23,7 +24,7 @@ class AccessibilityIssue extends Model
         parent::boot();
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = \Illuminate\Support\Str::ulid();
+                $model->{$model->getKeyName()} = Str::ulid();
             }
         });
     }
@@ -36,6 +37,11 @@ class AccessibilityIssue extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(AccessibilityPage::class, 'page_id');
+    }
+
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     public function wcagCriteria(): BelongsToMany
