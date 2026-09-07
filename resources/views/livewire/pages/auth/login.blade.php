@@ -45,11 +45,28 @@ new #[Layout('layouts.guest')] class extends Component
             :error="$errors->has('form.email')"
         />
         @error('form.email')
-            <flux:error>{{ $message }}</flux:error> {{ __('') }} <flux:label>{{ __('Password') }}</flux:label>
+            <flux:error>{{ $message }}</flux:error>
+        @enderror
+
+        <flux:field>
+            <div class="mb-3 flex justify-between">
+                <flux:label>{{ __('Password') }}</flux:label>
                 @if (Route::has('password.request'))
                     <flux:link href="{{ route('password.request') }}" variant="subtle" wire:navigate class="text-sm">
                         {{ __('Forgot password?') }}
-                    </flux:link> {{ __('') }} <flux:error>{{ $message }}</flux:error>
+                    </flux:link>
+                @endif
+            </div>
+            <flux:input
+                wire:model="form.password"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                :error="$errors->has('form.password')"
+            />
+            @error('form.password')
+                <flux:error>{{ $message }}</flux:error>
             @enderror
         </flux:field>
 

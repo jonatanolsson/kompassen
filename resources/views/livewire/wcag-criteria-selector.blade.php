@@ -173,7 +173,15 @@ new class extends Component
             ->orderBy('number')
             ->get();
     }
-}; ?> {{ __('') }} <input type="hidden" name="wcag_criteria[]" value="{{ $item['id'] }}" /> {{ __('') }} <input type="hidden" name="wcag_code_snippets[{{ $item['id'] }}]" value="{{ $item['code_snippet'] ?? '' }}" />
+}; ?>
+
+<div>
+    <!-- Hidden input to store selected criteria for form submission -->
+    @foreach ($selectedCriteria as $item)
+        <input type="hidden" name="wcag_criteria[]" value="{{ $item['id'] }}" />
+        <input type="hidden" name="wcag_failure_types[{{ $item['id'] }}]" value="{{ $item['failure_type'] ?? '' }}" />
+        <input type="hidden" name="wcag_comments[{{ $item['id'] }}]" value="{{ $item['comment'] ?? '' }}" />
+        <input type="hidden" name="wcag_code_snippets[{{ $item['id'] }}]" value="{{ $item['code_snippet'] ?? '' }}" />
     @endforeach
 
     <!-- Button to open modal -->
@@ -196,18 +204,44 @@ new class extends Component
                         class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition cursor-pointer"
                         title="{{ __('Click to edit') }}"
                     >
-                        <span>{{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion-> {{ __('') }} <button 
+                        <span>{{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}</span>
+                    </button>
+                    <button 
                         type="button"
                         wire:click="removeCriterion('{{ $criterion->id }}')"
                         class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
                         title="{{ __('Remove') }}"
-                    > {{ __('') }} </svg> {{ __('') }} </div>
+                    >
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            @endforeach
+        </div>
     @endif
 
-    <!-- Modal --> {{ __('') }} <div 
+    <!-- Modal -->
+    @if ($open)
+        <div 
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            @click.self="$wire.closeModal()"
+        >
+            <!-- Backdrop -->
+            <div 
                 class="absolute inset-0 bg-black/50"
                 @click="$wire.closeModal()"
-            > {{ __('') }} <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-700"> {{ __('') }} <flux:heading level="2">{{ __('Select WCAG Criteria') }}</flux:heading> {{ __('') }} <!-- Search Bar -->
+            ></div>
+
+            <!-- Modal Content -->
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-700">
+                <!-- Header -->
+                <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6 flex items-center justify-between">
+                    <flux:heading level="2">{{ __('Select WCAG Criteria') }}</flux:heading>
+                    <flux:button variant="ghost" icon="x-mark" size="sm" wire:click="closeModal" class="text-zinc-400" />
+                </div>
+
+                <!-- Search Bar -->
                 <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
                     <input 
                         wire:model.debounce-500ms="searchQuery"
@@ -218,7 +252,15 @@ new class extends Component
                     @if (!empty($searchQuery))
                         <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                             {{ count($this->wcagCriteria()) }} {{ __('criteria found') }}
-                        </div> {{ __('') }} <div class="p-6"> {{ __('') }} <div class="lg:col-span-1">
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Content -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Criteria List (Left) -->
+                        <div class="lg:col-span-1">
                             <flux:text class="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-4">
                                 {{ __('Criteria') }}
                             </flux:text>
@@ -235,22 +277,52 @@ new class extends Component
                                                     wire:click="$set('selectedDetailId', '{{ $criterion->id }}')"
                                                     class="w-full text-left p-2 rounded-lg transition text-xs {{ $selectedDetailId === $criterion->id ? 'bg-blue-100 dark:bg-blue-900 border-l-2 border-blue-500' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800' }}"
                                                 >
-                                                    <span class="font-semibold">{{ $criterion-> {{ __('') }} </span>
-                                                </button> {{ __('') }} <flux:text class="text-xs text-zinc-500 dark:text-zinc-400 text-center py-4">
+                                                    <span class="font-semibold">{{ $criterion->number }}</span>
+                                                    <span class="text-zinc-600 dark:text-zinc-400">({{ $criterion->level }})</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @empty
+                                    <flux:text class="text-xs text-zinc-500 dark:text-zinc-400 text-center py-4">
                                         {{ __('No criteria found') }}
-                                    </flux:text> {{ __('') }} <!-- Detail Panel (Right) -->
+                                    </flux:text>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- Detail Panel (Right) -->
                         <div class="lg:col-span-2">
                             @if ($this->getDetailCriterion())
                                 @php 
                                     $detail = $this->getDetailCriterion();
                                     $failures = $detail->relatedResources->where('type', 'wai_failure');
-                                    $links = $detail->relatedResources-> {{ __('') }} <div class="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"> {{ __('') }} <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Criterion') }}</flux:text>
-                                                <flux:heading level="3">{{ $detail-> {{ __('') }} <flux:badge variant="primary">WCAG {{ $detail-> {{ __('') }} <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                                            {{ $detail->name_sv ?? $detail-> {{ __('') }} </p>
+                                    $links = $detail->relatedResources->where('type', 'resource_link');
+                                @endphp
+                                <div class="space-y-4">
+                                    <!-- Criterion Detail -->
+                                    <div class="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                                        <div class="flex items-start justify-between mb-3">
+                                            <div>
+                                                <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Criterion') }}</flux:text>
+                                                <flux:heading level="3">{{ $detail->number }}</flux:heading>
+                                            </div>
+                                            <flux:badge variant="primary">WCAG {{ $detail->level }}</flux:badge>
+                                        </div>
+                                        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                                            {{ $detail->name_sv ?? $detail->name_en }}
+                                        </p>
+                                        <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                                            {{ $detail->description_sv ?? $detail->description_en }}
+                                        </p>
                                         <div class="mt-4">
                                             <flux:button type="button" wire:click="selectCriterion('{{ $detail->id }}')" variant="primary" class="w-full">
                                                 {{ __('Add to Selection') }}
-                                            </flux:button> {{ __('') }} <!-- Failures -->
+                                            </flux:button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Failures -->
                                     @if ($failures->count() > 0)
                                         <div class="border-t border-zinc-200 dark:border-zinc-700 pt-4">
                                             <flux:text class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
@@ -275,7 +347,13 @@ new class extends Component
                                                                 {{ __('View on W3C') }} →
                                                             </a>
                                                         @endif
-                                                    </div> {{ __('') }} <!-- Related Resources -->
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Related Resources -->
                                     @if ($links->count() > 0)
                                         <div class="border-t border-zinc-200 dark:border-zinc-700 pt-4">
                                             <flux:text class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
@@ -283,26 +361,72 @@ new class extends Component
                                             </flux:text>
                                             <div class="space-y-2">
                                                 @foreach ($links as $link)
-                                                    <a href="{{ $link-> {{ __('') }} </p>
-                                                    </a> {{ __('') }} </div>
+                                                    <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition">
+                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                                                            {{ $link->title_sv ?? $link->title_en }} →
+                                                        </p>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             @else
                                 <div class="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg text-center border border-zinc-200 dark:border-zinc-700">
                                     <flux:text class="text-zinc-600 dark:text-zinc-400">
                                         {{ __('Select a criterion to view details') }}
                                     </flux:text>
-                                </div> {{ __('') }} </div> {{ __('') }} <button 
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
+                    <button 
                         type="button"
                         wire:click="closeModal"
                         class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
                     >
                         {{ __('Done') }}
-                    </button> {{ __('') }} </div>
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 
-    <!-- Failure Details Modal --> {{ __('') }} <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"> {{ __('') }} <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"> {{ __('') }} <div class="flex items-center justify-between">
+    <!-- Failure Details Modal -->
+    @if ($showFailureModal && $failureModalCriterionId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
+
+            <!-- Modal Content -->
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Header -->
+                <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
+                    <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
                             {{ __('Add Failure Details') }}
-                        </h2> {{ __('') }} <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /> {{ __('') }} </div> {{ __('') }} <div class="p-6 space-y-4"> {{ __('') }} <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                        </h2>
+                        <button 
+                            type="button"
+                            wire:click="closeFailureModal"
+                            class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 focus:outline-none"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="p-6 space-y-4">
+                    <!-- Failure Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                             {{ __('Failure Type') }}
                         </label>
                         <input 
@@ -310,7 +434,11 @@ new class extends Component
                             wire:model="failureType"
                             placeholder="{{ __('E.g., F3, F13, or custom description') }}"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                        /> {{ __('') }} <div>
+                        />
+                    </div>
+
+                    <!-- Comment -->
+                    <div>
                         <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                             {{ __('Comment') }}
                         </label>
@@ -319,7 +447,10 @@ new class extends Component
                             placeholder="{{ __('Describe why/how this criterion fails') }}"
                             rows="6"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                        > {{ __('') }} <!-- Code Snippet -->
+                        ></textarea>
+                    </div>
+
+                    <!-- Code Snippet -->
                     <div>
                         <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                             {{ __('Code Snippet') }} <span class="text-xs text-zinc-500">({{ __('optional') }})</span>
@@ -329,7 +460,13 @@ new class extends Component
                             placeholder="{{ __('Example code that fails') }}"
                             rows="8"
                             class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
-                        > {{ __('') }} </div> {{ __('') }} <button 
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
+                    <button 
                         type="button"
                         wire:click="closeFailureModal"
                         class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
@@ -342,7 +479,10 @@ new class extends Component
                         class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition font-semibold"
                     >
                         {{ __('Confirm & Add') }}
-                    </button> {{ __('') }} </div>
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 </div>
 
