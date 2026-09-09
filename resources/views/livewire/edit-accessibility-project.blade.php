@@ -26,10 +26,12 @@
 
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
-                            <flux:editor
+                            <flux:textarea
                                 wire:model="description"
                                 placeholder="{{ __('Add details about the audit scope...') }}"
+                                rows="6"
                             />
+                            <flux:text size="sm" class="text-zinc-500 mt-2">{{ __('Supports Markdown formatting') }}</flux:text>
                             <flux:error name="description" />
                         </flux:field>
                     </div>
