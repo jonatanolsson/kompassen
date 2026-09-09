@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Keep changes aligned with the existing Laravel + Livewire + Volt + Flux stack. Prefer small, focused edits that preserve household scoping, authorization, and the current UI system.
+Keep changes aligned with the existing Laravel + Livewire + Volt + Flux stack. Prefer small, focused edits that preserve scoping, authorization, and the current UI system.
 
 ## Stack
 
@@ -41,6 +41,18 @@ If a frontend change is not visible, the user may need to run `bash vendor/bin/s
 
 ## Architecture overview
 
+### Accessibility audit domain
+
+Kompassen is a WCAG accessibility audit tool. Core models:
+- **AccessibilityProject** — top-level audit scope, tied to a Team
+- **AccessibilityPage** — pages/services within a project
+- **AccessibilityIssue** — individual WCAG violations
+- **AccessibilityIssueAttachment** — screenshots/evidence for issues
+- **WcagSuccessCriterion** — WCAG 2.0/2.1 criteria mappings
+- **TestingMethodology** — audit methodologies per project
+
+All models use ULID primary keys (`$keyType = 'string'`, `$incrementing = false`).
+
 ### Controllers and UI composition
 
 The app uses thin Laravel controllers that usually render wrapper Blade views. Those views then mount Livewire or Volt components.
@@ -54,9 +66,28 @@ The app uses thin Laravel controllers that usually render wrapper Blade views. T
 There are two main UI patterns in this repo:
 
 1. **Single-file Volt components in Blade views** under `resources/views/livewire/...`
-2. **Class-based Livewire components** under `app/Livewire/...` for some dashboard and household-management features
+2. **Class-based Livewire components** under `app/Livewire/...` (Dashboard, WcagKnowledgeBase, Edit/Create screens, etc.)
 
 Before changing a screen, inspect sibling files and keep the same component style.
+
+### CRITICAL: Livewire full-page component layout system
+
+Livewire components can be routed directly (full-page). These REQUIRE the `#[Layout('layouts.app')]` attribute:
+
+```php
+#[Layout('layouts.app')]
+class EditAccessibilityIssue extends Component { ... }
+```
+
+**Key rule:** The `#[Layout]` attribute automatically wraps the component view with the specified layout file. These views should render ONLY component content—do NOT wrap them with Blade component wrappers like `<x-app-layout>`.
+
+**Wrong:** Component view contains `<x-app-layout>{{ $this->component }}</x-app-layout>` with `#[Layout]` attribute
+- Results in nested layouts, missing dark mode, broken navigation
+
+**Right:** Component view contains only the component content, wrapped by layout via `#[Layout]` attribute
+- Layout's `{{ $slot }}` receives component view
+
+Blade component wrappers (like `<x-app-layout>`) are only for wrapping non-Livewire views.
 
 ## Domain rules
 
@@ -66,21 +97,85 @@ Never write queries that can leak data across projects.
 
 ### Authorization
 
-Policies are part of the normal flow. Income and expense policies currently rely on project membership checks. Keep authorization explicit in controllers and component actions.
+Policies are part of the normal flow. Issue and project policies rely on project membership/team access. Always authorize in controllers and component actions:
 
+```php
+$this->authorize('update', $project);
+```
 
-### Period handling
+### File uploads in Livewire components
 
-Periods are tied to household + year + month.
+Use `WithFileUploads` trait for handling file uploads:
 
-- Registration creates a default household, owner membership, and current period
-- `App\Actions\EnsurePeriodExists` creates a period automatically from a chosen date when needed
+```php
+use Livewire\WithFileUploads;
 
-Do not reintroduce a manual period selector where the codebase already derives period from date input.
+class EditAccessibilityIssue extends Component {
+    use AuthorizesRequests;
+    use WithFileUploads;
+
+    #[Validate('nullable|array')]
+    public array $attachments = [];
+}
+```
+
+In Blade: `<flux:input type="file" wire:model="attachments" multiple accept="image/*" />`
+
+**Storage convention:** Store files with meaningful subdirectories (e.g., `issue-attachments`), save the path in database as `filename` column.
+
+### Livewire property auto-exposure caveat
+
+Livewire automatically exposes all public properties to views. If a property name collides with a view variable passed from `render()`, the property overwrites the variable. 
+
+**Example:** Component has `public array $attachments = []` (for `WithFileUploads`), and `render()` passes `attachments => $databaseRows`. The public property shadows the passed variable.
+
+**Solution:** Rename view variables to avoid collision (e.g., `databaseAttachments`):
+
+```php
+return view('livewire.edit-issue', [
+    'databaseAttachments' => $issueAttachments,  // not 'attachments'
+]);
+```
+
+### Route model binding
+
+Register custom model bindings in `AppServiceProvider::boot()`:
+
+```php
+$this->app['router']->model('attachment', AccessibilityIssueAttachment::class);
+```
+
+Models with string primary keys (`$keyType = 'string'`, `$incrementing = false`) need explicit bindings.
 
 ## UI conventions
 
-Flux is the default UI system. **Always start with Flux components when building or changing UI.**
+### Dark mode and Flux interactivity
+
+Flux components require specific scripts in the layout to function correctly:
+
+- `@fluxAppearance` — enables dark mode support
+- `@livewireScripts` and `@fluxScripts` — required for Flux dropdown/modal/interactive components
+
+These MUST be in the layout file (e.g., `layouts/app.blade.php`) or in `<x-app-layout>` component:
+
+```blade
+<head>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @fluxAppearance
+</head>
+
+<body>
+    ...
+    @livewireScripts
+    @fluxScripts
+</body>
+```
+
+Without these, dropdowns won't open, modals won't work, dark mode won't toggle.
+
+### Flux is the default UI system
+
+**Always start with Flux components when building or changing UI.**
 
 Do not jump straight to raw Tailwind utility styling if Flux already has a suitable component or pattern. Tailwind should be used to compose layout, spacing, and supporting presentation **around** Flux components, not as a replacement for them.
 
@@ -165,11 +260,60 @@ When a page needs navigation, filtering, sections, or a content shell, first ask
 
 ## Editing guidance
 
+### Localization
+
+All UI strings must be in `resources/lang/sv.json` (Swedish is primary). Use translation function in templates:
+
+```blade
+{{ __('Label text') }}
+{{ __('Action completed.') }}
+```
+
+Also applies to validation messages, button labels, section headings, etc. Avoids hardcoded English text.
+
+### General patterns
+
 - Follow existing naming, route names, and folder structure
 - Prefer named routes with `route()`
 - Reuse existing helpers, actions, and relationships before adding new abstractions
 - Keep controllers thin and put reusable domain behavior in actions/services where the repo already does that
 - Preserve current UX conventions: readable headings, non-wrapping primary actions when possible, and consistent spacing
+
+### Livewire component patterns
+
+**Deletion in components:** Use `wire:click` with `@confirm` directive instead of form submissions:
+
+```blade
+<flux:button 
+    wire:click="deleteAttachment('{{ $id }}')"
+    @confirm
+    variant="danger"
+>
+    Delete
+</flux:button>
+```
+
+```php
+public function deleteAttachment(string $id): void {
+    $attachment = ...; // fetch and authorize
+    Storage::disk('public')->delete($attachment->filename);
+    $attachment->delete();
+}
+```
+
+**File uploads:** Always show temporary uploads (preview with `temporaryUrl()`) separately from database records. This prevents Livewire array/object type confusion:
+
+```blade
+<!-- Database attachments as arrays -->
+@foreach ($databaseAttachments as $attachment)
+    <img src="{{ asset('storage/' . $attachment['filename']) }}" />
+@endforeach
+
+<!-- Temporary uploads as objects -->
+@foreach ($this->attachments as $file)
+    <img src="{{ $file->temporaryUrl() }}" />
+@endforeach
+```
 
 ## Testing guidance
 
