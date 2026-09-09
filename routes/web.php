@@ -48,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-projects.store');
     Route::get('accessibility-projects/{project}', [AccessibilityProjectController::class, 'show'])
         ->name('accessibility-projects.show');
-    Route::get('accessibility-projects/{project}/edit', [AccessibilityProjectController::class, 'edit'])
+    Route::get('accessibility-projects/{project}/edit', \App\Livewire\EditAccessibilityProject::class)
         ->name('accessibility-projects.edit');
     Route::put('accessibility-projects/{project}', [AccessibilityProjectController::class, 'update'])
         ->name('accessibility-projects.update');
@@ -106,11 +106,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-issues.store');
     Route::get('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'show'])
         ->name('accessibility-issues.show');
-    Route::get('accessibility-projects/{project}/issues/{issue}/edit', function (AccessibilityProject $project, AccessibilityIssue $issue) {
-        return view('accessibility.issues.edit', ['project' => $project, 'issue' => $issue]);
-    })->name('accessibility-issues.edit');
-    Route::put('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'update'])
-        ->name('accessibility-issues.update');
+    Route::get('accessibility-projects/{project}/issues/{issue}/edit', \App\Livewire\EditAccessibilityIssue::class)
+        ->name('accessibility-issues.edit');
     Route::delete('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'destroy'])
         ->name('accessibility-issues.destroy');
     Route::put('accessibility-projects/{project}/issues/{issue}/assign', [AccessibilityIssueController::class, 'assign'])
