@@ -16,7 +16,7 @@ class AccessibilityIssueAttachmentController extends Controller
     {
         $this->authorize('update', $project);
 
-        Storage::disk('public')->delete($attachment->path);
+        Storage::disk('public')->delete($attachment->filename);
         $attachment->delete();
 
         return back()->with('success', 'Image deleted successfully.');
