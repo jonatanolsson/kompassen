@@ -132,7 +132,7 @@ class EditAccessibilityIssue extends Component
 
         $attachmentsList = AccessibilityIssue::findOrFail($this->issueId)
             ->attachments()
-            ->select('id', 'path', 'original_filename')
+            ->select('id', 'filename', 'original_filename')
             ->get()
             ->toArray();
 
