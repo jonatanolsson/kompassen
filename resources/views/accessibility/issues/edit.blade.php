@@ -155,7 +155,7 @@
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
                     <flux:card class="p-6">
-                        @livewire('wcag-criteria-selector', ['initialSelectedCriteria' => $selectedCriteria ?? []], key('wcag-selector-'.$issue->id))
+                        @livewire('wcag-criteria-selector', ['initialSelectedCriteria' => $selectedCriteria ?? []])
                         <flux:error name="wcag_criteria" />
                     </flux:card>
                 </div>
