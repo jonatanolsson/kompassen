@@ -71,7 +71,16 @@ class AccessibilityIssueController extends Controller
         $this->authorize('update', $project);
 
         $wcagCriteria = WcagSuccessCriterion::all();
-        $selectedCriteria = $issue->wcagCriteria()->pluck('wcag_success_criterion_id')->toArray();
+        $selectedCriteria = $issue->wcagCriteria()
+            ->get()
+            ->map(fn ($criterion) => [
+                'id' => $criterion->id,
+                'failure_type' => $criterion->pivot->failure_type ?? '',
+                'comment' => $criterion->pivot->comment ?? '',
+                'code_snippet' => $criterion->pivot->code_snippet ?? '',
+            ])
+            ->values()
+            ->toArray();
 
         return view('accessibility.issues.edit', compact('project', 'issue', 'wcagCriteria', 'selectedCriteria'));
     }
