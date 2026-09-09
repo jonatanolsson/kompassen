@@ -36,11 +36,9 @@
                             >
                                 {{ __('Export') }}
                             </flux:menu.item>
-                        </flux:menu.group>
 
-                        <flux:menu.separator />
+                            <flux:menu.separator />
 
-                        <flux:menu.group>
                             <!-- Mark as fixed -->
                             <flux:menu.item
                                 as="button"
