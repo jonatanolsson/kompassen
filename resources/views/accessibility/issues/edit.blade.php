@@ -155,10 +155,6 @@
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
                     <flux:card class="p-6">
-                        <!-- Debug: Show selectedCriteria -->
-                        <div class="mb-4 p-2 bg-blue-100 text-sm" style="display: none;">
-                            Selected: {{ json_encode($selectedCriteria ?? []) }}
-                        </div>
                         @livewire('wcag-criteria-selector', ['initialSelectedCriteria' => $selectedCriteria ?? []])
                         <flux:error name="wcag_criteria" />
                     </flux:card>
