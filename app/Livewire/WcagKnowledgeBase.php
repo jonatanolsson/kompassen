@@ -5,10 +5,7 @@ namespace App\Livewire;
 use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
-
-#[Layout('layouts.app')]
 
 class WcagKnowledgeBase extends Component
 {

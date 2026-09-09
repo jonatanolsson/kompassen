@@ -3,11 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\AppSetting;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-
-#[Layout('layouts.app')]
 
 class AppSettings extends Component
 {

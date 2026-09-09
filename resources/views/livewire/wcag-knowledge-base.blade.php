@@ -1,3 +1,4 @@
+<x-app-layout>
 <div>
     <flux:heading size="xl">{{ __('WCAG Knowledge Base') }}</flux:heading>
     <flux:subheading>{{ __('Browse success criteria and manage global examples with code snippets and references.') }}</flux:subheading>
@@ -213,3 +214,4 @@
         </div>
     </div>
 </div>
+</x-app-layout>
