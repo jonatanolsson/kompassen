@@ -1,4 +1,4 @@
-<x-app-layout>
+
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
@@ -150,4 +150,4 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+

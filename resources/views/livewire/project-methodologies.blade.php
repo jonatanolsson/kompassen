@@ -4,57 +4,12 @@
             <flux:heading level="2">{{ __('Testing Methodology') }}</flux:heading>
             <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('Tools and methods used to test this project') }}</flux:text>
         </div>
-        <flux:button wire:click="$set('showAddForm', true)" variant="primary" icon="plus" size="sm">
-            {{ __('Add Method') }}
-        </flux:button>
+        <flux:modal.trigger name="add-methodology-modal">
+            <flux:button variant="primary" icon="plus" size="sm">
+                {{ __('Add Method') }}
+            </flux:button>
+        </flux:modal.trigger>
     </div>
-
-    @if ($showAddForm)
-        <flux:card class="p-4 border border-zinc-200 dark:border-zinc-700">
-            <div class="space-y-4">
-                <flux:heading level="3" class="text-base">{{ __('Add Testing Method') }}</flux:heading>
-
-                <flux:field>
-                    <flux:label>{{ __('Method / Tool') }}</flux:label>
-                    <flux:select wire:model="selectedMethodologyId">
-                        <option value="">{{ __('Select a method...') }}</option>
-                        @foreach ($allMethodologies as $category => $methods)
-                            <optgroup label="{{ match($category) {
-                                'screen_reader' => __('Screen Readers'),
-                                'browser' => __('Browsers'),
-                                'browser_extension' => __('Browser Extensions'),
-                                'device' => __('Devices'),
-                                'testing_tool' => __('Testing Tools'),
-                                default => __(ucfirst(str_replace('_', ' ', $category))),
-                            } }}">
-                                @foreach ($methods as $method)
-                                    @if (!in_array($method->id, $projectMethodologyIds))
-                                        <option value="{{ $method->id }}">{{ $method->name }}</option>
-                                    @endif
-                                @endforeach
-                            </optgroup>
-                        @endforeach
-                    </flux:select>
-                    <flux:error name="selectedMethodologyId" />
-                </flux:field>
-
-                <flux:field>
-                <flux:label>{{ __('Version / Device / Notes') }} <flux:badge size="sm" variant="outline">{{ __('Optional') }}</flux:badge></flux:label>
-                    <flux:textarea
-                        wire:model="notes"
-                    placeholder="{{ __('e.g. JAWS 2024, Windows 11 22H2 — or leave blank') }}"
-                        rows="2"
-                    />
-                    <flux:error name="notes" />
-                </flux:field>
-
-                <div class="flex gap-2">
-                    <flux:button wire:click="addMethodology" variant="primary" size="sm">{{ __('Add') }}</flux:button>
-                    <flux:button wire:click="$set('showAddForm', false)" variant="ghost" size="sm">{{ __('Cancel') }}</flux:button>
-                </div>
-            </div>
-        </flux:card>
-    @endif
 
     @if ($projectMethodologies->isEmpty())
         <flux:card class="p-6 text-center">
@@ -130,4 +85,56 @@
             @endforeach
         </div>
     @endif
+
+    <!-- Add Methodology Modal -->
+    <flux:modal name="add-methodology-modal" class="md:w-96">
+    <div class="space-y-6">
+        <flux:heading level="2">{{ __('Add Testing Method') }}</flux:heading>
+
+        <flux:separator />
+
+        <div class="space-y-4">
+            <flux:field>
+                <flux:label>{{ __('Method / Tool') }}</flux:label>
+                <flux:select wire:model="selectedMethodologyId">
+                    <option value="">{{ __('Select a method...') }}</option>
+                    @foreach ($allMethodologies as $category => $methods)
+                        <optgroup label="{{ match($category) {
+                            'screen_reader' => __('Screen Readers'),
+                            'browser' => __('Browsers'),
+                            'browser_extension' => __('Browser Extensions'),
+                            'device' => __('Devices'),
+                            'testing_tool' => __('Testing Tools'),
+                            default => __(ucfirst(str_replace('_', ' ', $category))),
+                        } }}">
+                            @foreach ($methods as $method)
+                                @if (!in_array($method->id, $projectMethodologyIds))
+                                    <option value="{{ $method->id }}">{{ $method->name }}</option>
+                                @endif
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </flux:select>
+                <flux:error name="selectedMethodologyId" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Version / Device / Notes') }} <flux:badge size="sm" variant="outline">{{ __('Optional') }}</flux:badge></flux:label>
+                <flux:textarea
+                    wire:model="notes"
+                    placeholder="{{ __('e.g. JAWS 2024, Windows 11 22H2 — or leave blank') }}"
+                    rows="3"
+                />
+                <flux:error name="notes" />
+            </flux:field>
+        </div>
+
+        <flux:separator />
+
+        <div class="flex gap-2 justify-end">
+            <flux:button variant="ghost" wire:click="$dispatch('close-modal', { name: 'add-methodology-modal' })">{{ __('Cancel') }}</flux:button>
+            <flux:button wire:click="addMethodology" variant="primary">{{ __('Add Method') }}</flux:button>
+        </div>
+    </div>
+</flux:modal>
 </div>

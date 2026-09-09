@@ -1,4 +1,3 @@
-<x-app-layout>
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
@@ -19,4 +18,3 @@
         </div>
     </flux:card>
 </div>
-</x-app-layout>

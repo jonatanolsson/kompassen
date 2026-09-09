@@ -6,13 +6,17 @@ use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
+#[Layout('layouts.app')]
 class EditAccessibilityIssue extends Component
 {
     use AuthorizesRequests;
+    use WithFileUploads;
 
     #[Locked]
     public string $projectId;
@@ -44,6 +48,9 @@ class EditAccessibilityIssue extends Component
     public bool $wcagModalOpen = false;
 
     public string $wcagSearch = '';
+
+    #[Validate('nullable|array')]
+    public array $attachments = [];
 
     public function mount(AccessibilityProject $project, AccessibilityIssue $issue): void
     {
@@ -79,6 +86,20 @@ class EditAccessibilityIssue extends Component
             'status' => $this->status,
         ]);
 
+        // Handle file uploads
+        if (! empty($this->attachments)) {
+            foreach ($this->attachments as $file) {
+                $path = $file->store('issues', 'public');
+                $issue->attachments()->create([
+                    'path' => $path,
+                    'original_filename' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ]);
+            }
+            $this->attachments = [];
+        }
+
         session()->flash('success', __('Issue updated successfully.'));
         $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
@@ -109,7 +130,7 @@ class EditAccessibilityIssue extends Component
             ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
             ->toArray();
 
-        $attachments = AccessibilityIssue::findOrFail($this->issueId)
+        $attachmentsList = AccessibilityIssue::findOrFail($this->issueId)
             ->attachments()
             ->select('id', 'path', 'original_filename')
             ->get()
@@ -119,7 +140,7 @@ class EditAccessibilityIssue extends Component
             ->when($this->wcagSearch, function ($criteria) {
                 return $criteria->filter(function ($c) {
                     return str_contains(
-                        strtolower($c->number . ' ' . ($c->name_sv ?? '') . ' ' . ($c->name_en ?? '')),
+                        strtolower($c->number.' '.($c->name_sv ?? '').' '.($c->name_en ?? '')),
                         strtolower($this->wcagSearch)
                     );
                 });
@@ -136,7 +157,7 @@ class EditAccessibilityIssue extends Component
 
         return view('livewire.edit-accessibility-issue', [
             'pages' => $pages,
-            'attachments' => $attachments,
+            'attachments' => $attachmentsList,
             'availableCriteria' => $availableCriteria,
         ]);
     }

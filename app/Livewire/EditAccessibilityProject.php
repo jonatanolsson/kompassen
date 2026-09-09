@@ -4,10 +4,12 @@ namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class EditAccessibilityProject extends Component
 {
     use AuthorizesRequests;

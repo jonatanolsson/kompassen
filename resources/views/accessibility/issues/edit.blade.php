@@ -56,27 +56,54 @@
                     </flux:field>
 
                     @if ($issue->attachments->count() > 0)
-                        <div>
-                            <flux:heading level="3" class="text-sm mb-3">{{ __('Current Images') }}</flux:heading>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="space-y-3">
+                            <flux:heading level="3" class="text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Current Images') }}</flux:heading>
+                            <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
                                 @foreach ($issue->attachments as $attachment)
-                                    <div class="relative group">
-                                        <img 
-                                            src="{{ asset('storage/' . $attachment->path) }}" 
-                                            alt="{{ $attachment->original_filename }}"
-                                            class="w-full h-32 object-cover rounded border border-zinc-200 dark:border-zinc-700"
-                                        />
+                                    <div class="flex flex-col">
+                                        <flux:modal.trigger name="attachment-lightbox-{{ $loop->index }}">
+                                            <button
+                                                type="button"
+                                                class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow duration-200 bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:opacity-75"
+                                            >
+                                                <img 
+                                                    src="{{ asset('storage/' . $attachment->path) }}" 
+                                                    alt="{{ $attachment->original_filename }}"
+                                                    class="w-full h-28 object-cover"
+                                                />
+                                            </button>
+                                        </flux:modal.trigger>
                                         <form 
                                             action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}" 
                                             method="POST" 
-                                            class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition rounded"
                                             onsubmit="return confirm('{{ __('Delete this image?') }}')"
+                                            class="mt-3"
                                         >
                                             @csrf
                                             @method('DELETE')
-                                            <flux:button type="submit" variant="danger" size="xs" icon="trash">{{ __('Delete') }}</flux:button>
+                                            <flux:button type="submit" variant="danger" size="xs" icon="trash" class="w-full">{{ __('Delete') }}</flux:button>
                                         </form>
                                     </div>
+
+                                    <!-- Image Lightbox Modal for each attachment -->
+                                    <flux:modal name="attachment-lightbox-{{ $loop->index }}" class="w-auto max-w-4xl">
+                                        <div class="space-y-4">
+                                            <div class="flex items-center justify-between">
+                                                <flux:heading level="2">{{ $attachment->original_filename }}</flux:heading>
+                                                <flux:modal.close />
+                                            </div>
+
+                                            <flux:separator />
+
+                                            <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
+                                                <img 
+                                                    src="{{ asset('storage/' . $attachment->path) }}" 
+                                                    alt="{{ $attachment->original_filename }}"
+                                                    class="max-h-[70vh] object-contain"
+                                                />
+                                            </div>
+                                        </div>
+                                    </flux:modal>
                                 @endforeach
                             </div>
                         </div>

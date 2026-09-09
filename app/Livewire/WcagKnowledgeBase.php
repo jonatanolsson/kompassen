@@ -5,8 +5,10 @@ namespace App\Livewire;
 use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class WcagKnowledgeBase extends Component
 {
     public ?string $selectedCriterionId = null;
@@ -15,10 +17,15 @@ class WcagKnowledgeBase extends Component
 
     // Example form fields
     public string $exampleTitle = '';
+
     public string $exampleDescription = '';
+
     public string $exampleCode = '';
+
     public string $exampleCodeLanguage = 'html';
+
     public string $exampleUrl = '';
+
     public string $exampleUrlLabel = '';
 
     public ?string $editingExampleId = null;
@@ -59,21 +66,21 @@ class WcagKnowledgeBase extends Component
     public function saveExample(): void
     {
         $this->validate([
-            'exampleTitle'        => ['required', 'string', 'max:255'],
-            'exampleDescription'  => ['nullable', 'string'],
-            'exampleCode'         => ['nullable', 'string'],
+            'exampleTitle' => ['required', 'string', 'max:255'],
+            'exampleDescription' => ['nullable', 'string'],
+            'exampleCode' => ['nullable', 'string'],
             'exampleCodeLanguage' => ['nullable', 'string', 'max:50'],
-            'exampleUrl'          => ['nullable', 'url', 'max:500'],
-            'exampleUrlLabel'     => ['nullable', 'string', 'max:255'],
+            'exampleUrl' => ['nullable', 'url', 'max:500'],
+            'exampleUrlLabel' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data = [
-            'title'        => $this->exampleTitle,
-            'description'  => $this->exampleDescription ?: null,
+            'title' => $this->exampleTitle,
+            'description' => $this->exampleDescription ?: null,
             'code_snippet' => $this->exampleCode ?: null,
             'code_language' => $this->exampleCodeLanguage ?: 'html',
-            'url'          => $this->exampleUrl ?: null,
-            'url_label'    => $this->exampleUrlLabel ?: null,
+            'url' => $this->exampleUrl ?: null,
+            'url_label' => $this->exampleUrlLabel ?: null,
         ];
 
         if ($this->editingExampleId) {
@@ -97,13 +104,13 @@ class WcagKnowledgeBase extends Component
             return;
         }
 
-        $this->editingExampleId    = $id;
-        $this->exampleTitle        = $example->title;
-        $this->exampleDescription  = $example->description ?? '';
-        $this->exampleCode         = $example->code_snippet ?? '';
+        $this->editingExampleId = $id;
+        $this->exampleTitle = $example->title;
+        $this->exampleDescription = $example->description ?? '';
+        $this->exampleCode = $example->code_snippet ?? '';
         $this->exampleCodeLanguage = $example->code_language ?? 'html';
-        $this->exampleUrl          = $example->url ?? '';
-        $this->exampleUrlLabel     = $example->url_label ?? '';
+        $this->exampleUrl = $example->url ?? '';
+        $this->exampleUrlLabel = $example->url_label ?? '';
     }
 
     public function deleteExample(string $id): void
@@ -120,13 +127,13 @@ class WcagKnowledgeBase extends Component
 
     private function resetExampleForm(): void
     {
-        $this->editingExampleId    = null;
-        $this->exampleTitle        = '';
-        $this->exampleDescription  = '';
-        $this->exampleCode         = '';
+        $this->editingExampleId = null;
+        $this->exampleTitle = '';
+        $this->exampleDescription = '';
+        $this->exampleCode = '';
         $this->exampleCodeLanguage = 'html';
-        $this->exampleUrl          = '';
-        $this->exampleUrlLabel     = '';
+        $this->exampleUrl = '';
+        $this->exampleUrlLabel = '';
     }
 
     public function render()

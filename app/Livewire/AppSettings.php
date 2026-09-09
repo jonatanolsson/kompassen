@@ -3,16 +3,20 @@
 namespace App\Livewire;
 
 use App\Models\AppSetting;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
+#[Layout('layouts.app')]
 class AppSettings extends Component
 {
     use WithFileUploads;
 
     public ?string $currentLogo = null;
 
-    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
+    /** @var TemporaryUploadedFile|null */
     public $logo = null;
 
     public function mount(): void
@@ -28,7 +32,7 @@ class AppSettings extends Component
 
         if ($this->logo) {
             if ($this->currentLogo) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($this->currentLogo);
+                Storage::disk('public')->delete($this->currentLogo);
             }
 
             $path = $this->logo->store('brand', 'public');
@@ -43,7 +47,7 @@ class AppSettings extends Component
     public function removeLogo(): void
     {
         if ($this->currentLogo) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($this->currentLogo);
+            Storage::disk('public')->delete($this->currentLogo);
             AppSetting::set('brand_logo', null);
             $this->currentLogo = null;
         }

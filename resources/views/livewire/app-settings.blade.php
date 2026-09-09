@@ -1,5 +1,4 @@
-<x-app-layout>
-<div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+<div class="max-w-2xl mx-auto px-4 py-8 space-y-8">
     <div>
         <flux:heading level="1" class="mb-1">{{ __('App Settings') }}</flux:heading>
         <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Manage branding and application settings.') }}</flux:text>
@@ -46,4 +45,3 @@
         </div>
     </form>
 </div>
-</x-app-layout>

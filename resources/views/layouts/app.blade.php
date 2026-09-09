@@ -13,7 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @fluxAppearance
+            @fluxAppearance
     </head>
     <body class="font-sans antialiased">
         <div class="flex min-h-screen">
@@ -54,14 +54,11 @@
                 <flux:sidebar.spacer />
 
                 <flux:sidebar.nav>
-                    <form method="POST" action="{{ route('logout') }}" class="w-full" onsubmit="this.querySelector('button').disabled=true">
+                    <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
+                        <flux:sidebar.item as="button" type="submit" icon="arrow-right-start-on-rectangle">
                             {{ __('Logout') }}
-                        </button>
+                        </flux:sidebar.item>
                     </form>
                 </flux:sidebar.nav>
             </flux:sidebar>
@@ -89,15 +86,10 @@
 
                                 <flux:menu.separator />
 
-                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                <flux:menu.item icon="arrow-right-start-on-rectangle" variant="danger" as="form" action="{{ route('logout') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        {{ __('Logout') }}
-                                    </button>
-                                </form>
+                                    <button type="submit" class="w-full text-left">{{ __('Logout') }}</button>
+                                </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     @endauth
@@ -109,7 +101,7 @@
                 </flux:main>
             </div>
         </div>
-        @livewireScripts
-        @fluxScripts
+            @livewireScripts
+    @fluxScripts
     </body>
 </html>

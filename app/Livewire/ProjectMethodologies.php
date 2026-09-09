@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
 use App\Models\TestingMethodology;
-use Livewire\Component;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class ProjectMethodologies extends Component
 {
@@ -27,7 +27,7 @@ class ProjectMethodologies extends Component
             $this->selectedMethodologyId => ['notes' => $this->notes ?: null],
         ]);
 
-        $this->reset(['selectedMethodologyId', 'notes', 'showAddForm']);
+        $this->reset(['selectedMethodologyId', 'notes']);
     }
 
     public function removeMethodology(string $methodologyId): void
