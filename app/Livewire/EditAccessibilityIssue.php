@@ -7,6 +7,7 @@ use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -89,26 +90,19 @@ class EditAccessibilityIssue extends Component
 
         // Handle file uploads
         if (! empty($this->attachments)) {
-            foreach ($this->attachments as $file) {
-                $filename = $file->store('issue-attachments', 'public');
-                $issue->attachments()->create([
-                    'filename' => $filename,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'mime_type' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ]);
-            }
+            $this->storeAttachments($this->attachments, $issue);
             $this->attachments = [];
         }
 
         session()->flash('success', __('Issue updated successfully.'));
-        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
+        $this->redirect(route('accessibility-issues.edit', [$project, $issue]), navigate: true);
     }
 
     public function cancel(): void
     {
         $project = AccessibilityProject::findOrFail($this->projectId);
-        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
+        $issue = AccessibilityIssue::findOrFail($this->issueId);
+        $this->redirect(route('accessibility-issues.show', [$project, $issue]), navigate: true);
     }
 
     public function openWcagModal(): void
@@ -122,6 +116,22 @@ class EditAccessibilityIssue extends Component
         $this->wcagSearch = '';
     }
 
+    private function storeAttachments(array $files, AccessibilityIssue $issue): void
+    {
+        foreach ($files as $file) {
+            $filename = Str::ulid().'.'.$file->extension();
+            $path = $file->storeAs('accessibility-issues/'.$issue->id, $filename, 'public');
+
+            $issue->attachments()->create([
+                'filename' => $filename,
+                'original_filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'path' => $path,
+            ]);
+        }
+    }
+
     public function deleteAttachment(string $attachmentId): void
     {
         $issue = AccessibilityIssue::findOrFail($this->issueId);
@@ -129,7 +139,7 @@ class EditAccessibilityIssue extends Component
 
         $this->authorize('update', AccessibilityProject::findOrFail($this->projectId));
 
-        Storage::disk('public')->delete($attachment->filename);
+        Storage::disk('public')->delete($attachment->path);
         $attachment->delete();
     }
 
@@ -144,11 +154,11 @@ class EditAccessibilityIssue extends Component
 
         $attachmentsList = AccessibilityIssue::findOrFail($this->issueId)
             ->attachments()
-            ->select('id', 'filename', 'original_filename')
+            ->select('id', 'path', 'original_filename')
             ->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
-                'filename' => $a->filename,
+                'path' => $a->path,
                 'original_filename' => $a->original_filename,
             ])
             ->toArray();

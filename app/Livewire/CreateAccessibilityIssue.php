@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -91,13 +92,15 @@ class CreateAccessibilityIssue extends Component
     private function storeAttachments(array $files, AccessibilityIssue $issue): void
     {
         foreach ($files as $file) {
-            $filename = $file->store('issue-attachments', 'public');
+            $filename = Str::ulid().'.'.$file->extension();
+            $path = $file->storeAs('accessibility-issues/'.$issue->id, $filename, 'public');
 
             $issue->attachments()->create([
                 'filename' => $filename,
-                'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getMimeType(),
                 'size' => $file->getSize(),
+                'original_filename' => $file->getClientOriginalName(),
+                'path' => $path,
             ]);
         }
     }

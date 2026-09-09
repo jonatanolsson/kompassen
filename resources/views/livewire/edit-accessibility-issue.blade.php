@@ -52,17 +52,17 @@
                     @if (count($databaseAttachments) > 0 || count($this->attachments) > 0)
                         <div class="space-y-3">
                             <flux:heading level="3" class="text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Current Images') }}</flux:heading>
-                            <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
                                 <!-- Existing database attachments -->
                                 @foreach ($databaseAttachments as $attachment)
-                                    <div class="flex flex-col">
+                                    <div class="flex flex-col gap-1">
                                         <flux:modal.trigger name="issue-attachment-lightbox-{{ $loop->index }}">
                                             <button
                                                 type="button"
                                                 class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow duration-200 bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:opacity-75"
                                             >
                                                 <img
-                                                    src="{{ asset('storage/' . $attachment['filename']) }}"
+                                                    src="{{ asset('storage/' . $attachment['path']) }}"
                                                     alt="{{ $attachment['original_filename'] }}"
                                                     class="w-full h-28 object-cover"
                                                 />
@@ -73,46 +73,46 @@
                                             variant="danger" 
                                             size="xs" 
                                             icon="trash" 
-                                            class="w-full mt-3"
+                                            class="w-full"
                                             wire:click="deleteAttachment('{{ $attachment['id'] }}')"
-                                            @confirm
+                                            wire:confirm="{{ __('Delete this image?') }}"
                                         >
                                             {{ __('Delete') }}
                                         </flux:button>
+
+                                        <!-- Image Lightbox Modal for each attachment -->
+                                        <flux:modal name="issue-attachment-lightbox-{{ $loop->index }}" class="w-auto max-w-4xl">
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <flux:heading level="2">{{ $attachment['original_filename'] }}</flux:heading>
+                                                    <flux:modal.close />
+                                                </div>
+
+                                                <flux:separator />
+
+                                                <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
+                                                    <img
+                                                        src="{{ asset('storage/' . $attachment['path']) }}"
+                                                        alt="{{ $attachment['original_filename'] }}"
+                                                        class="max-h-[70vh] object-contain"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </flux:modal>
                                     </div>
-
-                                    <!-- Image Lightbox Modal for each attachment -->
-                                    <flux:modal name="issue-attachment-lightbox-{{ $loop->index }}" class="w-auto max-w-4xl">
-                                        <div class="space-y-4">
-                                            <div class="flex items-center justify-between">
-                                                <flux:heading level="2">{{ $attachment['original_filename'] }}</flux:heading>
-                                                <flux:modal.close />
-                                            </div>
-
-                                            <flux:separator />
-
-                                            <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
-                                                <img
-                                                    src="{{ asset('storage/' . $attachment['filename']) }}"
-                                                    alt="{{ $attachment['original_filename'] }}"
-                                                    class="max-h-[70vh] object-contain"
-                                                />
-                                            </div>
-                                        </div>
-                                    </flux:modal>
                                 @endforeach
 
                                 <!-- Newly uploaded temporary files (preview) -->
                                 @foreach ($this->attachments as $uploadedFile)
-                                    <div class="flex flex-col">
-                                        <div class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm bg-zinc-50 dark:bg-zinc-800">
+                                    <div class="flex flex-col self-start">
+                                        <div class="relative h-28 overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
                                             <img
                                                 src="{{ $uploadedFile->temporaryUrl() }}"
                                                 alt="{{ $uploadedFile->getClientOriginalName() }}"
-                                                class="w-full h-28 object-cover"
+                                                class="w-full h-full object-cover"
                                             />
-                                            <div class="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
-                                                <span class="text-white text-xs font-semibold bg-blue-600 bg-opacity-75 px-2 py-1 rounded">{{ __('New') }}</span>
+                                            <div class="absolute inset-0 flex items-center justify-center bg-blue-950/35">
+                                                <span class="rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">{{ __('New') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -200,4 +200,3 @@
             </form>
         </div>
     </div>
-

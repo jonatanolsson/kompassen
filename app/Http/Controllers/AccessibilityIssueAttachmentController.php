@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccessibilityProject;
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityIssueAttachment;
+use App\Models\AccessibilityProject;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +16,7 @@ class AccessibilityIssueAttachmentController extends Controller
     {
         $this->authorize('update', $project);
 
-        Storage::disk('public')->delete($attachment->filename);
+        Storage::disk('public')->delete($attachment->path);
         $attachment->delete();
 
         return back()->with('success', 'Image deleted successfully.');
