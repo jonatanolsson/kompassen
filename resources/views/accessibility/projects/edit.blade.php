@@ -24,8 +24,11 @@
                         <flux:label>{{ __('Description') }}</flux:label>
                         <flux:textarea 
                             name="description" 
-                            rows="4"
+                            rows="6"
                         >{{ old('description', $project->description) }}</flux:textarea>
+                        <flux:text size="sm" class="text-zinc-500 mt-2">
+                            {{ __('Supports Markdown formatting') }}
+                        </flux:text>
                         <flux:error name="description" />
                     </flux:field>
 

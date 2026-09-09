@@ -25,8 +25,11 @@
                         <flux:textarea 
                             name="description" 
                             placeholder="Add details about the audit scope..."
-                            rows="4"
+                            rows="6"
                         >{{ old('description') }}</flux:textarea>
+                        <flux:text size="sm" class="text-zinc-500 mt-2">
+                            {{ __('Supports Markdown formatting') }}
+                        </flux:text>
                         <flux:error name="description" />
                     </flux:field>
 

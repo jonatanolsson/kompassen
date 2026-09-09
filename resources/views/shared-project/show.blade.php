@@ -26,9 +26,9 @@
                             WCAG {{ $project->target_wcag_level }} • {{ Str::title($project->status) }}
                         </flux:text>
                         @if ($project->description)
-                            <flux:text class="text-base mt-3 print:mt-2 print:text-sm">
-                                {{ $project->description }}
-                            </flux:text>
+                            <div class="text-base mt-3 print:mt-2 print:text-sm prose prose-sm dark:prose-invert max-w-none">
+                                {!! \App\Helpers\MarkdownHelper::toHtml($project->description) !!}
+                            </div>
                         @endif
                     </div>
                 </div>

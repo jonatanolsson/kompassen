@@ -33,8 +33,11 @@
                             <flux:textarea
                                 name="description"
                                 placeholder="{{ __('Describe the issue in detail...') }}"
-                                rows="4"
+                                rows="6"
                             >{{ old('description', $issue->description) }}</flux:textarea>
+                            <flux:text size="sm" class="text-zinc-500 mt-2">
+                                {{ __('Supports Markdown formatting') }}
+                            </flux:text>
                             <flux:error name="description" />
                         </flux:field>
                     </div>
