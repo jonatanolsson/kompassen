@@ -49,12 +49,12 @@
                         <flux:error name="attachments" />
                     </flux:field>
 
-                    @if (count($attachments) > 0 || count($this->attachments) > 0)
+                    @if (count($databaseAttachments) > 0 || count($this->attachments) > 0)
                         <div class="space-y-3">
                             <flux:heading level="3" class="text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Current Images') }}</flux:heading>
                             <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
                                 <!-- Existing database attachments -->
-                                @foreach ($attachments as $attachment)
+                                @foreach ($databaseAttachments as $attachment)
                                     <div class="flex flex-col">
                                         <flux:modal.trigger name="issue-attachment-lightbox-{{ $loop->index }}">
                                             <button

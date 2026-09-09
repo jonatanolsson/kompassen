@@ -162,7 +162,7 @@ class EditAccessibilityIssue extends Component
 
         return view('livewire.edit-accessibility-issue', [
             'pages' => $pages,
-            'attachments' => $attachmentsList,
+            'databaseAttachments' => $attachmentsList,
             'availableCriteria' => $availableCriteria,
         ]);
     }
