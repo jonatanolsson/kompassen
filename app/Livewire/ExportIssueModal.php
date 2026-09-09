@@ -43,7 +43,7 @@ class ExportIssueModal extends Component
         $this->dispatch('notify', message: __('Copied to clipboard!'));
     }
 
-    public function download(): void
+    public function download()
     {
         return redirect()->route('accessibility-issues.export', [
             'project' => $this->project,
