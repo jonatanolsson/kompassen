@@ -53,9 +53,12 @@
                 <flux:sidebar.spacer />
 
                 <flux:sidebar.nav>
-                    <flux:sidebar.item as="button" wire:click="logout" icon="arrow-right-start-on-rectangle">
-                        {{ __('Logout') }}
-                    </flux:sidebar.item>
+                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                        @csrf
+                        <flux:sidebar.item type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                            {{ __('Logout') }}
+                        </flux:sidebar.item>
+                    </form>
                 </flux:sidebar.nav>
             </flux:sidebar>
 
@@ -82,9 +85,12 @@
 
                                 <flux:menu.separator />
 
-                                <flux:menu.item icon="arrow-right-start-on-rectangle" variant="danger" as="button" wire:click="logout">
-                                    {{ __('Logout') }}
-                                </flux:menu.item>
+                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                    @csrf
+                                    <flux:menu.item icon="arrow-right-start-on-rectangle" variant="danger" type="submit" class="w-full">
+                                        {{ __('Logout') }}
+                                    </flux:menu.item>
+                                </form>
                             </flux:menu>
                         </flux:dropdown>
                     @endauth
