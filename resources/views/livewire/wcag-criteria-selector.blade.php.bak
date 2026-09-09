@@ -194,7 +194,7 @@ new class extends Component
     </flux:button>
 
     <!-- Selected Criteria Display -->
-    @if ($this->getSelectedCriteria()->count() > 0)
+    @if ($selectedCriteria)
         <div class="mt-4 flex flex-wrap gap-2">
             @foreach ($this->getSelectedCriteria() as $criterion)
                 <div class="group relative">
