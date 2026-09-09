@@ -45,7 +45,6 @@
                             <flux:menu.item
                                 as="button"
                                 onclick="submitResolution('fixed', 'resolve-fixed-form')"
-                                variant="subtle"
                             >
                                 <span class="text-green-600 dark:text-green-400">{{ __('Mark as fixed') }}</span>
                             </flux:menu.item>
@@ -54,9 +53,8 @@
                             <flux:menu.item
                                 as="button"
                                 onclick="submitResolution('wontfix', 'resolve-wontfix-form')"
-                                variant="danger"
                             >
-                                {{ __('Mark as wontfix') }}
+                                <span class="text-red-600 dark:text-red-400">{{ __('Mark as wontfix') }}</span>
                             </flux:menu.item>
                         </flux:menu.group>
                     </flux:menu>
