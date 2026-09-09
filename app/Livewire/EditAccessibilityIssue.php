@@ -6,6 +6,7 @@ use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -119,6 +120,17 @@ class EditAccessibilityIssue extends Component
     {
         $this->wcagModalOpen = false;
         $this->wcagSearch = '';
+    }
+
+    public function deleteAttachment(string $attachmentId): void
+    {
+        $issue = AccessibilityIssue::findOrFail($this->issueId);
+        $attachment = $issue->attachments()->findOrFail($attachmentId);
+
+        $this->authorize('update', AccessibilityProject::findOrFail($this->projectId));
+
+        Storage::disk('public')->delete($attachment->filename);
+        $attachment->delete();
     }
 
     public function render()

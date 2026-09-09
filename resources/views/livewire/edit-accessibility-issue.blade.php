@@ -68,16 +68,17 @@
                                                 />
                                             </button>
                                         </flux:modal.trigger>
-                                        <form
-                                            action="{{ route('accessibility-issue-attachments.destroy', [$this->projectId, $this->issueId, $attachment['id']]) }}"
-                                            method="POST"
-                                            onsubmit="return confirm(@js(__('Delete this image?')))"
-                                            class="mt-3"
+                                        <flux:button 
+                                            type="button"
+                                            variant="danger" 
+                                            size="xs" 
+                                            icon="trash" 
+                                            class="w-full mt-3"
+                                            wire:click="deleteAttachment('{{ $attachment['id'] }}')"
+                                            @confirm
                                         >
-                                            @csrf
-                                            @method('DELETE')
-                                            <flux:button type="submit" variant="danger" size="xs" icon="trash" class="w-full mt-3">{{ __('Delete') }}</flux:button>
-                                        </form>
+                                            {{ __('Delete') }}
+                                        </flux:button>
                                     </div>
 
                                     <!-- Image Lightbox Modal for each attachment -->
