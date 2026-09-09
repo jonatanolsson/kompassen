@@ -12,37 +12,70 @@
                     <flux:badge color="blue">{{ __('Difficulty') }}: {{ Str::title($issue->difficulty) }}</flux:badge>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <a href="{{ route('accessibility-issues.edit', [$project, $issue]) }}">
-                    <flux:button variant="outline" icon="pencil">{{ __('Edit') }}</flux:button>
-                </a>
-
-                <!-- Export Issue -->
-                <flux:modal.trigger name="export-issue-modal">
-                    <flux:button icon="arrow-up-tray">{{ __('Export') }}</flux:button>
-                </flux:modal.trigger>
-
-                <!-- Mark as fixed -->
-                <form id="resolve-fixed-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="resolution_status" value="" />
-                    <input type="hidden" name="resolution_notes" value="" />
-                    <flux:button type="button" variant="primary" icon="check" size="sm" onclick="submitResolution('fixed', 'resolve-fixed-form')">{{ __('Mark as fixed') }}</flux:button>
-                </form>
-
-                <!-- Mark as wontfix -->
-                <form id="resolve-wontfix-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="inline">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="resolution_status" value="" />
-                    <input type="hidden" name="resolution_notes" value="" />
-                    <flux:button type="button" variant="danger" icon="x-mark" size="sm" onclick="submitResolution('wontfix', 'resolve-wontfix-form')">{{ __('Mark as wontfix') }}</flux:button>
-                </form>
-
+            <div class="flex gap-2 items-center">
                 <a href="{{ route('accessibility-projects.show', $project) }}">
-                    <flux:button variant="ghost">{{ __('Back') }}</flux:button>
+                    <flux:button variant="ghost" icon="arrow-left">{{ __('Back') }}</flux:button>
                 </a>
+
+                <!-- Actions Dropdown -->
+                <flux:dropdown>
+                    <flux:button variant="outline" icon="ellipsis-horizontal">{{ __('Actions') }}</flux:button>
+
+                    <flux:menu>
+                        <flux:menu.group>
+                            <!-- Edit -->
+                            <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil-square" wire:navigate>
+                                {{ __('Edit') }}
+                            </flux:menu.item>
+
+                            <!-- Export -->
+                            <flux:menu.item
+                                as="button"
+                                @click="$dispatch('openModal', 'export-issue-modal')"
+                                icon="arrow-down-tray"
+                            >
+                                {{ __('Export') }}
+                            </flux:menu.item>
+                        </flux:menu.group>
+
+                        <flux:menu.separator />
+
+                        <flux:menu.group>
+                            <!-- Mark as fixed -->
+                            <flux:menu.item
+                                as="button"
+                                onclick="submitResolution('fixed', 'resolve-fixed-form')"
+                                variant="subtle"
+                            >
+                                <span class="text-green-600 dark:text-green-400">{{ __('Mark as fixed') }}</span>
+                            </flux:menu.item>
+
+                            <!-- Mark as wontfix -->
+                            <flux:menu.item
+                                as="button"
+                                onclick="submitResolution('wontfix', 'resolve-wontfix-form')"
+                                variant="danger"
+                            >
+                                {{ __('Mark as wontfix') }}
+                            </flux:menu.item>
+                        </flux:menu.group>
+                    </flux:menu>
+                </flux:dropdown>
+
+                <!-- Hidden forms for resolution -->
+                <form id="resolve-fixed-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="resolution_status" value="" />
+                    <input type="hidden" name="resolution_notes" value="" />
+                </form>
+
+                <form id="resolve-wontfix-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="resolution_status" value="" />
+                    <input type="hidden" name="resolution_notes" value="" />
+                </form>
             </div>
 
             <script>
