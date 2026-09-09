@@ -64,7 +64,12 @@
         @if ($issue->description)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>
-                <flux:card class="p-6"> {{ __('description" />') }} </div>
+                <flux:card class="p-6">
+                    <div class="prose prose-sm dark:prose-invert max-w-none">
+                        <x-user-content :content="$issue->description" />
+                    </div>
+                </flux:card>
+            </div>
         @endif
 
         <!-- Images -->
