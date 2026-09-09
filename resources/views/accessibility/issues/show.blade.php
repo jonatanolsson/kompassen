@@ -133,15 +133,31 @@
         @if ($wcagCriteria->count() > 0)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
-                <div class="space-y-2">
+                <div class="space-y-3">
                     @foreach ($wcagCriteria as $criterion)
                         <flux:card class="p-4">
-                            <div class="flex items-start gap-3">
-                                <span class="font-bold text-blue-600 dark:text-blue-400 min-w-fit">{{ $criterion->number }}</span>
-                                <div class="flex-1">
-                                    <flux:heading level="4" class="text-sm">{{ $criterion->name_sv ?? $criterion->name_en }}</flux:heading>
-                                    <flux:text class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('Level') }} {{ Str::upper($criterion->level) }}</flux:text>
+                            <div class="space-y-2">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3 flex-1">
+                                        <span class="font-bold text-blue-600 dark:text-blue-400 min-w-fit">{{ $criterion->number }}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <flux:heading level="4" class="text-sm">{{ $criterion->name_sv ?? $criterion->name_en }}</flux:heading>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <flux:badge color="blue" class="text-xs">{{ Str::upper($criterion->level) }}</flux:badge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if ($criterion->url)
+                                        <a href="{{ $criterion->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-medium whitespace-nowrap">
+                                            W3C →
+                                        </a>
+                                    @endif
                                 </div>
+                                @if ($criterion->description_sv || $criterion->description_en)
+                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                        {{ $criterion->description_sv ?? $criterion->description_en }}
+                                    </p>
+                                @endif
                             </div>
                         </flux:card>
                     @endforeach

@@ -102,7 +102,7 @@
                                                 @php
                                                     $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
                                                     $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
-                                                    $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description])->all();
+                                                    $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                                                 @endphp
                                                 <button 
                                                     type="button"
@@ -209,7 +209,7 @@
                             @php
                                 $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
                                 $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
-                                $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level])->all();
+                                $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                             @endphp
                             <button
                                 type="button"
@@ -309,7 +309,7 @@
                         @foreach ($stats['wcag_mapping'] as $number => $mappings)
                             @php 
                                 $criterion = $mappings->first()['criterion'];
-                                $criterionData = $criterion->only('id', 'number', 'name_en', 'name_sv', 'level', 'description');
+                                $criterionData = $criterion->only('id', 'number', 'name_en', 'name_sv', 'level', 'description_en', 'description_sv', 'url');
                                 $issuesData = $mappings->map(fn($m) => $m['issue']->only('id', 'title', 'severity'))->all();
                             @endphp
                             <button
@@ -418,14 +418,21 @@
 
                     <!-- WCAG Criteria -->
                     <div x-show="selectedIssue?.wcag && selectedIssue.wcag.length > 0">
-                        <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-2">{{ __('WCAG Criteria') }}</h3>
-                        <div class="flex flex-wrap gap-2">
+                        <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-3">{{ __('WCAG Criteria') }}</h3>
+                        <div class="space-y-2">
                             <template x-for="criterion in selectedIssue?.wcag || []" :key="criterion.number">
-                                <div class="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 rounded text-xs font-medium">
-                                    <span x-text="criterion.number"></span>
-                                    <span>–</span>
-                                    <span x-text="criterion.name"></span>
-                                    <span class="text-blue-700 dark:text-blue-300">(<span x-text="criterion.level"></span>)</span>
+                                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+                                    <div class="flex items-start justify-between gap-2 mb-1">
+                                        <div class="flex items-start gap-2">
+                                            <span class="font-bold text-blue-700 dark:text-blue-300" x-text="criterion.number"></span>
+                                            <span class="text-sm font-medium text-zinc-900 dark:text-white" x-text="criterion.name"></span>
+                                            <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-700 text-blue-900 dark:text-blue-100" x-text="criterion.level"></span>
+                                        </div>
+                                        <a x-show="criterion.url" :href="criterion.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-medium">
+                                            W3C →
+                                        </a>
+                                    </div>
+                                    <p x-show="criterion.description" class="text-xs text-zinc-700 dark:text-zinc-300" x-text="criterion.description"></p>
                                 </div>
                             </template>
                         </div>
@@ -476,6 +483,14 @@
 
                 <!-- Content -->
                 <div class="flex-1 overflow-auto p-6 space-y-4">
+                    <!-- W3C Link -->
+                    <div x-show="selectedCriterion?.url" class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+                        <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ __('View on W3C') }}</span>
+                        <a x-show="selectedCriterion?.url" :href="selectedCriterion?.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                            Öppna →
+                        </a>
+                    </div>
+
                     <!-- Level -->
                     <div>
                         <p class="text-sm text-zinc-600 dark:text-zinc-400">
@@ -484,10 +499,10 @@
                         </p>
                     </div>
 
-                    <!-- Description -->
-                    <div x-show="selectedCriterion?.description">
+                    <!-- Description (Swedish or English) -->
+                    <div x-show="selectedCriterion?.description_sv || selectedCriterion?.description_en">
                         <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-2">{{ __('Description') }}</h3>
-                        <p class="text-sm text-zinc-700 dark:text-zinc-300" x-text="selectedCriterion?.description || ''"></p>
+                        <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed" x-text="selectedCriterion?.description_sv || selectedCriterion?.description_en || ''"></p>
                     </div>
 
                     <!-- Affected Issues -->
