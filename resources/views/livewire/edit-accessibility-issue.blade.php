@@ -49,10 +49,11 @@
                         <flux:error name="attachments" />
                     </flux:field>
 
-                    @if (count($attachments) > 0)
+                    @if (count($attachments) > 0 || count($this->attachments) > 0)
                         <div class="space-y-3">
                             <flux:heading level="3" class="text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Current Images') }}</flux:heading>
                             <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
+                                <!-- Existing database attachments -->
                                 @foreach ($attachments as $attachment)
                                     <div class="flex flex-col">
                                         <flux:modal.trigger name="issue-attachment-lightbox-{{ $loop->index }}">
@@ -61,7 +62,7 @@
                                                 class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow duration-200 bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:opacity-75"
                                             >
                                                 <img
-                                                    src="{{ asset('storage/' . $attachment['path']) }}"
+                                                    src="{{ asset('storage/' . $attachment['filename']) }}"
                                                     alt="{{ $attachment['original_filename'] }}"
                                                     class="w-full h-28 object-cover"
                                                 />
@@ -91,13 +92,29 @@
 
                                             <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
                                                 <img
-                                                    src="{{ asset('storage/' . $attachment['path']) }}"
+                                                    src="{{ asset('storage/' . $attachment['filename']) }}"
                                                     alt="{{ $attachment['original_filename'] }}"
                                                     class="max-h-[70vh] object-contain"
                                                 />
                                             </div>
                                         </div>
                                     </flux:modal>
+                                @endforeach
+
+                                <!-- Newly uploaded temporary files (preview) -->
+                                @foreach ($this->attachments as $uploadedFile)
+                                    <div class="flex flex-col">
+                                        <div class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm bg-zinc-50 dark:bg-zinc-800">
+                                            <img
+                                                src="{{ $uploadedFile->temporaryUrl() }}"
+                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
+                                                class="w-full h-28 object-cover"
+                                            />
+                                            <div class="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                                                <span class="text-white text-xs font-semibold bg-blue-600 bg-opacity-75 px-2 py-1 rounded">{{ __('New') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
