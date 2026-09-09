@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -11,7 +12,8 @@ class EditAccessibilityProject extends Component
 {
     use AuthorizesRequests;
 
-    public AccessibilityProject $project;
+    #[Locked]
+    public string $projectId;
 
     #[Validate('required|string|max:255')]
     public string $name = '';
@@ -29,7 +31,7 @@ class EditAccessibilityProject extends Component
     {
         $this->authorize('update', $project);
 
-        $this->project = $project;
+        $this->projectId = $project->id;
         $this->name = $project->name;
         $this->description = $project->description;
         $this->target_wcag_level = $project->target_wcag_level;
@@ -40,7 +42,10 @@ class EditAccessibilityProject extends Component
     {
         $this->validate();
 
-        $this->project->update([
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $this->authorize('update', $project);
+
+        $project->update([
             'name' => $this->name,
             'description' => $this->description,
             'target_wcag_level' => $this->target_wcag_level,
@@ -50,22 +55,25 @@ class EditAccessibilityProject extends Component
         // Handle logo if provided
         if (request()->hasFile('client_logo')) {
             $path = request()->file('client_logo')->store('project-logos', 'public');
-            $this->project->update(['client_logo' => $path]);
+            $project->update(['client_logo' => $path]);
         }
 
         session()->flash('success', __('Project updated successfully.'));
-        $this->redirect(route('accessibility-projects.show', $this->project), navigate: true);
+        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
 
     public function cancel(): void
     {
-        $this->redirect(route('accessibility-projects.show', $this->project), navigate: true);
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
 
     public function render()
     {
+        $project = AccessibilityProject::findOrFail($this->projectId);
+
         return view('livewire.edit-accessibility-project', [
-            'project' => $this->project,
+            'project' => $project,
         ]);
     }
 }

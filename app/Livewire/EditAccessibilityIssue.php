@@ -6,6 +6,7 @@ use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -13,8 +14,11 @@ class EditAccessibilityIssue extends Component
 {
     use AuthorizesRequests;
 
-    public AccessibilityProject $project;
-    public AccessibilityIssue $issue;
+    #[Locked]
+    public string $projectId;
+
+    #[Locked]
+    public string $issueId;
 
     #[Validate('required|string|max:255')]
     public string $title = '';
@@ -43,8 +47,8 @@ class EditAccessibilityIssue extends Component
     {
         $this->authorize('update', $project);
 
-        $this->project = $project;
-        $this->issue = $issue;
+        $this->projectId = $project->id;
+        $this->issueId = $issue->id;
 
         $this->title = $issue->title;
         $this->description = $issue->description;
@@ -70,7 +74,12 @@ class EditAccessibilityIssue extends Component
     {
         $this->validate();
 
-        $this->issue->update([
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $issue = AccessibilityIssue::findOrFail($this->issueId);
+
+        $this->authorize('update', $project);
+
+        $issue->update([
             'title' => $this->title,
             'description' => $this->description,
             'page_id' => $this->page_id,
@@ -90,27 +99,29 @@ class EditAccessibilityIssue extends Component
                     'code_snippet' => $criterion['code_snippet'] ?? null,
                 ];
             }
-            $this->issue->wcagCriteria()->sync($syncData);
+            $issue->wcagCriteria()->sync($syncData);
         } else {
-            $this->issue->wcagCriteria()->detach();
+            $issue->wcagCriteria()->detach();
         }
 
         session()->flash('success', __('Issue updated successfully.'));
-        $this->redirect(route('accessibility-projects.show', $this->project), navigate: true);
+        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
 
     public function cancel(): void
     {
-        $this->redirect(route('accessibility-projects.show', $this->project), navigate: true);
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
 
     public function render()
     {
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $issue = AccessibilityIssue::findOrFail($this->issueId);
+
         return view('livewire.edit-accessibility-issue', [
-            'project' => $this->project,
-            'issue' => $this->issue,
-            'wcagCriteria' => WcagSuccessCriterion::all(),
+            'project' => $project,
+            'issue' => $issue,
         ]);
     }
 }
-
