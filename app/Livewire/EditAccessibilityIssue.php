@@ -134,6 +134,11 @@ class EditAccessibilityIssue extends Component
             ->attachments()
             ->select('id', 'filename', 'original_filename')
             ->get()
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'filename' => $a->filename,
+                'original_filename' => $a->original_filename,
+            ])
             ->toArray();
 
         $availableCriteria = WcagSuccessCriterion::all()
