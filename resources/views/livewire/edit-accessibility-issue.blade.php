@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
                 <flux:heading level="1">{{ __('Edit Issue') }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">
@@ -8,7 +8,7 @@
                 </flux:text>
             </div>
 
-            <form wire:submit="update" enctype="multipart/form-data" class="space-y-8">
+            <form wire:submit="update" enctype="multipart/form-data" class="space-y-8" wire:key="issue-edit-{{ $this->issueId }}">
                 <!-- Title Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('Issue Details') }}</flux:heading>
@@ -17,7 +17,7 @@
                             <flux:label>{{ __('Issue Title') }}</flux:label>
                             <flux:input
                                 type="text"
-                                wire:model="title"
+                                wire:model.defer="title"
                                 placeholder="{{ __('e.g., Missing alt text on product images') }}"
                                 required
                             />
@@ -27,7 +27,7 @@
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
                             <flux:editor
-                                wire:model="description"
+                                wire:model.defer="description"
                                 placeholder="{{ __('Describe the issue in detail...') }}"
                             />
                             <flux:error name="description" />
@@ -40,28 +40,28 @@
                 <!-- Images Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
-                    
+
                     <flux:field class="mb-4">
                         <flux:label>{{ __('Upload new images') }}</flux:label>
                         <flux:input type="file" name="attachments[]" multiple accept="image/*" />
                     </flux:field>
 
-                    @if ($issue->attachments->count() > 0)
+                    @if (count($attachments) > 0)
                         <div>
                             <flux:heading level="3" class="text-sm mb-3">{{ __('Current Images') }}</flux:heading>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                @foreach ($issue->attachments as $attachment)
+                                @foreach ($attachments as $attachment)
                                     <div class="relative group">
-                                        <img 
-                                            src="{{ asset('storage/' . $attachment->path) }}" 
-                                            alt="{{ $attachment->original_filename }}"
+                                        <img
+                                            src="{{ asset('storage/' . $attachment['path']) }}"
+                                            alt="{{ $attachment['original_filename'] }}"
                                             class="w-full h-32 object-cover rounded border border-zinc-200 dark:border-zinc-700"
                                         />
-                                        <form 
-                                            action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}" 
-                                            method="POST" 
+                                        <form
+                                            action="{{ route('accessibility-issue-attachments.destroy', [$this->projectId, $this->issueId, $attachment['id']]) }}"
+                                            method="POST"
                                             class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition rounded"
-                                            onsubmit="return confirm('{{ __('Delete this image?') }}')"
+                                            onsubmit="return confirm(@js(__('Delete this image?')))"
                                         >
                                             @csrf
                                             @method('DELETE')
@@ -82,10 +82,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Page/Service') }}</flux:label>
-                            <flux:select wire:model="page_id">
+                            <flux:select wire:model.defer="page_id">
                                 <option value="">{{ __('Not specific to a page') }}</option>
-                                @foreach ($project->pages as $page)
-                                    <option value="{{ $page->id }}">{{ $page->name }}</option>
+                                @foreach ($pages as $page)
+                                    <option value="{{ $page['id'] }}">{{ $page['name'] }}</option>
                                 @endforeach
                             </flux:select>
                             <flux:error name="page_id" />
@@ -95,7 +95,7 @@
                             <flux:label>{{ __('Component Area') }}</flux:label>
                             <flux:input
                                 type="text"
-                                wire:model="component_area"
+                                wire:model.defer="component_area"
                                 placeholder="{{ __('e.g., header, footer, main-nav') }}"
                             />
                             <flux:error name="component_area" />
@@ -111,7 +111,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Severity') }}</flux:label>
-                            <flux:select wire:model="severity" required>
+                            <flux:select wire:model.defer="severity" required>
                                 <option value="critical">{{ __('Critical') }}</option>
                                 <option value="major">{{ __('Major') }}</option>
                                 <option value="moderate">{{ __('Moderate') }}</option>
@@ -122,7 +122,7 @@
 
                         <flux:field>
                             <flux:label>{{ __('Difficulty to Fix') }}</flux:label>
-                            <flux:select wire:model="difficulty" required>
+                            <flux:select wire:model.defer="difficulty" required>
                                 <option value="easy">{{ __('Easy') }}</option>
                                 <option value="medium">{{ __('Medium') }}</option>
                                 <option value="hard">{{ __('Hard') }}</option>
@@ -132,7 +132,7 @@
 
                         <flux:field>
                             <flux:label>{{ __('Status') }}</flux:label>
-                            <flux:select wire:model="status" required>
+                            <flux:select wire:model.defer="status" required>
                                 <option value="open">{{ __('Open') }}</option>
                                 <option value="resolved">{{ __('Resolved') }}</option>
                                 <option value="wont_fix">{{ __("Won't Fix") }}</option>
@@ -143,15 +143,6 @@
                 </div>
 
                 <flux:separator />
-
-                <!-- WCAG Section -->
-                <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
-                    <flux:card class="p-6">
-                        @livewire('wcag-criteria-selector', ['initialSelectedCriteria' => $selectedCriteria])
-                        <flux:error name="wcag_criteria" />
-                    </flux:card>
-                </div>
 
                 <!-- Actions -->
                 <div class="flex gap-3 pt-6">

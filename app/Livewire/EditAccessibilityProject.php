@@ -43,6 +43,7 @@ class EditAccessibilityProject extends Component
         $this->validate();
 
         $project = AccessibilityProject::findOrFail($this->projectId);
+
         $this->authorize('update', $project);
 
         $project->update([
@@ -73,7 +74,7 @@ class EditAccessibilityProject extends Component
         $project = AccessibilityProject::findOrFail($this->projectId);
 
         return view('livewire.edit-accessibility-project', [
-            'project' => $project,
+            'clientLogo' => $project->client_logo,
         ]);
     }
 }

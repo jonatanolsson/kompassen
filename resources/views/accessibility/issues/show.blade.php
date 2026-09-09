@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-    <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto px-4 py-8">
         <div class="flex items-start justify-between mb-8">
             <div>
                 <flux:heading level="1" class="mb-2">{{ $issue->title }}</flux:heading>

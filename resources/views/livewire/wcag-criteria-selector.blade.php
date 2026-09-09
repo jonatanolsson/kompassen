@@ -403,7 +403,7 @@ new class extends Component
             <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
 
             <!-- Modal Content -->
-            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
                 <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
                     <div class="flex items-center justify-between">

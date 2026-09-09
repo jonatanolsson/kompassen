@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
                 <flux:heading level="1">{{ __('Edit Issue') }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">

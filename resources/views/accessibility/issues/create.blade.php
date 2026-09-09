@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto px-4 py-8">
             <flux:heading level="1" class="mb-2">{{ __('Report Issue') }}</flux:heading>
             <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">
                 {{ __('Document an accessibility issue found during the audit.') }}

@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
                 <flux:heading level="1">{{ __('Edit Project') }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">
@@ -71,11 +71,11 @@
                 <!-- Logo Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('Client Logo') }}</flux:heading>
-                    @if ($project->client_logo)
+                    @if ($clientLogo)
                         <div class="flex items-center gap-4 mb-4">
-                            <img 
-                                src="{{ Storage::url($project->client_logo) }}" 
-                                alt="{{ $project->name }}"
+                            <img
+                                src="{{ Storage::url($clientLogo) }}"
+                                alt="{{ $this->name }}"
                                 class="h-16 max-w-xs object-contain"
                             />
                             <flux:text size="sm" class="text-zinc-500">

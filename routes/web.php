@@ -42,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
     // Projects
     Route::get('accessibility-projects', [AccessibilityProjectController::class, 'index'])
         ->name('accessibility-projects.index');
-    Route::get('accessibility-projects/create', [AccessibilityProjectController::class, 'create'])
+    Route::get('accessibility-projects/create', \App\Livewire\CreateAccessibilityProject::class)
         ->name('accessibility-projects.create');
     Route::post('accessibility-projects', [AccessibilityProjectController::class, 'store'])
         ->name('accessibility-projects.store');
@@ -88,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-reports.destroy');
 
     // Pages within projects
-    Route::get('accessibility-projects/{project}/pages/create', [AccessibilityPageController::class, 'create'])
+    Route::get('accessibility-projects/{project}/pages/create', \App\Livewire\CreateAccessibilityPage::class)
         ->name('accessibility-pages.create');
     Route::post('accessibility-projects/{project}/pages', [AccessibilityPageController::class, 'store'])
         ->name('accessibility-pages.store');
@@ -100,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-pages.destroy');
 
     // Issues within projects
-    Route::get('accessibility-projects/{project}/issues/create', [AccessibilityIssueController::class, 'create'])
+    Route::get('accessibility-projects/{project}/issues/create', \App\Livewire\CreateAccessibilityIssue::class)
         ->name('accessibility-issues.create');
     Route::post('accessibility-projects/{project}/issues', [AccessibilityIssueController::class, 'store'])
         ->name('accessibility-issues.store');

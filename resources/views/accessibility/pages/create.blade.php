@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
-    <div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto px-4 py-8">
         <flux:heading level="1" class="mb-2">{{ __('Add Page') }}</flux:heading>
         <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">{{ __('Add a page or service to audit in this project.') }}</flux:text>
 

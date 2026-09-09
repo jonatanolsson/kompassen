@@ -41,7 +41,9 @@ class EditAccessibilityIssue extends Component
     #[Validate('required|in:open,resolved,wont_fix')]
     public string $status = 'open';
 
-    public array $selectedCriteria = [];
+    public bool $wcagModalOpen = false;
+
+    public string $wcagSearch = '';
 
     public function mount(AccessibilityProject $project, AccessibilityIssue $issue): void
     {
@@ -49,7 +51,6 @@ class EditAccessibilityIssue extends Component
 
         $this->projectId = $project->id;
         $this->issueId = $issue->id;
-
         $this->title = $issue->title;
         $this->description = $issue->description;
         $this->page_id = $issue->page_id;
@@ -57,17 +58,6 @@ class EditAccessibilityIssue extends Component
         $this->severity = $issue->severity;
         $this->difficulty = $issue->difficulty;
         $this->status = $issue->status;
-
-        $this->selectedCriteria = $issue->wcagCriteria()
-            ->get()
-            ->map(fn ($criterion) => [
-                'id' => $criterion->id,
-                'failure_type' => $criterion->pivot->failure_type ?? '',
-                'comment' => $criterion->pivot->comment ?? '',
-                'code_snippet' => $criterion->pivot->code_snippet ?? '',
-            ])
-            ->values()
-            ->toArray();
     }
 
     public function update(): void
@@ -89,21 +79,6 @@ class EditAccessibilityIssue extends Component
             'status' => $this->status,
         ]);
 
-        // Update WCAG criteria
-        if (! empty($this->selectedCriteria)) {
-            $syncData = [];
-            foreach ($this->selectedCriteria as $criterion) {
-                $syncData[$criterion['id']] = [
-                    'failure_type' => $criterion['failure_type'] ?? null,
-                    'comment' => $criterion['comment'] ?? null,
-                    'code_snippet' => $criterion['code_snippet'] ?? null,
-                ];
-            }
-            $issue->wcagCriteria()->sync($syncData);
-        } else {
-            $issue->wcagCriteria()->detach();
-        }
-
         session()->flash('success', __('Issue updated successfully.'));
         $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
@@ -114,14 +89,55 @@ class EditAccessibilityIssue extends Component
         $this->redirect(route('accessibility-projects.show', $project), navigate: true);
     }
 
+    public function openWcagModal(): void
+    {
+        $this->wcagModalOpen = true;
+    }
+
+    public function closeWcagModal(): void
+    {
+        $this->wcagModalOpen = false;
+        $this->wcagSearch = '';
+    }
+
     public function render()
     {
-        $project = AccessibilityProject::findOrFail($this->projectId);
-        $issue = AccessibilityIssue::findOrFail($this->issueId);
+        $pages = AccessibilityProject::findOrFail($this->projectId)
+            ->pages()
+            ->select('id', 'name')
+            ->get()
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
+            ->toArray();
+
+        $attachments = AccessibilityIssue::findOrFail($this->issueId)
+            ->attachments()
+            ->select('id', 'path', 'original_filename')
+            ->get()
+            ->toArray();
+
+        $availableCriteria = WcagSuccessCriterion::all()
+            ->when($this->wcagSearch, function ($criteria) {
+                return $criteria->filter(function ($c) {
+                    return str_contains(
+                        strtolower($c->number . ' ' . ($c->name_sv ?? '') . ' ' . ($c->name_en ?? '')),
+                        strtolower($this->wcagSearch)
+                    );
+                });
+            })
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'number' => $c->number,
+                'name_sv' => $c->name_sv,
+                'name_en' => $c->name_en,
+                'level' => $c->level,
+            ])
+            ->values()
+            ->toArray();
 
         return view('livewire.edit-accessibility-issue', [
-            'project' => $project,
-            'issue' => $issue,
+            'pages' => $pages,
+            'attachments' => $attachments,
+            'availableCriteria' => $availableCriteria,
         ]);
     }
 }
