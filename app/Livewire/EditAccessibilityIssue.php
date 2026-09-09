@@ -89,9 +89,9 @@ class EditAccessibilityIssue extends Component
         // Handle file uploads
         if (! empty($this->attachments)) {
             foreach ($this->attachments as $file) {
-                $path = $file->store('issues', 'public');
+                $filename = $file->store('issue-attachments', 'public');
                 $issue->attachments()->create([
-                    'path' => $path,
+                    'filename' => $filename,
                     'original_filename' => $file->getClientOriginalName(),
                     'mime_type' => $file->getMimeType(),
                     'size' => $file->getSize(),
