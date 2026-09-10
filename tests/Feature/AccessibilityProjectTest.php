@@ -1,9 +1,11 @@
 <?php
 
+use App\Livewire\EditAccessibilityProject;
 use App\Models\AccessibilityProject;
-use App\Models\Team;
 use App\Models\ProjectMember;
+use App\Models\Team;
 use App\Models\User;
+use Livewire\Livewire;
 
 test('can view accessibility projects index', function () {
     $team = Team::factory()->create();
@@ -31,13 +33,36 @@ test('can create accessibility project', function () {
     ]);
 });
 
+test('can update project wcag level from edit form', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'target_wcag_level' => 'AA',
+    ]);
+
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityProject::class, ['project' => $project])
+        ->set('target_wcag_level', 'AAA')
+        ->call('update')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($project->refresh()->target_wcag_level)->toBe('AAA');
+});
+
 test('can view project details', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
     $project = AccessibilityProject::factory()->create([
         'team_id' => $team->id,
     ]);
-    
+
     ProjectMember::create([
         'project_id' => $project->id,
         'user_id' => $user->id,
@@ -56,7 +81,7 @@ test('can add page to project', function () {
     $project = AccessibilityProject::factory()->create([
         'team_id' => $team->id,
     ]);
-    
+
     ProjectMember::create([
         'project_id' => $project->id,
         'user_id' => $user->id,
@@ -81,7 +106,7 @@ test('can report issue', function () {
     $project = AccessibilityProject::factory()->create([
         'team_id' => $team->id,
     ]);
-    
+
     ProjectMember::create([
         'project_id' => $project->id,
         'user_id' => $user->id,

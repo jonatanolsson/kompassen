@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1">{{ __('Edit Issue') }}</flux:heading>
+                <flux:heading level="1" class="text-xl">{{ __('Edit Issue') }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">
                     {{ __('Update the issue details and metadata.') }}
                 </flux:text>
@@ -48,7 +48,7 @@
                 <!-- Images Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
-                    
+
                     <flux:field class="mb-4">
                         <flux:label>{{ __('Upload new images') }}</flux:label>
                         <flux:input type="file" name="attachments[]" multiple accept="image/*" />
@@ -66,16 +66,16 @@
                                                 type="button"
                                                 class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow duration-200 bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:opacity-75"
                                             >
-                                                <img 
-                                                    src="{{ asset('storage/' . $attachment->path) }}" 
+                                                <img
+                                                    src="{{ asset('storage/' . $attachment->path) }}"
                                                     alt="{{ $attachment->original_filename }}"
                                                     class="w-full h-28 object-cover"
                                                 />
                                             </button>
                                         </flux:modal.trigger>
-                                        <form 
-                                            action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}" 
-                                            method="POST" 
+                                        <form
+                                            action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}"
+                                            method="POST"
                                             onsubmit="return confirm('{{ __('Delete this image?') }}')"
                                             class="mt-3"
                                         >
@@ -96,8 +96,8 @@
                                             <flux:separator />
 
                                             <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
-                                                <img 
-                                                    src="{{ asset('storage/' . $attachment->path) }}" 
+                                                <img
+                                                    src="{{ asset('storage/' . $attachment->path) }}"
                                                     alt="{{ $attachment->original_filename }}"
                                                     class="max-h-[70vh] object-contain"
                                                 />

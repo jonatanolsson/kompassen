@@ -23,8 +23,8 @@ class EditAccessibilityProject extends Component
     #[Validate('nullable|string')]
     public string $description = '';
 
-    #[Validate('required|in:wcag2.0-a,wcag2.0-aa,wcag2.0-aaa,wcag2.1-a,wcag2.1-aa,wcag2.1-aaa')]
-    public string $target_wcag_level = 'wcag2.1-aa';
+    #[Validate('required|in:A,AA,AAA')]
+    public string $target_wcag_level = 'AA';
 
     #[Validate('required|in:planning,in-progress,completed')]
     public string $status = 'planning';

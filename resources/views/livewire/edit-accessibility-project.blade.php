@@ -25,10 +25,9 @@
 
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
-                            <flux:textarea
+                            <flux:editor
                                 wire:model="description"
                                 placeholder="{{ __('Add details about the audit scope...') }}"
-                                rows="6"
                             />
                             <flux:text size="sm" class="text-zinc-500 mt-2">{{ __('Supports Markdown formatting') }}</flux:text>
                             <flux:error name="description" />
@@ -45,12 +44,9 @@
                         <flux:field>
                             <flux:label>{{ __('Target WCAG Level') }}</flux:label>
                             <flux:select wire:model="target_wcag_level" required>
-                                <option value="wcag2.0-a">WCAG 2.0 Level A</option>
-                                <option value="wcag2.0-aa">WCAG 2.0 Level AA</option>
-                                <option value="wcag2.0-aaa">WCAG 2.0 Level AAA</option>
-                                <option value="wcag2.1-a">WCAG 2.1 Level A</option>
-                                <option value="wcag2.1-aa">WCAG 2.1 Level AA</option>
-                                <option value="wcag2.1-aaa">WCAG 2.1 Level AAA</option>
+                                <option value="A">WCAG 2.1 Level A</option>
+                                <option value="AA">WCAG 2.1 Level AA</option>
+                                <option value="AAA">WCAG 2.1 Level AAA</option>
                             </flux:select>
                             <flux:error name="target_wcag_level" />
                         </flux:field>

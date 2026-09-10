@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1">{{ __('Edit Issue') }}</flux:heading>
+                <flux:heading level="1" class="text-xl">{{ __('Edit Issue') }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">
                     {{ __('Update the issue details and metadata.') }}
                 </flux:text>
@@ -26,10 +26,9 @@
 
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
-                            <flux:textarea
-                                wire:model.defer="description"
+                            <flux:editor
+                                wire:model="description"
                                 placeholder="{{ __('Describe the issue in detail...') }}"
-                                rows="6"
                             />
                             <flux:text size="sm" class="text-zinc-500 mt-2">{{ __('Supports Markdown formatting') }}</flux:text>
                             <flux:error name="description" />
@@ -68,11 +67,11 @@
                                                 />
                                             </button>
                                         </flux:modal.trigger>
-                                        <flux:button 
+                                        <flux:button
                                             type="button"
-                                            variant="danger" 
-                                            size="xs" 
-                                            icon="trash" 
+                                            variant="danger"
+                                            size="xs"
+                                            icon="trash"
                                             class="w-full"
                                             wire:click="deleteAttachment('{{ $attachment['id'] }}')"
                                             wire:confirm="{{ __('Delete this image?') }}"

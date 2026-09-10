@@ -64,7 +64,7 @@ Use existing Artisan commands with `--no-interaction`. Run the focused test, Pin
 - Use Flux components before raw HTML controls. Use Tailwind mainly for layout and responsive composition.
 - Keep Flux styling aligned with existing `zinc` surfaces and dark-mode variants; follow patterns in `.examples/`.
 - Authenticated layouts must include `@fluxAppearance`, `@livewireScripts`, and `@fluxScripts`; without them dark mode, dropdowns, and modals fail.
-- Use `flux:textarea` for editable descriptions. Do not bind `flux:editor` to Livewire state; its client-side serialization conflicts with Livewire.
+- Use `flux:editor wire:model="description"` for rich-text issue descriptions. Keep editor state as a string and validate it in the Livewire action.
 
 ### Localization
 
