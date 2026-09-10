@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between mb-8">
             <div>
                 <flux:heading level="1">{{ $project->name }}</flux:heading>
-                <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ Str::title($project->status) }}</flux:text>
+                <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:text>
             </div>
             <div class="flex gap-2">
                 <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="ghost">{{ __('Preview') }}</flux:button>
@@ -23,10 +23,10 @@
         </div>
 
         @if ($project->description)
-            <flux:card class="mb-8 p-6">
-                <flux:heading level="3" class="mb-4">{{ __('Description') }}</flux:heading>
+            <section class="mb-8">
+                <flux:heading level="2" class="mb-3">{{ __('Description') }}</flux:heading>
                 <x-markdown :markdown="$project->description" />
-            </flux:card>
+            </section>
         @endif
 
         <flux:separator class="my-8" />
@@ -35,19 +35,17 @@
         <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
                 <flux:heading level="2">{{ __('Pages') }}</flux:heading>
-                <a href="{{ route('accessibility-pages.create', $project) }}">
-                    <flux:button variant="primary" icon="plus" size="sm">{{ __('Add Page') }}</flux:button>
-                </a>
+                <flux:button href="{{ route('accessibility-pages.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Add Page') }}</flux:button>
             </div>
 
             @if ($project->pages->isEmpty())
-                <flux:card class="p-8 text-center">
-                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No pages added yet.') }}</flux:text>
-                </flux:card>
+                <div class="py-4">
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No pages added yet.') }}</flux:text>
+                </div>
             @else
-                <div class="space-y-3">
+                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($project->pages as $page)
-                        <flux:card class="p-4 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                        <div class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
                             <div>
                                 <flux:heading level="4">{{ $page->name }}</flux:heading>
                                 @if ($page->url)
@@ -64,7 +62,7 @@
                                 <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
                                 </form>
                             </div>
-                        </flux:card>
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -76,27 +74,25 @@
         <div>
             <div class="flex items-center justify-between mb-4">
             <flux:heading level="2">{{ __('Issues') }}</flux:heading>
-                <a href="{{ route('accessibility-issues.create', $project) }}">
-                <flux:button variant="primary" icon="plus" size="sm">{{ __('Report Issue') }}</flux:button>
-                </a>
+                <flux:button href="{{ route('accessibility-issues.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Report Issue') }}</flux:button>
             </div>
 
             @if ($project->issues->isEmpty())
-                <flux:card class="p-8 text-center">
+                <div class="py-4">
                     <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No issues reported yet.') }}</flux:text>
-                </flux:card>
+                </div>
             @else
                 <div class="mb-4 flex items-center justify-between">
                     <div class="flex gap-2 items-center">
                         <flux:input id="issue-search" placeholder="{{ __('Search issues...') }}" class="max-w-sm" />
-                        <flux:select wire:model="filterSeverity" class="w-40">
+                        <flux:select id="issue-severity-filter" class="w-40">
                             <option value="">{{ __('All severities') }}</option>
                             <option value="critical">{{ __('Critical') }}</option>
                             <option value="major">{{ __('Major') }}</option>
                             <option value="moderate">{{ __('Moderate') }}</option>
                             <option value="minor">{{ __('Minor') }}</option>
                         </flux:select>
-                        <flux:select wire:model="filterStatus" class="w-40">
+                        <flux:select id="issue-status-filter" class="w-40">
                             <option value="">{{ __('All statuses') }}</option>
                             <option value="open">{{ __('Open') }}</option>
                             <option value="resolved">{{ __('Resolved') }}</option>
@@ -120,7 +116,7 @@
 
                     <flux:table.rows>
                     @foreach ($project->issues as $issue)
-                        <flux:table.row data-issue-row data-issue-id="{{ $issue->id }}" data-title="{{ Str::lower(e($issue->title)) }}" data-desc="{{ Str::lower(e(strip_tags($issue->description))) }}" data-page="{{ $issue->page ? Str::lower(e($issue->page->name)) : '' }}" data-wcag="{{ $issue->wcagCriteria->pluck('number')->join(' ') }}">
+                        <flux:table.row data-issue-row data-issue-id="{{ $issue->id }}" data-title="{{ Str::lower(e($issue->title)) }}" data-desc="{{ Str::lower(e(strip_tags($issue->description))) }}" data-page="{{ $issue->page ? Str::lower(e($issue->page->name)) : '' }}" data-wcag="{{ $issue->wcagCriteria->pluck('number')->join(' ') }}" data-severity="{{ $issue->severity }}" data-status="{{ $issue->status }}">
                             <flux:table.cell class="pr-2">
                                 <button type="button" onclick="toggleIssueDetails('{{ $issue->id }}', this)" aria-expanded="false" aria-controls="issue-details-{{ $issue->id }}" class="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500/30" aria-label="{{ __('Toggle details') }}">
                                     <flux:icon icon="chevron-down" class="w-4 h-4 transition-transform duration-150" />
@@ -187,7 +183,7 @@
                         <flux:table.row id="issue-details-{{ $issue->id }}" data-issue-details="{{ $issue->id }}" role="region" aria-label="{{ __('Issue details') }}" class="bg-zinc-50 dark:bg-zinc-800 hidden">
                             <flux:table.cell colspan="9">
                                 <div class="p-4">
-                                    <div class="mb-3 text-sm text-zinc-700 dark:text-zinc-300">{!! nl2br(e($issue->description)) !!}</div>
+                                    <x-markdown :markdown="$issue->description" class="mb-3 text-sm" />
 
                                     @if ($issue->wcagCriteria->isNotEmpty())
                                         <div class="mb-3">
@@ -326,42 +322,39 @@ document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('issue-search');
     if (!input) return;
 
+    const severity = document.getElementById('issue-severity-filter');
+    const status = document.getElementById('issue-status-filter');
     const rows = Array.from(document.querySelectorAll('[data-issue-row]'));
-    let timer;
 
-    // Ensure rows visible on load (handle accidental hidden state)
-    rows.forEach((r) => r.classList.remove('hidden'));
-
-
-    input.addEventListener('input', function () {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            const q = input.value.trim().toLowerCase();
+    const filterRows = () => {
+        const q = input.value.trim().toLowerCase();
+        const selectedSeverity = severity?.value ?? '';
+        const selectedStatus = status?.value ?? '';
 
         rows.forEach((row) => {
-                const title = row.getAttribute('data-title') || '';
-                const desc = row.getAttribute('data-desc') || '';
-                const page = row.getAttribute('data-page') || '';
-                const wcag = row.getAttribute('data-wcag') || '';
-                const id = row.getAttribute('data-issue-id');
+            const title = row.getAttribute('data-title') || '';
+            const desc = row.getAttribute('data-desc') || '';
+            const page = row.getAttribute('data-page') || '';
+            const wcag = row.getAttribute('data-wcag') || '';
+            const rowSeverity = row.getAttribute('data-severity') || '';
+            const rowStatus = row.getAttribute('data-status') || '';
+            const id = row.getAttribute('data-issue-id');
 
-                const match = q === '' || title.includes(q) || desc.includes(q) || page.includes(q) || wcag.includes(q);
+            const matchesQuery = q === '' || title.includes(q) || desc.includes(q) || page.includes(q) || wcag.includes(q);
+            const matchesSeverity = selectedSeverity === '' || rowSeverity === selectedSeverity;
+            const matchesStatus = selectedStatus === '' || rowStatus === selectedStatus;
+            const match = matchesQuery && matchesSeverity && matchesStatus;
 
-            // Use tailwind hidden class to avoid interfering with Alpine inline styles
-            if (!match) {
-                row.classList.add('hidden');
-            } else {
-                row.classList.remove('hidden');
-            }
+            row.classList.toggle('hidden', !match);
 
             const details = document.getElementById('issue-details-' + id);
-            if (details) {
-                if (!match) details.classList.add('hidden');
-                else details.classList.remove('hidden');
-            }
-            });
-        }, 150);
-    });
+            details?.classList.toggle('hidden', !match);
+        });
+    };
+
+    input.addEventListener('input', filterRows);
+    severity?.addEventListener('change', filterRows);
+    status?.addEventListener('change', filterRows);
 
     // Toggle function for expand/collapse
     window.toggleIssueDetails = function(id, btn) {

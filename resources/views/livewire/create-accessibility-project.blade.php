@@ -2,14 +2,14 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1">{{ __('Create Project') }}</flux:heading>
-                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Start a new accessibility audit by creating a project.') }}</flux:text>
+                <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Create Project') }}</flux:heading>
+                <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Start a new accessibility audit by creating a project.') }}</flux:text>
             </div>
 
             <form wire:submit="submit" enctype="multipart/form-data" class="space-y-8">
                 <!-- Project Details -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Project Details') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Project Details') }}</flux:heading>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
@@ -47,10 +47,9 @@
                         <div class="md:col-span-2">
                             <flux:field>
                                 <flux:label>{{ __('Description') }}</flux:label>
-                                <flux:textarea 
+                                <flux:editor
                                     wire:model="description"
                                     placeholder="{{ __('Add details about the audit scope...') }}"
-                                    rows="6"
                                 />
                                 <flux:text size="sm" class="text-zinc-500 mt-2">
                                     {{ __('Supports Markdown formatting') }}
@@ -65,7 +64,7 @@
 
                 <!-- Client Logo -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Branding') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Branding') }}</flux:heading>
                     
                     <flux:field>
                         <flux:label>{{ __('Client Logo') }}</flux:label>
@@ -73,6 +72,18 @@
                             wire:model="client_logo"
                             accept="image/*"
                         />
+                        @if ($client_logo)
+                            <div class="mt-3 flex items-center gap-3">
+                                <div class="h-16 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
+                                    <img
+                                        src="{{ $client_logo->temporaryUrl() }}"
+                                        alt="{{ __('New client logo preview') }}"
+                                        class="h-full w-full object-contain"
+                                    />
+                                </div>
+                                <flux:text size="sm" class="text-zinc-500">{{ __('Preview') }}</flux:text>
+                            </div>
+                        @endif
                         <flux:description>{{ __('Optional. Shown on reports for this project. PNG, SVG or JPG, max 2 MB.') }}</flux:description>
                         <flux:error name="client_logo" />
                     </flux:field>
@@ -90,4 +101,3 @@
             </form>
         </div>
     </div>
-

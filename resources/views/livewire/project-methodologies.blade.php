@@ -12,10 +12,9 @@
     </div>
 
     @if ($projectMethodologies->isEmpty())
-        <flux:card class="p-6 text-center">
-            <flux:icon name="beaker" class="mx-auto h-8 w-8 text-zinc-400 mb-2" />
+        <div class="py-4">
             <flux:text class="text-zinc-500 dark:text-zinc-400">{{ __('No testing methods added yet.') }}</flux:text>
-        </flux:card>
+        </div>
     @else
         @php
             $grouped = $projectMethodologies->groupBy(fn($m) => $m->category);
@@ -34,9 +33,9 @@
                             default => __(ucfirst(str_replace('_', ' ', $category))),
                         } }}
                     </flux:text>
-                    <div class="space-y-2">
+                    <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                         @foreach ($methods as $method)
-                            <div class="flex items-start gap-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-4 py-3 group"
+                            <div class="flex items-start gap-3 py-3 first:pt-0 last:pb-0 group"
                                  x-data="{ editing: false, notes: @js($method->pivot->notes ?? '') }">
                                 <div class="flex-1 min-w-0">
                                     <div class="font-medium text-sm text-zinc-900 dark:text-white">{{ $method->name }}</div>

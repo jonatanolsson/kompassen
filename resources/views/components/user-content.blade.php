@@ -2,6 +2,6 @@
 
 @if ($content)
     <div {{ $attributes->merge(['class' => 'user-content']) }}>
-        {!! $content !!}
+        {!! \App\Helpers\MarkdownHelper::toHtml($content) !!}
     </div>
 @endif

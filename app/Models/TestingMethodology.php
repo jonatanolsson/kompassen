@@ -44,12 +44,12 @@ class TestingMethodology extends Model
     public function getCategoryLabelAttribute(): string
     {
         return match ($this->category) {
-            'screen_reader' => 'Screen Reader',
-            'browser' => 'Browser',
-            'browser_extension' => 'Browser Extension',
-            'device' => 'Device',
-            'testing_tool' => 'Testing Tool',
-            default => ucfirst(str_replace('_', ' ', $this->category)),
+            'screen_reader' => __('Screen Reader'),
+            'browser' => __('Browser'),
+            'browser_extension' => __('Browser Extension'),
+            'device' => __('Device'),
+            'testing_tool' => __('Testing Tool'),
+            default => __(ucfirst(str_replace('_', ' ', $this->category))),
         };
     }
 }

@@ -23,7 +23,7 @@
                     <div class="flex-1 min-w-0">
                         <flux:heading level="1" class="print:mb-2">{{ $project->name }}</flux:heading>
                         <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 print:mt-1">
-                            WCAG {{ $project->target_wcag_level }} • {{ Str::title($project->status) }}
+                            WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}
                         </flux:text>
                         @if ($project->description)
                             <div class="text-base mt-3 print:mt-2 print:text-sm prose prose-sm dark:prose-invert max-w-none">
@@ -84,11 +84,13 @@
                                             @endif
                                         </div>
                                         <span class="inline-block px-2 py-1 text-xs font-medium rounded print:text-xs print:px-2 print:py-1 {{ $page->scope === 'in_scope' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 print:bg-green-50 print:border print:border-green-300 print:text-green-800' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 print:bg-amber-50 print:border print:border-amber-300 print:text-amber-800' }}">
-                                            {{ Str::title(str_replace('_', ' ', $page->scope)) }}
+                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $page->scope))) }}
                                         </span>
                                     </div>
                                     @if ($page->description)
-                                        <p class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-2 print:mt-1">{{ $page->description }}</p>
+                                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-2 print:mt-1 prose prose-sm dark:prose-invert max-w-none">
+                                            {!! \App\Helpers\MarkdownHelper::toHtml($page->description) !!}
+                                        </div>
                                     @endif
                                 </div>
 
@@ -101,6 +103,7 @@
                                             @foreach ($page->issues as $issue)
                                                 @php
                                                     $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
+                                                    $issueData['description'] = \App\Helpers\MarkdownHelper::toHtml($issue->description);
                                                     $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
                                                     $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                                                 @endphp
@@ -115,7 +118,7 @@
                                                             <flux:heading level="5" class="text-sm font-semibold mb-1">{{ $issue->title }}</flux:heading>
                                                         </div>
                                                         <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))" class="text-xs whitespace-nowrap print:text-xs">
-                                                            {{ Str::title($issue->severity) }}
+                                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
                                                         </flux:badge>
                                                     </div>
 
@@ -128,12 +131,12 @@
                                                         @endif
                                                         @if ($issue->difficulty)
                                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                                                {{ Str::title($issue->difficulty) }}
+                                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}
                                                             </flux:badge>
                                                         @endif
                                                         @if ($issue->status)
                                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                                                {{ Str::title($issue->status) }}
+                                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}
                                                             </flux:badge>
                                                         @endif
                                                     </div>
@@ -208,6 +211,7 @@
                         @foreach ($projectWideIssues as $issue)
                             @php
                                 $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
+                                $issueData['description'] = \App\Helpers\MarkdownHelper::toHtml($issue->description);
                                 $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
                                 $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                             @endphp
@@ -221,17 +225,17 @@
                                     <div class="flex items-start justify-between gap-4 print:gap-2 mb-3 print:mb-2">
                                         <flux:heading level="3" class="flex-1 min-w-0 print:text-base">{{ $issue->title }}</flux:heading>
                                         <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))" class="whitespace-nowrap print:text-xs">
-                                            {{ Str::title($issue->severity) }}
+                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
                                         </flux:badge>
                                     </div>
 
                                     <!-- Meta Badges -->
                                     <div class="flex flex-wrap gap-2 mb-3 print:mb-2 print:gap-1.5 print:text-xs">
                                         <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                            {{ __('Difficulty') }}: {{ Str::title($issue->difficulty) }}
+                                            {{ __('Difficulty') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}
                                         </flux:badge>
                                         <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                            {{ __('Status') }}: {{ Str::title($issue->status) }}
+                                            {{ __('Status') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}
                                         </flux:badge>
                                         @if ($issue->component_area)
                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
@@ -547,7 +551,7 @@
                 <div class="flex-1 overflow-auto p-4 flex items-center justify-center max-h-[70vh]">
                     <img
                         :src="selectedImage"
-                        alt="Full size preview"
+                        alt="{{ __('Full size preview') }}"
                         class="max-w-full max-h-full"
                     />
                 </div>

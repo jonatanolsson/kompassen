@@ -2,14 +2,14 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1">{{ __('Add Page') }}</flux:heading>
-                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Add a page or service to audit in this project.') }}</flux:text>
+                <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Add Page') }}</flux:heading>
+                <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Add a page or service to audit in this project.') }}</flux:text>
             </div>
 
             <form wire:submit="submit" class="space-y-8">
                 <!-- Page Details -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Page Information') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Page Information') }}</flux:heading>
                     
                     <div class="space-y-6">
                         <flux:field>
@@ -35,15 +35,16 @@
 
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
-                            <flux:textarea 
+                            <flux:editor
                                 wire:model="description"
                                 placeholder="{{ __('Add notes about this page...') }}"
-                                rows="4"
                             />
                             <flux:error name="description" />
                         </flux:field>
                     </div>
                 </div>
+
+                <flux:separator />
 
                 <!-- Actions -->
                 <div class="flex gap-4 pt-4">
@@ -55,4 +56,3 @@
             </form>
         </div>
     </div>
-

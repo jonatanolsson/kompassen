@@ -40,7 +40,7 @@
                     <div class="space-y-4">
                         <flux:field>
                             <flux:label for="email">{{ __('Email') }}</flux:label>
-                            <flux:input id="email" type="email" placeholder="you@example.com" />
+                            <flux:input id="email" type="email" placeholder="{{ __('you@example.com') }}" />
                         </flux:field>
 
                         <flux:field>

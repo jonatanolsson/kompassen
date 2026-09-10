@@ -40,6 +40,9 @@
                     <flux:sidebar.item href="{{ route('wcag.knowledge-base') }}" :active="request()->routeIs('wcag.knowledge-base')" icon="book-open" wire:navigate>
                         {{ __('Knowledge Base') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item href="{{ route('testing-methodologies') }}" :active="request()->routeIs('testing-methodologies')" icon="beaker" wire:navigate>
+                        {{ __('Testing Methodology') }}
+                    </flux:sidebar.item>
                     <flux:sidebar.item href="{{ route('accessibility-projects.index') }}" :active="request()->routeIs('accessibility-projects.*')" icon="document-text" wire:navigate>
                         {{ __('Accessibility') }}
                     </flux:sidebar.item>
@@ -69,7 +72,7 @@
                 <flux:header sticky container class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-600">
                     <flux:sidebar.toggle class="lg:hidden" icon="bars-2" />
 
-                    <flux:heading level="1" size="lg" class="flex-1 truncate">
+                    <flux:heading level="2" size="lg" class="flex-1 truncate">
                         {{ isset($title) ? $title : config('app.name') }}
                     </flux:heading>
 

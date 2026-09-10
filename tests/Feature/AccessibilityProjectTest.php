@@ -75,6 +75,26 @@ test('can view project details', function () {
     $response->assertSee($project->name);
 });
 
+test('page creation uses the application layout', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+    ]);
+
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('accessibility-pages.create', $project));
+
+    $response->assertSuccessful()
+        ->assertSee(__('Knowledge Base'))
+        ->assertSee(__('Page Information'));
+});
+
 test('can add page to project', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);

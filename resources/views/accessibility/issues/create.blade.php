@@ -54,7 +54,7 @@
                         <flux:input
                             type="text"
                             name="component_area"
-                            placeholder="e.g., header, footer, main-nav"
+                            placeholder="{{ __('e.g., header, footer, main-nav') }}"
                             value="{{ old('component_area') }}"
                         />
                         <flux:error name="component_area" />

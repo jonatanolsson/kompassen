@@ -2,8 +2,8 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1" class="text-xl">{{ __('Edit Issue') }}</flux:heading>
-                <flux:text class="text-zinc-600 dark:text-zinc-400">
+                <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Edit Issue') }}</flux:heading>
+                <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
                     {{ __('Update the issue details and metadata.') }}
                 </flux:text>
             </div>
@@ -11,7 +11,7 @@
             <form wire:submit="update" enctype="multipart/form-data" class="space-y-8" wire:key="issue-edit-{{ $this->issueId }}">
                 <!-- Title Section -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Issue Details') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Issue Details') }}</flux:heading>
                     <div class="space-y-4">
                         <flux:field>
                             <flux:label>{{ __('Issue Title') }}</flux:label>
@@ -40,30 +40,30 @@
 
                 <!-- Images Section -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Images') }}</flux:heading>
 
                     <flux:field class="mb-4">
                         <flux:label>{{ __('Upload new images') }}</flux:label>
-                        <flux:input type="file" wire:model="attachments" multiple accept="image/*" />
+                        <flux:file-upload wire:model="attachments" multiple accept="image/*" />
                         <flux:error name="attachments" />
                     </flux:field>
 
                     @if (count($databaseAttachments) > 0 || count($this->attachments) > 0)
                         <div class="space-y-3">
                             <flux:heading level="3" class="text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Current Images') }}</flux:heading>
-                            <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                                 <!-- Existing database attachments -->
                                 @foreach ($databaseAttachments as $attachment)
-                                    <div class="flex flex-col gap-1">
+                                    <div class="flex min-w-0 flex-col gap-2">
                                         <flux:modal.trigger name="issue-attachment-lightbox-{{ $loop->index }}">
                                             <button
                                                 type="button"
-                                                class="relative overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow duration-200 bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:opacity-75"
+                                                class="relative aspect-square w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm transition-shadow duration-200 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800"
                                             >
                                                 <img
                                                     src="{{ asset('storage/' . $attachment['path']) }}"
                                                     alt="{{ $attachment['original_filename'] }}"
-                                                    class="w-full h-28 object-cover"
+                                                    class="h-full w-full object-cover transition-transform duration-200 hover:scale-105"
                                                 />
                                             </button>
                                         </flux:modal.trigger>
@@ -103,8 +103,8 @@
 
                                 <!-- Newly uploaded temporary files (preview) -->
                                 @foreach ($this->attachments as $uploadedFile)
-                                    <div class="flex flex-col self-start">
-                                        <div class="relative h-28 overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
+                                    <div class="flex min-w-0 flex-col gap-2">
+                                        <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
                                             <img
                                                 src="{{ $uploadedFile->temporaryUrl() }}"
                                                 alt="{{ $uploadedFile->getClientOriginalName() }}"
@@ -125,7 +125,7 @@
 
                 <!-- Location Section -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Location') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Location') }}</flux:heading>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Page/Service') }}</flux:label>
@@ -154,7 +154,7 @@
 
                 <!-- Classification Section -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Classification') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Classification') }}</flux:heading>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Severity') }}</flux:label>

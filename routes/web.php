@@ -9,10 +9,14 @@ use App\Http\Controllers\GuestProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectShareLinkController;
 use App\Livewire\AppSettings;
+use App\Livewire\CreateAccessibilityIssue;
+use App\Livewire\CreateAccessibilityPage;
+use App\Livewire\CreateAccessibilityProject;
 use App\Livewire\Dashboard;
+use App\Livewire\EditAccessibilityIssue;
+use App\Livewire\EditAccessibilityProject;
+use App\Livewire\TestingMethodologies;
 use App\Livewire\WcagKnowledgeBase;
-use App\Models\AccessibilityIssue;
-use App\Models\AccessibilityProject;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -33,6 +37,10 @@ Route::get('wcag-knowledge-base', WcagKnowledgeBase::class)
     ->middleware(['auth'])
     ->name('wcag.knowledge-base');
 
+Route::get('testing-methodologies', TestingMethodologies::class)
+    ->middleware(['auth'])
+    ->name('testing-methodologies');
+
 // Guest project sharing (no auth required)
 Route::get('projects/shared/{token}', [GuestProjectController::class, 'show'])
     ->name('projects.shared');
@@ -42,13 +50,13 @@ Route::middleware(['auth'])->group(function () {
     // Projects
     Route::get('accessibility-projects', [AccessibilityProjectController::class, 'index'])
         ->name('accessibility-projects.index');
-    Route::get('accessibility-projects/create', \App\Livewire\CreateAccessibilityProject::class)
+    Route::get('accessibility-projects/create', CreateAccessibilityProject::class)
         ->name('accessibility-projects.create');
     Route::post('accessibility-projects', [AccessibilityProjectController::class, 'store'])
         ->name('accessibility-projects.store');
     Route::get('accessibility-projects/{project}', [AccessibilityProjectController::class, 'show'])
         ->name('accessibility-projects.show');
-    Route::get('accessibility-projects/{project}/edit', \App\Livewire\EditAccessibilityProject::class)
+    Route::get('accessibility-projects/{project}/edit', EditAccessibilityProject::class)
         ->name('accessibility-projects.edit');
     Route::put('accessibility-projects/{project}', [AccessibilityProjectController::class, 'update'])
         ->name('accessibility-projects.update');
@@ -88,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-reports.destroy');
 
     // Pages within projects
-    Route::get('accessibility-projects/{project}/pages/create', \App\Livewire\CreateAccessibilityPage::class)
+    Route::get('accessibility-projects/{project}/pages/create', CreateAccessibilityPage::class)
         ->name('accessibility-pages.create');
     Route::post('accessibility-projects/{project}/pages', [AccessibilityPageController::class, 'store'])
         ->name('accessibility-pages.store');
@@ -100,13 +108,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-pages.destroy');
 
     // Issues within projects
-    Route::get('accessibility-projects/{project}/issues/create', \App\Livewire\CreateAccessibilityIssue::class)
+    Route::get('accessibility-projects/{project}/issues/create', CreateAccessibilityIssue::class)
         ->name('accessibility-issues.create');
     Route::post('accessibility-projects/{project}/issues', [AccessibilityIssueController::class, 'store'])
         ->name('accessibility-issues.store');
     Route::get('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'show'])
         ->name('accessibility-issues.show');
-    Route::get('accessibility-projects/{project}/issues/{issue}/edit', \App\Livewire\EditAccessibilityIssue::class)
+    Route::get('accessibility-projects/{project}/issues/{issue}/edit', EditAccessibilityIssue::class)
         ->name('accessibility-issues.edit');
     Route::delete('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'destroy'])
         ->name('accessibility-issues.destroy');

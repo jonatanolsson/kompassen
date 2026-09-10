@@ -17,7 +17,7 @@
                 @if ($currentLogo)
                     <div class="flex items-center gap-4">
                         <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 p-3 flex items-center justify-center w-32 h-16">
-                            <img src="{{ Storage::url($currentLogo) }}" alt="Current logo" class="max-h-10 max-w-full object-contain" />
+                            <img src="{{ Storage::url($currentLogo) }}" alt="{{ __('Current logo') }}" class="max-h-10 max-w-full object-contain" />
                         </div>
                         <flux:button type="button" variant="subtle" size="sm" icon="trash" wire:click="removeLogo" wire:confirm="{{ __('Remove the current logo?') }}">
                             {{ __('Remove') }}

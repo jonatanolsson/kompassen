@@ -4,11 +4,16 @@ namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
 use App\Models\TestingMethodology;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class ProjectMethodologies extends Component
 {
+    use AuthorizesRequests;
+
     public AccessibilityProject $project;
 
     public bool $showAddForm = false;
@@ -19,12 +24,22 @@ class ProjectMethodologies extends Component
     #[Validate('nullable|string|max:1000')]
     public string $notes = '';
 
+    public function mount(AccessibilityProject $project): void
+    {
+        $this->project = $project;
+        $this->authorize('view', $this->project);
+    }
+
     public function addMethodology(): void
     {
+        $this->authorize('update', $this->project);
         $this->validate();
 
         $this->project->methodologies()->syncWithoutDetaching([
-            $this->selectedMethodologyId => ['notes' => $this->notes ?: null],
+            $this->selectedMethodologyId => [
+                'id' => (string) Str::ulid(),
+                'notes' => $this->notes ?: null,
+            ],
         ]);
 
         $this->reset(['selectedMethodologyId', 'notes']);
@@ -32,11 +47,18 @@ class ProjectMethodologies extends Component
 
     public function removeMethodology(string $methodologyId): void
     {
+        $this->authorize('update', $this->project);
         $this->project->methodologies()->detach($methodologyId);
     }
 
     public function updateNotes(string $methodologyId, string $notes): void
     {
+        $this->authorize('update', $this->project);
+        Validator::make(
+            ['notes' => $notes],
+            ['notes' => ['nullable', 'string', 'max:1000']],
+        )->validate();
+
         $this->project->methodologies()->updateExistingPivot($methodologyId, [
             'notes' => $notes ?: null,
         ]);
@@ -47,12 +69,15 @@ class ProjectMethodologies extends Component
         $allMethodologies = TestingMethodology::orderBy('category')->orderBy('name')->get()
             ->groupBy('category');
 
-        $projectMethodologyIds = $this->project->methodologies->pluck('id')->toArray();
+        $projectMethodologies = $this->project->methodologies()
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
 
         return view('livewire.project-methodologies', [
             'allMethodologies' => $allMethodologies,
-            'projectMethodologies' => $this->project->methodologies()->orderBy('category')->orderBy('name')->get(),
-            'projectMethodologyIds' => $projectMethodologyIds,
+            'projectMethodologies' => $projectMethodologies,
+            'projectMethodologyIds' => $projectMethodologies->pluck('id')->all(),
         ]);
     }
 }

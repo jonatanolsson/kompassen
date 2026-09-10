@@ -100,7 +100,7 @@
                                     <flux:heading size="sm">{{ $example->title }}</flux:heading>
                                     <div class="flex gap-1 shrink-0">
                                         <flux:button size="xs" variant="ghost" icon="pencil" wire:click="editExample('{{ $example->id }}')" />
-                                        <flux:button size="xs" variant="ghost" icon="trash" wire:click="deleteExample('{{ $example->id }}')" wire:confirm="Delete this example?" />
+                                        <flux:button size="xs" variant="ghost" icon="trash" wire:click="deleteExample('{{ $example->id }}')" wire:confirm="{{ __('Delete this example?') }}" />
                                     </div>
                                 </div>
 
@@ -182,7 +182,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <flux:field>
                                     <flux:label>{{ __('Reference URL') }}</flux:label>
-                                    <flux:input wire:model="exampleUrl" type="url" placeholder="https://…" />
+                                    <flux:input wire:model="exampleUrl" type="url" placeholder="{{ __('https://…') }}" />
                                     <flux:error name="exampleUrl" />
                                 </flux:field>
                                 <flux:field>

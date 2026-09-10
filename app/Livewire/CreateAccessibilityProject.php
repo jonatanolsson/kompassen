@@ -3,10 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\ProjectMember;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+#[Layout('layouts.app')]
 class CreateAccessibilityProject extends Component
 {
     use WithFileUploads;

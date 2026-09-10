@@ -5,13 +5,17 @@ namespace App\Livewire;
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+#[Layout('layouts.app')]
 class CreateAccessibilityIssue extends Component
 {
+    use AuthorizesRequests;
     use WithFileUploads;
 
     #[Locked]

@@ -8,11 +8,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class EditAccessibilityProject extends Component
 {
     use AuthorizesRequests;
+    use WithFileUploads;
 
     #[Locked]
     public string $projectId;
@@ -28,6 +30,9 @@ class EditAccessibilityProject extends Component
 
     #[Validate('required|in:planning,in-progress,completed')]
     public string $status = 'planning';
+
+    #[Validate('nullable|image|mimes:png,jpg,jpeg,svg|max:2048')]
+    public $client_logo;
 
     public function mount(AccessibilityProject $project): void
     {
@@ -55,9 +60,8 @@ class EditAccessibilityProject extends Component
             'status' => $this->status,
         ]);
 
-        // Handle logo if provided
-        if (request()->hasFile('client_logo')) {
-            $path = request()->file('client_logo')->store('project-logos', 'public');
+        if ($this->client_logo) {
+            $path = $this->client_logo->store('project-logos', 'public');
             $project->update(['client_logo' => $path]);
         }
 

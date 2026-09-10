@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\AccessibilityProject;
+use App\Models\TestingMethodology;
 use App\Policies\AccessibilityProjectPolicy;
+use App\Policies\TestingMethodologyPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -15,6 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         AccessibilityProject::class => AccessibilityProjectPolicy::class,
+        TestingMethodology::class => TestingMethodologyPolicy::class,
     ];
 
     /**

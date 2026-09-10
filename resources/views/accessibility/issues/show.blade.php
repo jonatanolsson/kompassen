@@ -6,10 +6,10 @@
                 <flux:heading level="1" class="mb-2">{{ $issue->title }}</flux:heading>
                 <div class="flex gap-2">
                     <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))">
-                        {{ Str::title($issue->severity) }}
+                        {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
                     </flux:badge>
-                    <flux:badge color="zinc">{{ Str::title($issue->status) }}</flux:badge>
-                    <flux:badge color="blue">{{ __('Difficulty') }}: {{ Str::title($issue->difficulty) }}</flux:badge>
+                    <flux:badge color="zinc">{{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}</flux:badge>
+                    <flux:badge color="blue">{{ __('Difficulty') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}</flux:badge>
                 </div>
             </div>
             <div class="flex gap-2 items-center">
@@ -96,9 +96,7 @@
         @if ($issue->description)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>
-                <flux:card class="p-6">
-                    <x-markdown :markdown="$issue->description" />
-                </flux:card>
+                <x-markdown :markdown="$issue->description" />
             </div>
         @endif
 
@@ -106,14 +104,14 @@
         @if ($issue->attachments->count() > 0)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     @foreach ($issue->attachments as $attachment)
-                        <div class="group">
-                            <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="block overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 hover:shadow-lg transition">
+                        <div class="group min-w-0">
+                            <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="block aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800">
                                 <img 
                                     src="{{ asset('storage/' . $attachment->path) }}" 
                                     alt="{{ $attachment->original_filename }}"
-                                    class="w-full h-48 object-cover group-hover:scale-105 transition"
+                                    class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                                 />
                             </a>
                             <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 truncate">{{ $attachment->original_filename }}</p>
@@ -124,29 +122,30 @@
         @endif
 
         <!-- Details -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
             @if ($issue->page)
-                <flux:card class="p-4">
+                <div>
                     <flux:heading level="3" class="text-sm mb-2">{{ __('Page/Service') }}</flux:heading>
                     <flux:text>{{ $issue->page->name }}</flux:text>
-                </flux:card>
+                </div>
             @endif
 
             @if ($issue->component_area)
-                <flux:card class="p-4">
+                <div>
                     <flux:heading level="3" class="text-sm mb-2">{{ __('Component Area') }}</flux:heading>
                     <flux:text>{{ $issue->component_area }}</flux:text>
-                </flux:card>
+                </div>
             @endif
 
             <!-- Assignee -->
-            <flux:card class="p-4">
+            <div>
                 <flux:heading level="3" class="text-sm mb-2">{{ __('Assigned To') }}</flux:heading>
                 @if ($issue->assignedTo)
                     <div class="flex items-center justify-between">
                         <flux:text>{{ $issue->assignedTo->name }}</flux:text>
-                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="PUT" class="inline">
+                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="inline">
                             @csrf
+                            @method('PUT')
                             <input type="hidden" name="assigned_to" value="">
                             <flux:button type="submit" variant="ghost" size="sm" icon="x-mark">
                                 {{ __('Unassign') }}
@@ -156,16 +155,16 @@
                 @else
                     <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
                 @endif
-            </flux:card>
+            </div>
         </div>
 
         <!-- WCAG Criteria -->
         @if ($wcagCriteria->count() > 0)
             <div class="mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
-                <div class="space-y-3">
+                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($wcagCriteria as $criterion)
-                        <flux:card class="p-4">
+                        <div class="py-4 first:pt-0 last:pb-0">
                             <div class="space-y-2">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex items-start gap-3 flex-1">
@@ -189,7 +188,7 @@
                                     </p>
                                 @endif
                             </div>
-                        </flux:card>
+                        </div>
                     @endforeach
                 </div>
             </div>

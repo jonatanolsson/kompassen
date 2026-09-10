@@ -3,11 +3,16 @@
 namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class CreateAccessibilityPage extends Component
 {
+    use AuthorizesRequests;
+
     #[Locked]
     public string $projectId = '';
 
@@ -17,7 +22,7 @@ class CreateAccessibilityPage extends Component
 
     public string $description = '';
 
-    public function mount(AccessibilityProject $project)
+    public function mount(AccessibilityProject $project): void
     {
         $this->authorize('update', $project);
         $this->projectId = $project->id;

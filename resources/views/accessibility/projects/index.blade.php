@@ -27,7 +27,7 @@
                                 
                                 <div class="flex items-center gap-4">
                                     <flux:badge color="zinc">{{ $project->target_wcag_level }}</flux:badge>
-                                    <flux:badge :color="$project->status === 'completed' ? 'green' : 'amber'">{{ Str::title($project->status) }}</flux:badge>
+                                    <flux:badge :color="$project->status === 'completed' ? 'green' : 'amber'">{{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:badge>
                                 </div>
                             </a>
                         </flux:card>

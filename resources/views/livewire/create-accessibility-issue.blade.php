@@ -2,14 +2,14 @@
     <div class="min-h-screen bg-white dark:bg-zinc-900">
         <div class="max-w-6xl mx-auto px-4 py-8">
             <div class="mb-8">
-                <flux:heading level="1">{{ __('Report Issue') }}</flux:heading>
-                <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Document an accessibility issue found during the audit.') }}</flux:text>
+                <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Report Issue') }}</flux:heading>
+                <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Document an accessibility issue found during the audit.') }}</flux:text>
             </div>
 
             <form wire:submit="submit" enctype="multipart/form-data" class="space-y-8">
                 <!-- Issue Details -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Issue Information') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Issue Information') }}</flux:heading>
                     
                     <div class="space-y-6">
                         <flux:field>
@@ -25,10 +25,9 @@
 
                         <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
-                            <flux:textarea
+                            <flux:editor
                                 wire:model="description"
                                 placeholder="{{ __('Describe the issue in detail...') }}"
-                                rows="6"
                             />
                             <flux:error name="description" />
                         </flux:field>
@@ -41,6 +40,23 @@
                                 accept="image/*"
                             />
                             <flux:error name="attachments" />
+
+                            @if (count($this->attachments) > 0)
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
+                                    @foreach ($this->attachments as $uploadedFile)
+                                        <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+                                            <img
+                                                src="{{ $uploadedFile->temporaryUrl() }}"
+                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
+                                                class="h-full w-full object-cover"
+                                            />
+                                            <span class="absolute bottom-2 left-2 rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">
+                                                {{ __('New') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </flux:field>
                     </div>
                 </div>
@@ -49,7 +65,7 @@
 
                 <!-- Location & Classification -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('Classification') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Classification') }}</flux:heading>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
@@ -110,7 +126,7 @@
 
                 <!-- WCAG Criteria -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('WCAG Success Criteria') }}</flux:heading>
                     
                     <div class="space-y-4">
                         <flux:text size="sm" class="text-zinc-600 dark:text-zinc-400">
@@ -150,4 +166,3 @@
             </form>
         </div>
     </div>
-

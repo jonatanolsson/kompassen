@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} - Accessibility Audit Report</title>
+    <title>{{ $title }} - {{ __('Accessibility Audit Report') }}</title>
     <style>
         * {
             margin: 0;
@@ -210,14 +210,14 @@
             <header role="banner">
                 @if ($project->client_logo)
                     <div class="header-logo">
-                        <img src="{{ Storage::url($project->client_logo) }}" alt="{{ $project->name }} logo" />
+                        <img src="{{ Storage::url($project->client_logo) }}" alt="{{ __(':name logo', ['name' => $project->name]) }}" />
                     </div>
                 @endif
                 <h1>{{ $title }}</h1>
                 <p>{{ $project->team->name }}</p>
             </header>
 
-            <div class="summary" role="region" aria-label="Report Summary">
+            <div class="summary" role="region" aria-label="{{ __('Report Summary') }}">
                 <div class="stat">
                     <div class="stat-value">{{ $issues->count() }}</div>
                     <div class="stat-label">{{ __('Total Issues') }}</div>
@@ -238,13 +238,13 @@
 
             <section class="content" role="main">
                 @if ($scope)
-                    <section class="scope" aria-label="Audit Scope">
+                    <section class="scope" aria-label="{{ __('Audit Scope') }}">
                         <h2 class="scope-title">{{ __('Scope') }}</h2>
                         <p>{{ $scope }}</p>
                     </section>
                 @endif
 
-                <div role="region" aria-label="Issues by WCAG Success Criteria">
+                <div role="region" aria-label="{{ __('Issues by WCAG Success Criteria') }}">
                     @forelse ($issuesByWcag as $key => $wcagGroup)
                         <section class="wcag-criterion">
                             @if ($wcagGroup['sc'])
@@ -261,12 +261,12 @@
                                     <li class="issue" role="listitem">
                                         <div class="issue-title">
                                             <h3 class="issue-heading">{{ $issue->title }}</h3>
-                                            <span class="severity-badge severity-{{ strtolower($issue->severity) }}" aria-label="Severity: {{ ucfirst($issue->severity) }}">
-                                                {{ ucfirst($issue->severity) }}
+                                            <span class="severity-badge severity-{{ strtolower($issue->severity) }}" aria-label="{{ __('Severity') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}">
+                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
                                             </span>
                                         </div>
                                         @if ($issue->description)
-                                            <div class="issue-description">{!! $issue->description !!}</div>
+                                            <div class="issue-description">{!! \App\Helpers\MarkdownHelper::toHtml($issue->description) !!}</div>
                                         @endif
                                     </li>
                                 @endforeach
@@ -279,7 +279,7 @@
             </section>
 
             <footer role="contentinfo">
-                <p>Report generated on {{ now()->format('M d, Y') }} at {{ now()->format('H:i') }}</p>
+                <p>{{ __('Report generated on :date', ['date' => now()->format('Y-m-d H:i')]) }}</p>
             </footer>
         </div>
     </main>

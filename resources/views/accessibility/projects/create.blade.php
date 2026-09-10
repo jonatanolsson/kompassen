@@ -24,7 +24,7 @@
                         <flux:label>{{ __('Description') }}</flux:label>
                         <flux:textarea 
                             name="description" 
-                            placeholder="Add details about the audit scope..."
+                            placeholder="{{ __('Add details about the audit scope...') }}"
                             rows="6"
                         >{{ old('description') }}</flux:textarea>
                         <flux:text size="sm" class="text-zinc-500 mt-2">

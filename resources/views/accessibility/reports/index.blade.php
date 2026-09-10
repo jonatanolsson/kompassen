@@ -35,7 +35,7 @@
                 <flux:table.row>
                     <flux:table.cell>{{ $report->title }}</flux:table.cell>
                     <flux:table.cell>
-                        <flux:badge>{{ $report->total_issues }} issues</flux:badge>
+                        <flux:badge>{{ $report->total_issues }} {{ __('Issues') }}</flux:badge>
                     </flux:table.cell>
                     <flux:table.cell>{{ $report->creator->name }}</flux:table.cell>
                     <flux:table.cell>{{ $report->created_at->format('M d, Y') }}</flux:table.cell>
