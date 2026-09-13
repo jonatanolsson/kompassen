@@ -59,7 +59,7 @@
 
                     <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-white print:border print:border-zinc-300 p-4 print:p-3 rounded-lg print:rounded">
                         <div class="text-3xl font-bold text-zinc-900 dark:text-white print:text-2xl print:text-black">{{ $stats['total_pages'] }}</div>
-                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Pages Tested') }}</div>
+                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Pages & Services Tested') }}</div>
                     </div>
                 </div>
             </section>
@@ -71,12 +71,26 @@
                     
                     <div class="space-y-6 print:space-y-4">
                         @foreach ($project->pages as $page)
+                            @php
+                                $resourceType = $page->resource_type ?? 'page';
+                                $accessContext = $page->access_context ?? 'not_applicable';
+                            @endphp
                             <flux:card class="border border-zinc-200 dark:border-zinc-700 print:border-zinc-300 rounded-lg overflow-hidden print:rounded print:page-break-inside-avoid">
                                 <!-- Page Header -->
                                 <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-zinc-100 p-4 print:p-3">
                                     <div class="flex items-start justify-between gap-4 print:gap-2">
                                         <div class="flex-1 min-w-0">
                                             <h3 class="text-lg font-semibold text-zinc-900 dark:text-white print:text-black print:text-base truncate">{{ $page->name }}</h3>
+                                            <div class="mt-1 flex flex-wrap gap-2">
+                                                <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200 print:bg-white print:border print:border-zinc-300">
+                                                    {{ __($resourceType === 'service' ? 'Service' : 'Page') }}
+                                                </span>
+                                                @if ($accessContext !== 'not_applicable')
+                                                    <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 print:bg-purple-50 print:border print:border-purple-300">
+                                                        {{ __($accessContext === 'authenticated' ? 'Authenticated' : ($accessContext === 'mixed' ? 'Public and authenticated' : 'Public')) }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                             @if ($page->url)
                                                 <a href="{{ $page->url }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-400 print:text-blue-700 hover:underline print:underline mt-1 break-all">
                                                     {{ $page->url }}

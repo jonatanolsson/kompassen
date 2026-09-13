@@ -1,5 +1,7 @@
 # IDRC WCAG Reporter - Core Features & Workflows
 
+> **Current implementation note:** The current workflow is database-driven: users create projects, pages and issues through authenticated Flux/Livewire forms, attach WCAG criteria and testing methodologies, generate HTML/PDF reports, and share project previews. The markdown-file workflows below describe the original product concept and should not be treated as current implementation details.
+
 ## Core Features
 
 ### Feature 1: Markdown-Based Audit Documentation

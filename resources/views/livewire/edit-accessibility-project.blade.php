@@ -55,7 +55,7 @@
                             <flux:label>{{ __('Status') }}</flux:label>
                             <flux:select wire:model="status" required>
                                 <option value="planning">{{ __('Planning') }}</option>
-                                <option value="in-progress">{{ __('In Progress') }}</option>
+                                <option value="in_progress">{{ __('In Progress') }}</option>
                                 <option value="completed">{{ __('Completed') }}</option>
                             </flux:select>
                             <flux:error name="status" />

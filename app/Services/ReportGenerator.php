@@ -14,6 +14,7 @@ class ReportGenerator
 
     public function generate(string $title, ?string $scope = null): AccessibilityReport
     {
+        $this->project->loadMissing('pages');
         $issues = $this->project->issues()->with('wcagCriteria')->get();
         $issuesByWcag = $this->groupIssuesByWcag($issues);
         $counts = $this->calculateIssueCounts($issues);

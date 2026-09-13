@@ -8,6 +8,7 @@ use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -32,7 +33,6 @@ class EditAccessibilityIssue extends Component
     #[Validate('nullable|string')]
     public string $description = '';
 
-    #[Validate('nullable|exists:accessibility_pages,id')]
     public ?string $page_id = null;
 
     #[Validate('nullable|string|max:255')]
@@ -77,6 +77,14 @@ class EditAccessibilityIssue extends Component
         $issue = AccessibilityIssue::findOrFail($this->issueId);
 
         $this->authorize('update', $project);
+
+        $this->validateOnly('page_id', [
+            'page_id' => [
+                'nullable',
+                Rule::exists('accessibility_pages', 'id')
+                    ->where(fn ($query) => $query->where('project_id', $project->id)),
+            ],
+        ]);
 
         $issue->update([
             'title' => $this->title,

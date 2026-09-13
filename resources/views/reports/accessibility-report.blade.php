@@ -85,6 +85,25 @@
             border-radius: 4px;
             margin-bottom: 30px;
         }
+        .targets {
+            margin-bottom: 30px;
+        }
+        .target {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .target:last-child {
+            border-bottom: none;
+        }
+        .target-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .target-meta {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 2px;
+        }
         .scope-title {
             font-weight: 600;
             color: #0284c7;
@@ -244,6 +263,36 @@
                     </section>
                 @endif
 
+                @if ($project->pages->isNotEmpty())
+                    <section class="targets" aria-labelledby="targets-heading">
+                        <h2 id="targets-heading" class="criterion-header">{{ __('Pages & Services') }}</h2>
+                        @foreach ($project->pages as $page)
+                            @php
+                                $resourceType = $page->resource_type ?? 'page';
+                                $accessContext = $page->access_context ?? 'not_applicable';
+                            @endphp
+                            <div class="target">
+                                <div class="target-name">
+                                    {{ $page->name }}
+                                    ({{ __($resourceType === 'service' ? 'Service' : 'Page') }})
+                                </div>
+                                @if ($page->url)
+                                    <div class="target-meta">{{ $page->url }}</div>
+                                @endif
+                                <div class="target-meta">
+                                    {{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}
+                                    @if ($accessContext !== 'not_applicable')
+                                        · {{ __($accessContext === 'authenticated' ? 'Authenticated' : ($accessContext === 'mixed' ? 'Public and authenticated' : 'Public')) }}
+                                    @endif
+                                </div>
+                                @if ($page->description)
+                                    <div class="issue-description">{!! \App\Helpers\MarkdownHelper::toHtml($page->description) !!}</div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </section>
+                @endif
+
                 <div role="region" aria-label="{{ __('Issues by WCAG Success Criteria') }}">
                     @forelse ($issuesByWcag as $key => $wcagGroup)
                         <section class="wcag-criterion">
@@ -267,6 +316,16 @@
                                         </div>
                                         @if ($issue->description)
                                             <div class="issue-description">{!! \App\Helpers\MarkdownHelper::toHtml($issue->description) !!}</div>
+                                        @endif
+                                        <p class="issue-description">
+                                            <strong>{{ __('Status') }}:</strong>
+                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}
+                                        </p>
+                                        @if ($issue->resolution_notes)
+                                            <div class="issue-description">
+                                                <strong>{{ __('Resolution Notes') }}:</strong>
+                                                {{ $issue->resolution_notes }}
+                                            </div>
                                         @endif
                                     </li>
                                 @endforeach

@@ -100,6 +100,13 @@
             </div>
         @endif
 
+        @if ($issue->resolution_notes)
+            <div class="mb-8">
+                <flux:heading level="2" class="mb-4">{{ __('Resolution Notes') }}</flux:heading>
+                <flux:text class="whitespace-pre-line">{{ $issue->resolution_notes }}</flux:text>
+            </div>
+        @endif
+
         <!-- Images -->
         @if ($issue->attachments->count() > 0)
             <div class="mb-8">

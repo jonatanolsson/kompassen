@@ -21,7 +21,7 @@ test('can view reports index', function () {
     $response = $this->actingAs($user)->get("/accessibility-projects/{$project->id}/reports");
 
     $response->assertStatus(200);
-    $response->assertSee('Reports for '.$project->name);
+    $response->assertSee(__('Reports for :name', ['name' => $project->name]));
 });
 
 test('can view report creation form', function () {
@@ -86,6 +86,43 @@ test('can generate report with issues', function () {
         'critical_count' => 1,
         'major_count' => 1,
     ])->exists())->toBeTrue();
+});
+
+test('generated report includes page and service access context', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    $project->pages()->create([
+        'name' => 'Mina sidor',
+        'resource_type' => 'service',
+        'access_context' => 'authenticated',
+        'url' => 'https://example.com/login',
+        'description' => '<p>Inloggat flöde.</p>',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('accessibility-reports.store', $project), [
+            'title' => 'Service audit',
+        ])
+        ->assertRedirect();
+
+    $report = AccessibilityReport::query()
+        ->where('project_id', $project->id)
+        ->where('title', 'Service audit')
+        ->firstOrFail();
+
+    expect($report->html_content)
+        ->toContain('Mina sidor')
+        ->toContain('Service')
+        ->toContain(__('Authenticated'))
+        ->toContain('Inloggat flöde.');
 });
 
 test('can view generated report', function () {

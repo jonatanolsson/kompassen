@@ -1,5 +1,7 @@
 # IDRC WCAG Reporter - Project Overview
 
+> **Current implementation note:** The active product is Kompassen, a Laravel 13 application using Livewire, Volt, Flux UI and a MariaDB/SQLite-backed data model. Projects, pages, issues, WCAG criteria, testing methodologies, reports and share links are stored in the database. The markdown-file workflow described below is historical and is not the current input path.
+
 ## What is the IDRC WCAG Reporter?
 
 The **IDRC WCAG Reporter** is a specialized tool that transforms accessibility audit findings into professional, standardized reports. It enables auditors and organizations to document and communicate the results of WCAG (Web Content Accessibility Guidelines) compliance testing in a structured, professional format.

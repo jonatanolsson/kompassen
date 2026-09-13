@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessibilityProject;
 use App\Models\ProjectMember;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +13,26 @@ class AccessibilityProjectController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
-        $projects = auth()->user()->team->accessibilityProjects;
+        $search = $request->string('search')->trim()->toString();
 
-        return view('accessibility.projects.index', compact('projects'));
+        $projects = auth()->user()->team->accessibilityProjects()
+            ->with(['pages:id,project_id,url'])
+            ->withCount(['pages', 'issues'])
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('pages', function (Builder $query) use ($search): void {
+                            $query->where('url', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->latest('updated_at')
+            ->get();
+
+        return view('accessibility.projects.index', compact('projects', 'search'));
     }
 
     public function create()
@@ -56,6 +72,16 @@ class AccessibilityProjectController extends Controller
     public function show(AccessibilityProject $project)
     {
         $this->authorize('view', $project);
+
+        $project->load([
+            'pages',
+            'issues.page',
+            'issues.wcagCriteria',
+            'issues.assignedTo',
+            'shareLinks',
+            'members.user',
+            'methodologies',
+        ]);
 
         return view('accessibility.projects.show', compact('project'));
     }

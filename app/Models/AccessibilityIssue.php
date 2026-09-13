@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'assigned_to', 'assigned_at'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;
@@ -25,6 +25,27 @@ class AccessibilityIssue extends Model
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
                 $model->{$model->getKeyName()} = Str::ulid();
+            }
+        });
+        static::saving(function (self $issue): void {
+            if ($issue->isDirty('status')) {
+                $issue->resolution_status = match ($issue->status) {
+                    'resolved' => 'fixed',
+                    'wont_fix' => 'wontfix',
+                    default => 'open',
+                };
+            } elseif ($issue->isDirty('resolution_status')) {
+                $issue->status = match ($issue->resolution_status) {
+                    'fixed' => 'resolved',
+                    'wontfix' => 'wont_fix',
+                    default => 'open',
+                };
+            }
+
+            if ($issue->status === 'open') {
+                $issue->resolved_at = null;
+            } elseif ($issue->isDirty(['status', 'resolution_status']) && $issue->resolved_at === null) {
+                $issue->resolved_at = now();
             }
         });
     }

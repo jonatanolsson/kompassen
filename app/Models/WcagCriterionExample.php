@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class WcagCriterionExample extends Model
@@ -36,5 +37,12 @@ class WcagCriterionExample extends Model
     public function criterion(): BelongsTo
     {
         return $this->belongsTo(WcagSuccessCriterion::class, 'wcag_success_criterion_id');
+    }
+
+    public function referenceLinks(): HasMany
+    {
+        return $this->hasMany(WcagCriterionExampleLink::class, 'wcag_criterion_example_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 }

@@ -31,6 +31,13 @@ class AccessibilityProjectPolicy
         return $member && in_array($member->role, ['owner', 'editor']);
     }
 
+    public function manageMembers(User $user, AccessibilityProject $project): bool
+    {
+        $member = $project->members()->where('user_id', $user->id)->first();
+
+        return $member && $member->role === 'owner';
+    }
+
     public function delete(User $user, AccessibilityProject $project): bool
     {
         // Only owner members can delete

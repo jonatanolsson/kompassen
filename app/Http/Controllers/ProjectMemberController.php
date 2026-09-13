@@ -14,11 +14,7 @@ class ProjectMemberController extends Controller
 
     public function store(Request $request, AccessibilityProject $project)
     {
-        // Only owners can add members
-        $member = $project->members()->where('user_id', auth()->id())->first();
-        if (!$member || $member->role !== 'owner') {
-            abort(403);
-        }
+        $this->authorize('manageMembers', $project);
 
         $validated = $request->validate([
             'email' => 'required|email|exists:users,email',
@@ -29,12 +25,12 @@ class ProjectMemberController extends Controller
 
         // Check if user is already a member
         if ($project->members()->where('user_id', $user->id)->exists()) {
-            return back()->withErrors(['email' => 'User is already a member of this project.']);
+            return back()->withErrors(['email' => __('User is already a member of this project.')]);
         }
 
         // Check if user is in the same team
-        if ((string)$user->team_id !== (string)$project->team_id) {
-            return back()->withErrors(['email' => 'User must be in the same team.']);
+        if ((string) $user->team_id !== (string) $project->team_id) {
+            return back()->withErrors(['email' => __('User must be in the same team.')]);
         }
 
         ProjectMember::create([
@@ -43,12 +39,12 @@ class ProjectMemberController extends Controller
             'role' => $validated['role'],
         ]);
 
-        return back()->with('success', 'Member added successfully.');
+        return back()->with('success', __('Member added successfully.'));
     }
 
     public function update(Request $request, AccessibilityProject $project, ProjectMember $member)
     {
-        $this->authorize('update', $project);
+        $this->authorize('manageMembers', $project);
 
         $validated = $request->validate([
             'role' => 'required|in:owner,editor,viewer',
@@ -56,15 +52,15 @@ class ProjectMemberController extends Controller
 
         $member->update($validated);
 
-        return back()->with('success', 'Member role updated.');
+        return back()->with('success', __('Member role updated.'));
     }
 
     public function destroy(AccessibilityProject $project, ProjectMember $member)
     {
-        $this->authorize('update', $project);
+        $this->authorize('manageMembers', $project);
 
         $member->delete();
 
-        return back()->with('success', 'Member removed.');
+        return back()->with('success', __('Member removed.'));
     }
 }

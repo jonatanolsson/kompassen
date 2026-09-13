@@ -28,7 +28,7 @@ class EditAccessibilityProject extends Component
     #[Validate('required|in:A,AA,AAA')]
     public string $target_wcag_level = 'AA';
 
-    #[Validate('required|in:planning,in-progress,completed')]
+    #[Validate('required|in:planning,in_progress,completed')]
     public string $status = 'planning';
 
     #[Validate('nullable|image|mimes:png,jpg,jpeg,svg|max:2048')]

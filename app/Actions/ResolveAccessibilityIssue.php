@@ -11,7 +11,7 @@ class ResolveAccessibilityIssue
         $issue->update([
             'resolution_status' => $status,
             'resolution_notes' => $notes,
-            'resolved_at' => now(),
+            'resolved_at' => $status === 'open' ? null : now(),
         ]);
     }
 }

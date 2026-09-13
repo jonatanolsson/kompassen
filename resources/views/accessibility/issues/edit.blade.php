@@ -121,7 +121,7 @@
                             <flux:select name="page_id">
                                 <option value="">{{ __('Not specific to a page') }}</option>
                                 @foreach ($project->pages as $page)
-                                    <option value="{{ $page->id }}" @selected(old('page_id', $issue->page_id) === $page->id)>{{ $page->name }}</option>
+                                    <option value="{{ $page->id }}" @selected(old('page_id', $issue->page_id) === $page->id)>{{ $page->name }}{{ ($page->resource_type ?? 'page') === 'service' ? ' ('.__('Service').')' : '' }}</option>
                                 @endforeach
                             </flux:select>
                             <flux:error name="page_id" />

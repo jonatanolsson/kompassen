@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'name', 'url', 'description', 'scope'])]
+#[Fillable(['project_id', 'name', 'resource_type', 'url', 'access_context', 'description', 'scope'])]
 class AccessibilityPage extends Model
 {
     use HasFactory;
@@ -22,7 +23,7 @@ class AccessibilityPage extends Model
         parent::boot();
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = \Illuminate\Support\Str::ulid();
+                $model->{$model->getKeyName()} = Str::ulid();
             }
         });
     }

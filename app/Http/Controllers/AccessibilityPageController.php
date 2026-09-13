@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccessibilityProject;
 use App\Models\AccessibilityPage;
+use App\Models\AccessibilityProject;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -24,14 +24,21 @@ class AccessibilityPageController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'resource_type' => 'nullable|in:page,service',
             'url' => 'nullable|url',
+            'access_context' => 'nullable|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
+            'scope' => 'required|in:in_scope,out_of_scope',
         ]);
 
-        $project->pages()->create($validated);
+        $project->pages()->create([
+            ...$validated,
+            'resource_type' => $validated['resource_type'] ?? 'page',
+            'access_context' => $validated['access_context'] ?? 'not_applicable',
+        ]);
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Page created successfully.');
+            ->with('success', __('Page or service created successfully.'));
     }
 
     public function edit(AccessibilityProject $project, AccessibilityPage $page)
@@ -47,14 +54,21 @@ class AccessibilityPageController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'resource_type' => 'nullable|in:page,service',
             'url' => 'nullable|url',
+            'access_context' => 'nullable|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
+            'scope' => 'required|in:in_scope,out_of_scope',
         ]);
 
-        $page->update($validated);
+        $page->update([
+            ...$validated,
+            'resource_type' => $validated['resource_type'] ?? 'page',
+            'access_context' => $validated['access_context'] ?? 'not_applicable',
+        ]);
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Page updated successfully.');
+            ->with('success', __('Page or service updated successfully.'));
     }
 
     public function destroy(AccessibilityProject $project, AccessibilityPage $page)

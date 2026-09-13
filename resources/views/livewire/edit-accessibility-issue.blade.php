@@ -132,7 +132,9 @@
                             <flux:select wire:model.defer="page_id">
                                 <option value="">{{ __('Not specific to a page') }}</option>
                                 @foreach ($pages as $page)
-                                    <option value="{{ $page['id'] }}">{{ $page['name'] }}</option>
+                                    <option value="{{ $page['id'] }}">
+                                        {{ $page['name'] }}{{ ($page['resource_type'] ?? 'page') === 'service' ? ' ('.__('Service').')' : '' }}
+                                    </option>
                                 @endforeach
                             </flux:select>
                             <flux:error name="page_id" />

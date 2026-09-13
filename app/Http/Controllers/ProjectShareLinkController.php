@@ -29,11 +29,11 @@ class ProjectShareLinkController extends Controller
             ->with('share_link_token', $link->token);
     }
 
-    public function destroy(AccessibilityProject $project, ProjectShareLink $link)
+    public function destroy(AccessibilityProject $project, ProjectShareLink $shareLink)
     {
         $this->authorize('update', $project);
 
-        $link->delete();
+        $shareLink->delete();
 
         return back()->with('success', 'Share link deleted.');
     }

@@ -1,69 +1,54 @@
-# IDRC WCAG Reporter - System Architecture
+  # IDRC WCAG Reporter - System Architecture
 
-## High-Level Overview
+  ## High-Level Overview
 
-The IDRC WCAG Reporter is a **report generation system** that processes accessibility audit findings documented in markdown files and produces professional HTML and PDF reports. It follows a three-stage pipeline architecture:
+  Kompassen is a **database-backed Laravel application** that manages accessibility audits and produces HTML/PDF reports. Authenticated users work in team-scoped projects through Livewire/Volt components and Flux UI, while thin controllers handle nested project resources and report endpoints.
 
-```
-Input Documents → Processing Engine → Report Output
-(Markdown files)  (Parsing, Validation, (HTML + PDF)
-                   Transformation)
-```
+  Current high-level flow:
 
-## Core System Components
+  ```
+  Authenticated user → Team/project access → Pages and issues → WCAG/methodology data → HTML/PDF report or share link
+  ```
 
-### 1. **Content Management Layer**
-**Responsibility**: Store and organize audit findings and metadata
+  The markdown-file pipeline described in later sections is historical.
 
-- **Audit Report Document** - The main report definition containing:
-  - Audit metadata (title, evaluators, date, scope, target WCAG level)
-  - Scope definitions (what was and wasn't evaluated)
-  - Testing tools and environment details
-  - List of technologies tested
-  
-- **Issue Collection** - Individual markdown files, each representing one accessibility finding:
-  - Problem description
-  - Affected WCAG Success Criteria
-  - Severity classification
-  - Difficulty to fix
-  - Possible solutions
-  - References and links
+  ## Core System Components
 
-- **Reference Data** - Static data providing context:
-  - WCAG Success Criteria definitions (number, name, level)
-  - Severity level definitions
-  - Difficulty classifications
-  - Multi-language text mappings
+  ### 1. **Application and access layer**
+  **Responsibility**: Authenticate users and enforce team/project permissions.
 
-### 2. **Data Processing Engine**
-**Responsibility**: Transform and organize raw content for rendering
+  - Laravel routes and policies protect authenticated resources.
+  - Project membership controls `view`, `update` and `delete` access.
+  - Nested resources must remain scoped to their parent project.
 
-**Key Functions:**
-- **Markdown Parser** - Extracts frontmatter (metadata) and content from markdown files
-- **Content Validator** - Ensures required fields are present and valid:
-  - Required metadata fields (title, evaluators, date, target level)
-  - Valid WCAG SC references (e.g., "1.1.1")
-  - Valid severity/difficulty values
-  
-- **Issue Aggregator** - Collects and organizes all issues:
+  ### 2. **Audit data layer**
+  **Responsibility**: Store and organize audit findings and metadata
+
+  - **Accessibility projects** - Team-scoped audit containers with target WCAG level, status and audit date.
+  - **Pages** - Audited URLs/services with descriptions and in/out-of-scope classification.
+  - **Issues** - Findings with severity, difficulty, status/resolution, assignment, attachments and WCAG criteria.
+  - **Reference data** - WCAG success criteria, examples, related resources and testing methodologies.
+  - **Reports and share links** - Stored report snapshots and controlled guest previews.
+
+  ### 3. **Livewire/Flux application layer**
+  **Responsibility**: Provide interactive project, issue, knowledge-base, settings and dashboard workflows.
+
+  - Livewire components own reactive forms and validation.
+  - Volt/Blade views compose the application shell and legacy resource pages.
+  - Flux components provide form fields, tables, dialogs, badges and navigation.
+
+  ### 4. **Report generation layer**
+  **Responsibility**: Transform and organize raw content for rendering
+
+  **Key Functions:**
+  - **Issue aggregator** - Loads project issues and their WCAG criteria.
   - Groups issues by WCAG guideline
   - Sorts by SC number
   - Associates severity levels
-  
-- **Report Builder** - Generates intermediate report structure:
-  - Combines audit metadata with processed issues
-  - Calculates statistics (total issues, issues by severity)
-  - Creates navigation structure for table of contents
-  
-- **Data Enrichment** - Adds contextual information:
-  - Looks up full WCAG SC names and descriptions
-  - Maps severity levels to display information
-  - Resolves multi-language text
+  - **Report builder** - Calculates issue statistics and renders the stored HTML snapshot.
+  - **PDF generator** - Converts a stored report snapshot to PDF for download.
 
-### 3. **Output Generation Layer**
-**Responsibility**: Produce final reports in different formats
-
-**HTML Report Generator:**
+  **HTML Report Generator:**
 - Converts processed data to HTML structure
 - Applies styling and layout
 - Creates navigation and table of contents

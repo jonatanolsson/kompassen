@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AccessibilityIssueController extends Controller
 {
@@ -27,7 +28,7 @@ class AccessibilityIssueController extends Controller
 
     public function show(AccessibilityProject $project, AccessibilityIssue $issue)
     {
-        $this->authorize('update', $project);
+        $this->authorize('view', $project);
 
         $wcagCriteria = $issue->wcagCriteria()->get();
 
@@ -41,7 +42,11 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'page_id' => 'nullable|exists:accessibility_pages,id',
+            'page_id' => [
+                'nullable',
+                Rule::exists('accessibility_pages', 'id')
+                    ->where(fn ($query) => $query->where('project_id', $project->id)),
+            ],
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',
@@ -92,7 +97,11 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'page_id' => 'nullable|exists:accessibility_pages,id',
+            'page_id' => [
+                'nullable',
+                Rule::exists('accessibility_pages', 'id')
+                    ->where(fn ($query) => $query->where('project_id', $project->id)),
+            ],
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',
@@ -142,12 +151,14 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('update', $project);
 
-        $status = request()->input('resolution_status');
-        $notes = request()->input('resolution_notes');
+        $validated = request()->validate([
+            'resolution_status' => 'required|in:open,fixed,wontfix',
+            'resolution_notes' => 'nullable|string|max:5000',
+        ]);
 
-        (new ResolveAccessibilityIssue)($issue, $status, $notes);
+        (new ResolveAccessibilityIssue)($issue, $validated['resolution_status'], $validated['resolution_notes'] ?? null);
 
-        $translatedStatus = __($status);
+        $translatedStatus = __($validated['resolution_status']);
 
         return back()->with('success', __('Issue marked as :status', ['status' => $translatedStatus]));
     }
@@ -157,7 +168,11 @@ class AccessibilityIssueController extends Controller
         $this->authorize('update', $project);
 
         $validated = request()->validate([
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_to' => [
+                'nullable',
+                Rule::exists('project_members', 'user_id')
+                    ->where(fn ($query) => $query->where('project_id', $project->id)),
+            ],
         ]);
 
         $issue->update([
@@ -174,7 +189,7 @@ class AccessibilityIssueController extends Controller
 
     public function export(AccessibilityProject $project, AccessibilityIssue $issue): Response
     {
-        $this->authorize('update', $project);
+        $this->authorize('view', $project);
 
         $format = request()->query('format', 'json');
         $exporter = new IssueExporter($issue);

@@ -7,6 +7,7 @@ use App\Models\AccessibilityProject;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -50,7 +51,11 @@ class CreateAccessibilityIssue extends Component
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'page_id' => 'nullable|exists:accessibility_pages,id',
+            'page_id' => [
+                'nullable',
+                Rule::exists('accessibility_pages', 'id')
+                    ->where(fn ($query) => $query->where('project_id', $this->projectId)),
+            ],
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',

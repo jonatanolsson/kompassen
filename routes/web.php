@@ -65,16 +65,20 @@ Route::middleware(['auth'])->group(function () {
 
     // Project members
     Route::post('accessibility-projects/{project}/members', [ProjectMemberController::class, 'store'])
+        ->scopeBindings()
         ->name('project-members.store');
     Route::put('accessibility-projects/{project}/members/{member}', [ProjectMemberController::class, 'update'])
+        ->scopeBindings()
         ->name('project-members.update');
     Route::delete('accessibility-projects/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])
+        ->scopeBindings()
         ->name('project-members.destroy');
 
     // Project share links
     Route::post('accessibility-projects/{project}/share-links', [ProjectShareLinkController::class, 'store'])
         ->name('project-share-links.store');
-    Route::delete('accessibility-projects/{project}/share-links/{link}', [ProjectShareLinkController::class, 'destroy'])
+    Route::delete('accessibility-projects/{project}/share-links/{shareLink}', [ProjectShareLinkController::class, 'destroy'])
+        ->scopeBindings()
         ->name('project-share-links.destroy');
 
     // Project preview (authenticated owner sees guest view)
@@ -99,36 +103,48 @@ Route::middleware(['auth'])->group(function () {
     Route::get('accessibility-projects/{project}/pages/create', CreateAccessibilityPage::class)
         ->name('accessibility-pages.create');
     Route::post('accessibility-projects/{project}/pages', [AccessibilityPageController::class, 'store'])
+        ->scopeBindings()
         ->name('accessibility-pages.store');
     Route::get('accessibility-projects/{project}/pages/{page}/edit', [AccessibilityPageController::class, 'edit'])
+        ->scopeBindings()
         ->name('accessibility-pages.edit');
     Route::put('accessibility-projects/{project}/pages/{page}', [AccessibilityPageController::class, 'update'])
+        ->scopeBindings()
         ->name('accessibility-pages.update');
     Route::delete('accessibility-projects/{project}/pages/{page}', [AccessibilityPageController::class, 'destroy'])
+        ->scopeBindings()
         ->name('accessibility-pages.destroy');
 
     // Issues within projects
     Route::get('accessibility-projects/{project}/issues/create', CreateAccessibilityIssue::class)
         ->name('accessibility-issues.create');
     Route::post('accessibility-projects/{project}/issues', [AccessibilityIssueController::class, 'store'])
+        ->scopeBindings()
         ->name('accessibility-issues.store');
     Route::get('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'show'])
+        ->scopeBindings()
         ->name('accessibility-issues.show');
     Route::get('accessibility-projects/{project}/issues/{issue}/edit', EditAccessibilityIssue::class)
+        ->scopeBindings()
         ->name('accessibility-issues.edit');
     Route::delete('accessibility-projects/{project}/issues/{issue}', [AccessibilityIssueController::class, 'destroy'])
+        ->scopeBindings()
         ->name('accessibility-issues.destroy');
     Route::put('accessibility-projects/{project}/issues/{issue}/assign', [AccessibilityIssueController::class, 'assign'])
+        ->scopeBindings()
         ->name('accessibility-issues.assign');
     Route::get('accessibility-projects/{project}/issues/{issue}/export', [AccessibilityIssueController::class, 'export'])
+        ->scopeBindings()
         ->name('accessibility-issues.export');
 
     // Issue attachments
     Route::delete('accessibility-projects/{project}/issues/{issue}/attachments/{attachment}', [AccessibilityIssueAttachmentController::class, 'destroy'])
+        ->scopeBindings()
         ->name('accessibility-issue-attachments.destroy');
 
     // Issue resolution
     Route::patch('accessibility-projects/{project}/issues/{issue}/resolve', [AccessibilityIssueController::class, 'resolve'])
+        ->scopeBindings()
         ->name('accessibility-issues.resolve');
 });
 
