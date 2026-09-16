@@ -45,6 +45,12 @@ Use existing Artisan commands with `--no-interaction`. Run the focused test, Pin
 
 ## Non-negotiable conventions
 
+### Documentation
+
+- Update `README.md` in the same change whenever adding a new feature or
+  making a critical change. Document user-visible behavior, setup changes,
+  configuration requirements, and operational considerations when relevant.
+
 ### Scope and authorization
 
 - Every project-related query and mutation must be scoped to the current project.
