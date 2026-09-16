@@ -19,7 +19,11 @@ use App\Livewire\TestingMethodologies;
 use App\Livewire\WcagKnowledgeBase;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+})->name('home');
 
 Route::get('dashboard', Dashboard::class)
     ->middleware(['auth', 'verified'])

@@ -46,15 +46,60 @@
                     @endif
                 </flux:card>
             @else
-                <div class="overflow-x-auto px-1 py-2 sm:px-2">
-                    <flux:table class="min-w-[1100px]">
+                <div
+                    x-data="{
+                        open: false,
+                        columns: {
+                            pages: false,
+                            issues: false,
+                            wcag: false,
+                            status: false,
+                        },
+                    }"
+                    class="space-y-3"
+                >
+                    <div class="flex justify-end">
+                        <div class="relative">
+                            <flux:button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                x-on:click="open = !open"
+                                x-bind:aria-expanded="open"
+                                aria-controls="project-columns-menu"
+                            >
+                                {{ __('Columns') }}
+                            </flux:button>
+
+                            <div
+                                id="project-columns-menu"
+                                x-cloak
+                                x-show="open"
+                                x-transition
+                                x-on:click.outside="open = false"
+                                x-on:keydown.escape.window="open = false"
+                                class="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-700 dark:bg-zinc-800"
+                            >
+                                <flux:heading size="sm">{{ __('Show columns') }}</flux:heading>
+                                <div class="mt-3 space-y-3">
+                                    <flux:checkbox x-model="columns.pages" label="{{ __('Pages & Services') }}" />
+                                    <flux:checkbox x-model="columns.issues" label="{{ __('Issues') }}" />
+                                    <flux:checkbox x-model="columns.wcag" label="{{ __('WCAG Level') }}" />
+                                    <flux:checkbox x-model="columns.status" label="{{ __('Status') }}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full overflow-x-auto px-1 py-2 sm:px-2">
+                    <flux:table class="w-full min-w-[760px]">
                             <flux:table.columns>
                                 <flux:table.cell class="min-w-56 whitespace-nowrap">{{ __('Project') }}</flux:table.cell>
                                 <flux:table.cell class="min-w-48 whitespace-nowrap">{{ __('Domain') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-20 whitespace-nowrap">{{ __('Pages & Services') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-20 whitespace-nowrap">{{ __('Issues') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-28 whitespace-nowrap">{{ __('WCAG Level') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-36 whitespace-nowrap">{{ __('Status') }}</flux:table.cell>
+                                <flux:table.cell x-cloak x-show="columns.pages" class="min-w-20 whitespace-nowrap">{{ __('Pages & Services') }}</flux:table.cell>
+                                <flux:table.cell x-cloak x-show="columns.issues" class="min-w-20 whitespace-nowrap">{{ __('Issues') }}</flux:table.cell>
+                                <flux:table.cell x-cloak x-show="columns.wcag" class="min-w-28 whitespace-nowrap">{{ __('WCAG Level') }}</flux:table.cell>
+                                <flux:table.cell x-cloak x-show="columns.status" class="min-w-36 whitespace-nowrap">{{ __('Status') }}</flux:table.cell>
                                 <flux:table.cell class="min-w-32 whitespace-nowrap">{{ __('Updated') }}</flux:table.cell>
                                 <flux:table.cell class="min-w-32 whitespace-nowrap">{{ __('Actions') }}</flux:table.cell>
                             </flux:table.columns>
@@ -84,12 +129,12 @@
                                             </span>
                                         @endif
                                     </flux:table.cell>
-                                    <flux:table.cell class="min-w-20 py-4">{{ $project->pages_count }}</flux:table.cell>
-                                    <flux:table.cell class="min-w-20 py-4">{{ $project->issues_count }}</flux:table.cell>
-                                    <flux:table.cell class="min-w-28 py-4">
+                                    <flux:table.cell x-cloak x-show="columns.pages" class="min-w-20 py-4">{{ $project->pages_count }}</flux:table.cell>
+                                    <flux:table.cell x-cloak x-show="columns.issues" class="min-w-20 py-4">{{ $project->issues_count }}</flux:table.cell>
+                                    <flux:table.cell x-cloak x-show="columns.wcag" class="min-w-28 py-4">
                                         <flux:badge color="zinc">{{ $project->target_wcag_level }}</flux:badge>
                                     </flux:table.cell>
-                                    <flux:table.cell class="min-w-36 py-4">
+                                    <flux:table.cell x-cloak x-show="columns.status" class="min-w-36 py-4">
                                         <flux:badge :color="$project->status === 'completed' ? 'green' : ($project->status === 'in_progress' ? 'blue' : 'amber')">
                                             {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}
                                         </flux:badge>
@@ -120,6 +165,7 @@
                                 </flux:table.row>
                             @endforeach
                     </flux:table>
+                    </div>
                 </div>
             @endif
         </div>

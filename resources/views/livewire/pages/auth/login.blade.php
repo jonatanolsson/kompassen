@@ -9,6 +9,14 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
 
+    public function mount(): void
+    {
+        if (app()->environment(['local', 'testing'])) {
+            $this->form->email = 'test@example.com';
+            $this->form->password = 'password';
+        }
+    }
+
     /**
      * Handle an incoming authentication request.
      */
@@ -25,7 +33,10 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <flux:heading class="text-center mb-8" size="xl">{{ __('Welcome back') }}</flux:heading>
+    <div class="text-center">
+        <flux:heading size="xl">{{ __('Welcome back') }}</flux:heading>
+        <flux:subheading class="mt-2">{{ __('Log in to continue to Kompassen.') }}</flux:subheading>
+    </div>
 
     @if (session('status'))
         <flux:callout class="mb-6" icon="check-circle" color="success">
@@ -33,7 +44,7 @@ new #[Layout('layouts.guest')] class extends Component
         </flux:callout>
     @endif
 
-    <form wire:submit="login" class="space-y-6">
+    <form wire:submit="login" class="mt-8 space-y-6">
         <flux:input
             wire:model="form.email"
             label="{{ __('Email') }}"

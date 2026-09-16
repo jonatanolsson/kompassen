@@ -34,6 +34,10 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
 - **Svenska översättningar** – UI-strängar går via Laravels
   översättningsfunktion.
 
+Rotadressen (`/`) skickar gäster till inloggningen och inloggade användare
+vidare till dashboarden. Det finns därför en gemensam inloggningssida på
+`/login`.
+
 ## Teknikstack
 
 - PHP 8.3+

@@ -8,7 +8,16 @@ test('login screen can be rendered', function () {
 
     $response
         ->assertOk()
-        ->assertSeeVolt('pages.auth.login');
+        ->assertSeeVolt('pages.auth.login')
+        ->assertDontSee(__('Professional WCAG accessibility auditing and reporting tools.'))
+        ->assertDontSee(__('Accessibility Made Easy'))
+        ->assertSee(__('Remember me'));
+});
+
+test('login form is prefilled with development credentials outside production', function () {
+    Volt::test('pages.auth.login')
+        ->assertSet('form.email', 'test@example.com')
+        ->assertSet('form.password', 'password');
 });
 
 test('users can authenticate using the login screen', function () {

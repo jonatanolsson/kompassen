@@ -1,6 +1,8 @@
 {
     "Accessibility Report": "Tillgänglighetsrapport",
     "Pages & Services": "Sidor & tjänster",
+    "Columns": "Kolumner",
+    "Show columns": "Visa kolumner",
     "Pages & Services Tested": "Sidor och tjänster som testats",
     "Report sections": "Rapportens avsnitt",
     "Last updated": "Senast uppdaterad",
@@ -373,6 +375,7 @@
     "Cannot delete a methodology used by projects.": "En testmetod som används av projekt kan inte raderas.",
     "No testing methodologies available.": "Inga testmetoder tillgängliga.",
     "Welcome": "Välkommen",
+    "Log in to continue to Kompassen.": "Logga in för att fortsätta till Kompassen.",
     "Email": "E-post",
     "you@example.com": "you@example.com",
     "Remember me for 30 days": "Kom ihåg mig i 30 dagar",

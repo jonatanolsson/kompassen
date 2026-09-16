@@ -16,6 +16,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+[x-cloak] {
+    display: none !important;
+}
+
 /* ── user-content ──────────────────────────────────────────────
    Typography for rich text from flux:editor (TipTap HTML output).
    Follows Flux's zinc palette and spacing conventions.

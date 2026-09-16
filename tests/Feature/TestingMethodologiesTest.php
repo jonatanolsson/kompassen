@@ -22,6 +22,7 @@ test('team users can view testing methodology administration', function () {
 
     $response->assertSuccessful()
         ->assertSee(__('Testing Methodologies'))
+        ->assertSee('testing-methodology-form-modal', false)
         ->assertSee($methodology->name);
 });
 
@@ -39,11 +40,13 @@ test('users can create update and delete an unused custom methodology', function
     $component = Livewire::actingAs($user)
         ->test(TestingMethodologies::class)
         ->call('openCreateForm')
+        ->assertSet('editingMethodologyId', null)
         ->set('name', 'Keyboard testing')
         ->set('category', 'testing_tool')
         ->set('description', 'Manual keyboard-only checks.')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('close-modal', name: 'testing-methodology-form-modal');
 
     $methodology = TestingMethodology::query()
         ->where('name', 'Keyboard testing')
@@ -53,9 +56,13 @@ test('users can create update and delete an unused custom methodology', function
 
     $component
         ->call('edit', $methodology->id)
+        ->assertSet('editingMethodologyId', $methodology->id)
+        ->assertSet('category', 'testing_tool')
+        ->assertSet('description', 'Manual keyboard-only checks.')
         ->set('name', 'Keyboard and focus testing')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('close-modal', name: 'testing-methodology-form-modal');
 
     expect($methodology->refresh()->name)->toBe('Keyboard and focus testing');
 

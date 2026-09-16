@@ -24,8 +24,24 @@ test('project listing shows project domains and counts', function () {
         ->assertSuccessful()
         ->assertSee('Website audit')
         ->assertSee('example.com')
+        ->assertSee(__('Columns'))
+        ->assertSee(__('Show columns'))
+        ->assertSee(__('Project'))
+        ->assertSee(__('Domain'))
+        ->assertSee(__('Updated'))
+        ->assertSee(__('Actions'))
+        ->assertSee(__('Pages & Services'))
+        ->assertSee(__('Issues'))
         ->assertSee(__('WCAG Level'))
-        ->assertSee(__('Status'));
+        ->assertSee(__('Status'))
+        ->assertSee('pages: false', false)
+        ->assertSee('issues: false', false)
+        ->assertSee('wcag: false', false)
+        ->assertSee('status: false', false)
+        ->assertSee('x-show="columns.pages"', false)
+        ->assertSee('x-show="columns.issues"', false)
+        ->assertSee('x-show="columns.wcag"', false)
+        ->assertSee('x-show="columns.status"', false);
 });
 
 test('project listing filters by project name or page domain', function () {

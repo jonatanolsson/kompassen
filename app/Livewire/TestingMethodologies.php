@@ -23,8 +23,6 @@ class TestingMethodologies extends Component
 
     public string $description = '';
 
-    public bool $showForm = false;
-
     public function mount(): void
     {
         $this->authorize('viewAny', TestingMethodology::class);
@@ -55,7 +53,6 @@ class TestingMethodologies extends Component
     public function openCreateForm(): void
     {
         $this->resetForm();
-        $this->showForm = true;
     }
 
     public function edit(string $id): void
@@ -67,7 +64,6 @@ class TestingMethodologies extends Component
         $this->name = $methodology->name;
         $this->category = $methodology->category;
         $this->description = $methodology->description ?? '';
-        $this->showForm = true;
     }
 
     public function save(): void
@@ -106,6 +102,7 @@ class TestingMethodologies extends Component
 
         $this->resetForm();
         unset($this->methodologies);
+        $this->dispatch('close-modal', name: 'testing-methodology-form-modal');
         $this->dispatch('toast', message: __('Testing methodology saved.'), variant: 'success');
     }
 
@@ -141,7 +138,6 @@ class TestingMethodologies extends Component
         $this->name = '';
         $this->category = 'screen_reader';
         $this->description = '';
-        $this->showForm = false;
         $this->resetValidation();
     }
 

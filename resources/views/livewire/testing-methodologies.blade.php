@@ -6,63 +6,12 @@
                 {{ __('Manage the methods available when documenting project testing.') }}
             </flux:text>
         </div>
-        <flux:button variant="primary" icon="plus" wire:click="openCreateForm">
-            {{ __('Add Testing Methodology') }}
-        </flux:button>
+        <flux:modal.trigger name="testing-methodology-form-modal">
+            <flux:button variant="primary" icon="plus" wire:click="openCreateForm">
+                {{ __('Add Testing Methodology') }}
+            </flux:button>
+        </flux:modal.trigger>
     </div>
-
-    @if ($showForm)
-        <flux:card>
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <flux:heading level="2">
-                        {{ $editingMethodologyId ? __('Edit Testing Methodology') : __('Add Testing Methodology') }}
-                    </flux:heading>
-                    <flux:text class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                        {{ __('This method will be available to all projects.') }}
-                    </flux:text>
-                </div>
-                <flux:button variant="subtle" icon="x-mark" wire:click="cancel" />
-            </div>
-
-            <flux:separator class="my-6" />
-
-            <form wire:submit="save" class="space-y-5">
-                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <flux:field>
-                        <flux:label>{{ __('Name') }}</flux:label>
-                        <flux:input wire:model="name" />
-                        <flux:error name="name" />
-                    </flux:field>
-
-                    <flux:field>
-                        <flux:label>{{ __('Category') }}</flux:label>
-                        <flux:select wire:model="category">
-                            @foreach ($this->categoryOptions() as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </flux:select>
-                        <flux:error name="category" />
-                    </flux:field>
-                </div>
-
-                <flux:field>
-                    <flux:label>{{ __('Description') }}</flux:label>
-                    <flux:textarea wire:model="description" rows="3" />
-                    <flux:error name="description" />
-                </flux:field>
-
-                <div class="flex justify-end gap-2">
-                    <flux:button type="button" variant="ghost" wire:click="cancel">
-                        {{ __('Cancel') }}
-                    </flux:button>
-                    <flux:button type="submit" variant="primary">
-                        {{ $editingMethodologyId ? __('Update Methodology') : __('Save Methodology') }}
-                    </flux:button>
-                </div>
-            </form>
-        </flux:card>
-    @endif
 
     @forelse ($this->methodologies as $category => $methodologies)
         <section class="space-y-3">
@@ -92,9 +41,11 @@
                         </flux:table.cell>
                         <flux:table.cell>{{ $methodology->projects_count }}</flux:table.cell>
                         <flux:table.cell class="flex gap-1">
-                            <flux:button size="sm" variant="subtle" icon="pencil" wire:click="edit('{{ $methodology->id }}')">
-                                {{ __('Edit') }}
-                            </flux:button>
+                            <flux:modal.trigger name="testing-methodology-form-modal">
+                                <flux:button size="sm" variant="subtle" icon="pencil" wire:click="edit('{{ $methodology->id }}')">
+                                    {{ __('Edit') }}
+                                </flux:button>
+                            </flux:modal.trigger>
                             <flux:button
                                 size="sm"
                                 variant="subtle"
@@ -114,4 +65,56 @@
             <flux:callout.text>{{ __('No testing methodologies available.') }}</flux:callout.text>
         </flux:callout>
     @endforelse
+
+    <flux:modal name="testing-methodology-form-modal" class="w-full max-w-2xl">
+        <form wire:submit="save" class="space-y-6">
+            <div>
+                <flux:heading size="lg">
+                    {{ $editingMethodologyId ? __('Edit Testing Methodology') : __('Add Testing Methodology') }}
+                </flux:heading>
+                <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
+                    {{ __('This method will be available to all projects.') }}
+                </flux:text>
+            </div>
+
+            <flux:separator />
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <flux:field>
+                    <flux:label>{{ __('Name') }}</flux:label>
+                    <flux:input wire:model="name" autofocus />
+                    <flux:error name="name" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Category') }}</flux:label>
+                    <flux:select wire:model="category">
+                        @foreach ($this->categoryOptions() as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="category" />
+                </flux:field>
+            </div>
+
+            <flux:field>
+                <flux:label>{{ __('Description') }}</flux:label>
+                <flux:textarea wire:model="description" rows="3" />
+                <flux:error name="description" />
+            </flux:field>
+
+            <flux:separator />
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button type="button" variant="ghost" wire:click="cancel">
+                        {{ __('Cancel') }}
+                    </flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary">
+                    {{ $editingMethodologyId ? __('Update Methodology') : __('Save Methodology') }}
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
 </div>
