@@ -28,6 +28,8 @@ class EditAccessibilityProject extends Component
     #[Validate('required|in:A,AA,AAA')]
     public string $target_wcag_level = 'AA';
 
+    public string $target_wcag_version = '2.1';
+
     #[Validate('required|in:planning,in_progress,completed')]
     public string $status = 'planning';
 
@@ -42,6 +44,7 @@ class EditAccessibilityProject extends Component
         $this->name = $project->name;
         $this->description = $project->description;
         $this->target_wcag_level = $project->target_wcag_level;
+        $this->target_wcag_version = $project->target_wcag_version ?? '2.1';
         $this->status = $project->status;
     }
 

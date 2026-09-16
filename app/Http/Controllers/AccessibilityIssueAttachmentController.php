@@ -19,6 +19,6 @@ class AccessibilityIssueAttachmentController extends Controller
         Storage::disk('public')->delete($attachment->path);
         $attachment->delete();
 
-        return back()->with('success', 'Image deleted successfully.');
+        return back()->with('success', __('Image deleted successfully.'));
     }
 }

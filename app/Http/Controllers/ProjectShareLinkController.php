@@ -25,7 +25,7 @@ class ProjectShareLinkController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
-        return back()->with('success', 'Share link created successfully.')
+        return back()->with('success', __('Share link created successfully.'))
             ->with('share_link_token', $link->token);
     }
 
@@ -35,6 +35,6 @@ class ProjectShareLinkController extends Controller
 
         $shareLink->delete();
 
-        return back()->with('success', 'Share link deleted.');
+        return back()->with('success', __('Share link deleted.'));
     }
 }

@@ -74,6 +74,9 @@ test('can view project details', function () {
 
     $response->assertStatus(200);
     $response->assertSee($project->name);
+    $response->assertSee(route('accessibility-reports.create', $project));
+    $response->assertSee(__('Preview'));
+    $response->assertSee(__('Actions'));
 });
 
 test('renders project description as formatted user content', function () {

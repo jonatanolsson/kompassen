@@ -78,6 +78,6 @@ class AccessibilityPageController extends Controller
         $page->delete();
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Page deleted successfully.');
+            ->with('success', __('Page deleted successfully.'));
     }
 }

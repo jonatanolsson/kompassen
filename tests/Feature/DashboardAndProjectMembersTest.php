@@ -76,14 +76,24 @@ test('project members are visible and management controls are owner-only', funct
     $this->actingAs($owner)
         ->get(route('accessibility-projects.show', $project))
         ->assertSuccessful()
-        ->assertSee(__('Manage Members'))
-        ->assertSee(__('Only users from your team can be added.'))
-        ->assertSee('Project Editor');
+        ->assertSee(route('project-members.index', $project));
 
     $this->actingAs($editor)
         ->get(route('accessibility-projects.show', $project))
         ->assertSuccessful()
-        ->assertDontSee(__('Manage Members'))
+        ->assertSee(route('project-members.index', $project));
+
+    $this->actingAs($owner)
+        ->get(route('project-members.index', $project))
+        ->assertSuccessful()
+        ->assertSee(__('Add Member'))
+        ->assertSee(__('Only users from your team can be added.'))
+        ->assertSee('Project Editor');
+
+    $this->actingAs($editor)
+        ->get(route('project-members.index', $project))
+        ->assertSuccessful()
+        ->assertDontSee(__('Add Member'))
         ->assertSee('Project Owner');
 });
 

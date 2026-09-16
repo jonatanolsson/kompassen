@@ -5,12 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\AccessibilityProject;
 use App\Models\ProjectMember;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class ProjectMemberController extends Controller
 {
     use AuthorizesRequests;
+
+    public function index(AccessibilityProject $project): View
+    {
+        $this->authorize('view', $project);
+
+        $project->load('members.user');
+
+        return view('accessibility.projects.members', compact('project'));
+    }
 
     public function store(Request $request, AccessibilityProject $project)
     {

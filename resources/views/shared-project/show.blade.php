@@ -6,12 +6,59 @@
         <title>{{ $project->name }} - {{ __('Accessibility Report') }}</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @fluxAppearance
     </head>
-    <body class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 print:text-black" x-data="{ selectedImage: '', showModal: false, selectedIssue: null, selectedCriterion: null, showIssueModal: false, showCriterionModal: false }">
+    <body
+        class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 print:text-black"
+        x-data="{
+            selectedImage: '',
+            showModal: false,
+            selectedIssue: null,
+            selectedCriterion: null,
+            modalTrigger: null,
+            openModal(property, value, trigger) {
+                this.modalTrigger = trigger ? (trigger.currentTarget || trigger) : null;
+                this[property] = value;
+                this.$nextTick(() => this.$refs[property + 'Modal']?.focus());
+            },
+            closeModal(property) {
+                this[property] = property === 'selectedImage' ? '' : null;
+                this.showModal = false;
+                this.$nextTick(() => {
+                    if (this.modalTrigger && typeof this.modalTrigger.focus === 'function') {
+                        this.modalTrigger.focus();
+                    }
+                });
+            },
+            trapFocus(event) {
+                if (event.key !== 'Tab') {
+                    return;
+                }
+
+                const focusable = [...event.currentTarget.querySelectorAll('a[href], button:not([disabled]), [tabindex]')]
+                    .filter(element => element.tabIndex >= 0);
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+
+                if (!first || !last) {
+                    return;
+                }
+
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }
+        }"
+    >
         <!-- Header -->
         <header class="border-b border-zinc-200 dark:border-zinc-700 print:border-zinc-300 print:page-break-after-avoid">
-            <div class="max-w-4xl mx-auto px-6 py-8 print:py-6">
+            <div class="max-w-5xl mx-auto px-6 py-8 print:py-6">
                 <div class="flex items-start gap-6 print:gap-4">
                     @if ($project->client_logo)
                         <img 
@@ -21,14 +68,29 @@
                         />
                     @endif
                     <div class="flex-1 min-w-0">
+                        <flux:text class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 print:text-zinc-700">
+                            {{ __('Accessibility Report') }}
+                        </flux:text>
                         <flux:heading level="1" class="print:mb-2">{{ $project->name }}</flux:heading>
                         <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 print:mt-1">
-                            WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}
+                            WCAG {{ $project->target_wcag_version }} nivå {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}
                         </flux:text>
-                        @if ($project->description)
-                            <div class="text-base mt-3 print:mt-2 print:text-sm prose prose-sm dark:prose-invert max-w-none">
-                                {!! \App\Helpers\MarkdownHelper::toHtml($project->description) !!}
+                        <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400 sm:grid-cols-3 print:grid-cols-3 print:mt-3 print:text-zinc-700">
+                            <div>
+                                <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Audit Date') }}</dt>
+                                <dd>{{ $project->audit_date?->format('Y-m-d') ?? __('Not specified') }}</dd>
                             </div>
+                            <div>
+                                <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Target WCAG Level') }}</dt>
+                                <dd>WCAG {{ $project->target_wcag_version }} {{ $project->target_wcag_level }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Last updated') }}</dt>
+                                <dd>{{ $project->updated_at->format('Y-m-d H:i') }}</dd>
+                            </div>
+                        </dl>
+                        @if ($project->description)
+                            <x-user-content :content="$project->description" class="mt-4 print:mt-3 text-base print:text-sm" />
                         @endif
                     </div>
                 </div>
@@ -36,12 +98,31 @@
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-4xl mx-auto px-6 py-12 print:py-8">
+        <main class="max-w-5xl mx-auto px-6 py-10 print:py-8">
+            <!-- Executive Summary -->
+            <section id="executive-summary" class="mb-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-700 dark:bg-zinc-800/60 print:border-zinc-300 print:bg-white print:page-break-inside-avoid">
+                <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div class="max-w-3xl">
+                        <flux:text class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 print:text-zinc-700">
+                            {{ __('Executive summary') }}
+                        </flux:text>
+                        <flux:heading level="2" class="mt-1 text-2xl print:text-xl">{{ $stats['risk_level'] }}</flux:heading>
+                        <flux:text class="mt-3 text-base leading-7 text-zinc-700 dark:text-zinc-300 print:text-zinc-700">
+                            {{ $stats['risk_summary'] }}
+                        </flux:text>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900 print:border-zinc-300">
+                        <div class="font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('Recommended next step') }}</div>
+                        <div class="mt-1 text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $stats['recommended_next_step'] }}</div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Summary Statistics -->
-            <section class="mb-12 print:mb-8 print:page-break-inside-avoid">
+            <section id="summary" class="mb-12 print:mb-8 print:page-break-inside-avoid">
                 <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2">{{ __('Summary') }}</flux:heading>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 print:grid-cols-4 print:gap-3">
+                <div class="grid grid-cols-2 gap-4 md:grid-cols-3 print:grid-cols-3 print:gap-3">
                     <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-white print:border print:border-zinc-300 p-4 print:p-3 rounded-lg print:rounded">
                         <div class="text-3xl font-bold text-zinc-900 dark:text-white print:text-2xl print:text-black">{{ $stats['total_issues'] }}</div>
                         <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Total Issues') }}</div>
@@ -57,20 +138,106 @@
                         <div class="text-sm text-amber-700 dark:text-amber-300 print:text-amber-800 mt-1">{{ __('Major') }}</div>
                     </div>
 
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 print:bg-white print:border print:border-yellow-300 p-4 print:p-3 rounded-lg print:rounded">
+                        <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 print:text-yellow-700 print:text-2xl">{{ $stats['severity_counts']['moderate'] ?? 0 }}</div>
+                        <div class="text-sm text-yellow-700 dark:text-yellow-300 print:text-yellow-800 mt-1">{{ __('Moderate') }}</div>
+                    </div>
+
+                    <div class="bg-green-50 dark:bg-green-900/20 print:bg-white print:border print:border-green-300 p-4 print:p-3 rounded-lg print:rounded">
+                        <div class="text-3xl font-bold text-green-600 dark:text-green-400 print:text-green-700 print:text-2xl">{{ $stats['severity_counts']['minor'] ?? 0 }}</div>
+                        <div class="text-sm text-green-700 dark:text-green-300 print:text-green-800 mt-1">{{ __('Minor') }}</div>
+                    </div>
+
                     <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-white print:border print:border-zinc-300 p-4 print:p-3 rounded-lg print:rounded">
                         <div class="text-3xl font-bold text-zinc-900 dark:text-white print:text-2xl print:text-black">{{ $stats['total_pages'] }}</div>
                         <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Pages & Services Tested') }}</div>
                     </div>
                 </div>
+
+                @if ($stats['total_out_of_scope_pages'] > 0)
+                    <flux:text class="mt-3 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">
+                        {{ __(':count pages or services are outside the audit scope.', ['count' => $stats['total_out_of_scope_pages']]) }}
+                    </flux:text>
+                @endif
             </section>
 
+            <nav aria-label="{{ __('Report sections') }}" class="mb-12 print:hidden">
+                <flux:heading level="2" class="mb-4">{{ __('Report sections') }}</flux:heading>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#executive-summary" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Executive summary') }}</a>
+                    <a href="#summary" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Summary') }}</a>
+                    @if ($stats['priority_issues']->count() > 0)
+                        <a href="#priority-actions" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Prioritized actions') }}</a>
+                    @endif
+                    @if ($inScopePages->count() > 0)
+                        <a href="#pages-services" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Pages & Services') }}</a>
+                    @endif
+                    @if ($outOfScopePages->count() > 0)
+                        <a href="#out-of-scope" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Out of Scope') }}</a>
+                    @endif
+                    @if ($projectWideIssues->count() > 0)
+                        <a href="#project-wide-issues" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Project-Wide Issues') }}</a>
+                    @endif
+                    @if ($stats['wcag_mapping']->count() > 0)
+                        <a href="#accessibility-standards" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm hover:border-blue-300 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-blue-600 dark:hover:text-blue-300">{{ __('Affected WCAG requirements') }}</a>
+                    @endif
+                </div>
+            </nav>
+
+            <!-- Priority Actions -->
+            @if ($stats['priority_issues']->count() > 0)
+                <section id="priority-actions" class="mb-12 print:mb-8 print:page-break-inside-avoid">
+                    <div class="mb-4">
+                        <flux:heading level="2">{{ __('Prioritized actions') }}</flux:heading>
+                        <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">
+                            {{ __('Start with these issues to reduce the most accessibility risk.') }}
+                        </flux:text>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3 print:grid-cols-3">
+                        @foreach ($stats['priority_issues'] as $issue)
+                            @php
+                                $severityLabel = __(Str::title(str_replace(['_', '-'], ' ', $issue->severity)));
+                                $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area', 'solution_suggestions');
+                                $issueData['description'] = \App\Helpers\MarkdownHelper::toHtml($issue->description);
+                                $issueData['severity_label'] = $severityLabel;
+                                $issueData['difficulty_label'] = $issue->difficulty ? __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) : null;
+                                $issueData['status_label'] = $issue->status ? __($issue->status) : null;
+                                $issueData['page_name'] = $issue->page?->name ?? __('Project-wide issue');
+                                $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
+                                $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
+                            @endphp
+                            <button
+                                type="button"
+                                data-issue="{{ json_encode($issueData) }}"
+                                @click="openModal('selectedIssue', JSON.parse($el.dataset.issue), $event)"
+                                class="rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-blue-600 print:border-zinc-300 print:shadow-none"
+                            >
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="font-semibold text-zinc-900 dark:text-white print:text-black">{{ $issue->title }}</div>
+                                    <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))" class="shrink-0">
+                                        {{ $severityLabel }}
+                                    </flux:badge>
+                                </div>
+                                <div class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">
+                                    {{ $issue->page?->name ?? __('Project-wide issue') }}
+                                </div>
+                                <div class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-700 dark:text-blue-300">
+                                    {{ __('View details') }} <span aria-hidden="true">→</span>
+                                </div>
+                            </button>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             <!-- Pages & Issues -->
-            @if ($project->pages->count() > 0)
-                <section class="mb-12 print:mb-8">
+            @if ($inScopePages->count() > 0)
+                <section id="pages-services" class="mb-12 print:mb-8">
                     <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Pages & Services') }}</flux:heading>
                     
                     <div class="space-y-6 print:space-y-4">
-                        @foreach ($project->pages as $page)
+                        @foreach ($inScopePages as $page)
                             @php
                                 $resourceType = $page->resource_type ?? 'page';
                                 $accessContext = $page->access_context ?? 'not_applicable';
@@ -92,7 +259,7 @@
                                                 @endif
                                             </div>
                                             @if ($page->url)
-                                                <a href="{{ $page->url }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-400 print:text-blue-700 hover:underline print:underline mt-1 break-all">
+                                                <a href="{{ $page->url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 dark:text-blue-400 print:text-blue-700 hover:underline print:underline mt-1 break-all">
                                                     {{ $page->url }}
                                                 </a>
                                             @endif
@@ -102,9 +269,7 @@
                                         </span>
                                     </div>
                                     @if ($page->description)
-                                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-2 print:mt-1 prose prose-sm dark:prose-invert max-w-none">
-                                            {!! \App\Helpers\MarkdownHelper::toHtml($page->description) !!}
-                                        </div>
+                                        <x-user-content :content="$page->description" class="mt-2 print:mt-1 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700" />
                                     @endif
                                 </div>
 
@@ -116,14 +281,23 @@
                                         <div class="space-y-3 print:space-y-2">
                                             @foreach ($page->issues as $issue)
                                                 @php
-                                                    $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
+                                                    $severityLabel = __(Str::title(str_replace(['_', '-'], ' ', $issue->severity)));
+                                                    $difficultyLabel = $issue->difficulty ? __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) : null;
+                                                    $statusLabel = $issue->status ? __($issue->status) : null;
+                                                    $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area', 'solution_suggestions');
                                                     $issueData['description'] = \App\Helpers\MarkdownHelper::toHtml($issue->description);
+                                                    $issueData['severity_label'] = $severityLabel;
+                                                    $issueData['difficulty_label'] = $difficultyLabel;
+                                                    $issueData['status_label'] = $statusLabel;
+                                                    $issueData['page_name'] = $page->name;
                                                     $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
                                                     $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                                                 @endphp
                                                 <button 
                                                     type="button"
-                                                    @click="selectedIssue = @json($issueData); showIssueModal = true"
+                                                    data-issue="{{ json_encode($issueData) }}"
+                                                    @click="openModal('selectedIssue', JSON.parse($el.dataset.issue), $event)"
+                                                    aria-label="{{ __('View issue details: :title', ['title' => $issue->title]) }}"
                                                     class="w-full text-left bg-white dark:bg-zinc-800 print:bg-white border border-zinc-200 dark:border-zinc-700 print:border-zinc-300 rounded-lg p-3 print:p-2.5 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600 print:hover:shadow-none transition print:hover:border-zinc-300"
                                                 >
                                                     <!-- Issue Header -->
@@ -132,7 +306,7 @@
                                                             <flux:heading level="5" class="text-sm font-semibold mb-1">{{ $issue->title }}</flux:heading>
                                                         </div>
                                                         <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))" class="text-xs whitespace-nowrap print:text-xs">
-                                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
+                                                            {{ $severityLabel }}
                                                         </flux:badge>
                                                     </div>
 
@@ -145,12 +319,12 @@
                                                         @endif
                                                         @if ($issue->difficulty)
                                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}
+                                                                {{ $difficultyLabel }}
                                                             </flux:badge>
                                                         @endif
                                                         @if ($issue->status)
                                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}
+                                                                {{ $statusLabel }}
                                                             </flux:badge>
                                                         @endif
                                                     </div>
@@ -172,6 +346,10 @@
                                                             @endforeach
                                                         </div>
                                                     @endif
+
+                                                    <div class="mt-3 flex items-center justify-end text-sm font-medium text-blue-700 dark:text-blue-300 print:hidden">
+                                                        {{ __('View details') }} <span class="ml-1" aria-hidden="true">→</span>
+                                                    </div>
                                                 </button>
                                             @endforeach
                                         </div>
@@ -181,33 +359,40 @@
                                 @endif
 
                                 <!-- Screenshots -->
-                                @if ($project->pages->first()?->issues->sum(fn($i) => $i->attachments->count()) > 0 || $page->issues->sum(fn($i) => $i->attachments->count()) > 0)
-                                    @php $attachments = $page->issues->flatMap(fn($i) => $i->attachments)->take(4); @endphp
-                                    @if ($attachments->count() > 0)
-                                        <div class="border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300 -m-4 mt-4 print:mt-4 p-4 print:p-3 bg-zinc-50 dark:bg-zinc-800 print:bg-zinc-50">
-                                            <flux:heading level="4" class="text-xs mb-3 print:mb-2 uppercase">{{ __('Screenshots') }}</flux:heading>
-                                            <div class="grid grid-cols-2 print:grid-cols-3 gap-2 print:gap-1.5">
-                                                @foreach ($attachments as $attachment)
-                                                    <button 
-                                                        type="button"
-                                                        @click="selectedImage = '{{ asset('storage/' . $attachment->path) }}'; showModal = true"
-                                                        class="print:hidden rounded border border-zinc-300 overflow-hidden hover:shadow-md transition"
-                                                    >
-                                                        <img 
-                                                            src="{{ asset('storage/' . $attachment->path) }}"
-                                                            alt="{{ $attachment->original_filename }}"
-                                                            class="w-full h-24 object-cover"
-                                                        />
-                                                    </button>
-                                                    <img 
-                                                        src="{{ asset('storage/' . $attachment->path) }}"
-                                                        alt="{{ $attachment->original_filename }}"
-                                                        class="hidden print:block rounded border border-zinc-300 w-full h-auto"
-                                                    />
-                                                @endforeach
-                                            </div>
+                                @if ($page->issues->sum(fn($i) => $i->attachments->count()) > 0)
+                                    <div class="border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300 -m-4 mt-4 print:mt-4 p-4 print:p-3 bg-zinc-50 dark:bg-zinc-800 print:bg-zinc-50">
+                                        <flux:heading level="4" class="text-xs mb-3 print:mb-2 uppercase">{{ __('Screenshots by issue') }}</flux:heading>
+                                        <div class="space-y-4">
+                                            @foreach ($page->issues->filter(fn($issue) => $issue->attachments->count() > 0) as $issueWithAttachments)
+                                                <div>
+                                                    <div class="mb-2 text-sm font-medium text-zinc-900 dark:text-white print:text-black">
+                                                        {{ __('Screenshots for :issue', ['issue' => $issueWithAttachments->title]) }}
+                                                    </div>
+                                                    <div class="grid grid-cols-2 gap-2 print:grid-cols-3 print:gap-1.5">
+                                                        @foreach ($issueWithAttachments->attachments->take(4) as $attachment)
+                                                            <button
+                                                                type="button"
+                                                                @click="openModal('selectedImage', '{{ asset('storage/' . $attachment->path) }}', $event); showModal = true"
+                                                                aria-label="{{ __('View image: :filename', ['filename' => $attachment->original_filename]) }}"
+                                                                class="print:hidden overflow-hidden rounded border border-zinc-300 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            >
+                                                                <img
+                                                                    src="{{ asset('storage/' . $attachment->path) }}"
+                                                                    alt="{{ __('Screenshot for :issue', ['issue' => $issueWithAttachments->title]) }}"
+                                                                    class="h-24 w-full object-cover"
+                                                                />
+                                                            </button>
+                                                            <img
+                                                                src="{{ asset('storage/' . $attachment->path) }}"
+                                                                alt="{{ __('Screenshot for :issue', ['issue' => $issueWithAttachments->title]) }}"
+                                                                class="hidden w-full rounded border border-zinc-300 print:block"
+                                                            />
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
                                         </div>
-                                    @endif
+                                    </div>
                                 @endif
                             </flux:card>
                         @endforeach
@@ -215,41 +400,76 @@
                 </section>
             @endif
 
+            <!-- Out-of-Scope Resources -->
+            @if ($outOfScopePages->count() > 0)
+                <section id="out-of-scope" class="mb-12 print:mb-8">
+                    <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Out of Scope') }}</flux:heading>
+                    <flux:text class="mb-4 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">
+                        {{ __('These pages and services were documented but excluded from this audit.') }}
+                    </flux:text>
+                    <div class="space-y-3 print:space-y-2">
+                        @foreach ($outOfScopePages as $page)
+                            <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20 print:border-amber-300 print:bg-white">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <h3 class="font-semibold text-zinc-900 dark:text-white print:text-black">{{ $page->name }}</h3>
+                                    <span class="text-xs font-medium text-amber-800 dark:text-amber-200 print:text-amber-800">{{ __('Out of Scope') }}</span>
+                                </div>
+                                @if ($page->url)
+                                    <a href="{{ $page->url }}" target="_blank" rel="noopener noreferrer" class="mt-1 block break-all text-sm text-blue-700 underline dark:text-blue-300 print:text-blue-800">
+                                        {{ $page->url }}
+                                    </a>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             <!-- Project-Wide Issues -->
-            @php $projectWideIssues = $project->issues()->whereNull('page_id')->get(); @endphp
             @if ($projectWideIssues->count() > 0)
-                <section class="mb-12 print:mb-8">
+                <section id="project-wide-issues" class="mb-12 print:mb-8">
                     <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Project-Wide Issues') }}</flux:heading>
                     
                     <div class="space-y-6 print:space-y-4">
                         @foreach ($projectWideIssues as $issue)
                             @php
-                                $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area');
+                                $severityLabel = __(Str::title(str_replace(['_', '-'], ' ', $issue->severity)));
+                                $difficultyLabel = $issue->difficulty ? __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) : null;
+                                $statusLabel = $issue->status ? __($issue->status) : null;
+                                $issueData = $issue->only('id', 'title', 'description', 'severity', 'difficulty', 'status', 'component_area', 'solution_suggestions');
                                 $issueData['description'] = \App\Helpers\MarkdownHelper::toHtml($issue->description);
+                                $issueData['severity_label'] = $severityLabel;
+                                $issueData['difficulty_label'] = $difficultyLabel;
+                                $issueData['status_label'] = $statusLabel;
+                                $issueData['page_name'] = $issue->page?->name ?? __('Project-wide issue');
                                 $issueData['attachments'] = $issue->attachments->map(fn($a) => ['path' => asset('storage/' . $a->path), 'filename' => $a->original_filename])->all();
                                 $issueData['wcag'] = $issue->wcagCriteria->map(fn($c) => ['number' => $c->number, 'name' => $c->name_sv ?? $c->name_en, 'level' => $c->level, 'description' => $c->description_sv ?? $c->description_en, 'url' => $c->url])->all();
                             @endphp
-                            <button
-                                type="button"
-                                @click="selectedIssue = @json($issueData); showIssueModal = true"
-                                class="w-full text-left"
+                            <flux:card
+                                role="button"
+                                tabindex="0"
+                                data-issue="{{ json_encode($issueData) }}"
+                                @click="openModal('selectedIssue', JSON.parse($el.dataset.issue), $event)"
+                                @keydown.enter="openModal('selectedIssue', JSON.parse($el.dataset.issue), $event)"
+                                @keydown.space.prevent="openModal('selectedIssue', JSON.parse($el.dataset.issue), $event)"
+                                aria-label="{{ __('View issue details: :title', ['title' => $issue->title]) }}"
+                                class="w-full text-left print:page-break-inside-avoid print:border print:border-zinc-300 hover:shadow-lg hover:border-zinc-300 dark:hover:border-zinc-600 print:hover:shadow-none transition cursor-pointer"
                             >
-                                <flux:card class="print:page-break-inside-avoid print:border print:border-zinc-300 hover:shadow-lg hover:border-zinc-300 dark:hover:border-zinc-600 print:hover:shadow-none transition cursor-pointer">
                                     <!-- Header Row -->
                                     <div class="flex items-start justify-between gap-4 print:gap-2 mb-3 print:mb-2">
                                         <flux:heading level="3" class="flex-1 min-w-0 print:text-base">{{ $issue->title }}</flux:heading>
                                         <flux:badge :color="$issue->severity === 'critical' ? 'red' : ($issue->severity === 'major' ? 'amber' : ($issue->severity === 'moderate' ? 'yellow' : 'green'))" class="whitespace-nowrap print:text-xs">
-                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
+                                            {{ $severityLabel }}
                                         </flux:badge>
                                     </div>
 
                                     <!-- Meta Badges -->
                                     <div class="flex flex-wrap gap-2 mb-3 print:mb-2 print:gap-1.5 print:text-xs">
                                         <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                            {{ __('Difficulty') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}
+                                            {{ __('Difficulty') }}: {{ $difficultyLabel }}
                                         </flux:badge>
                                         <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
-                                            {{ __('Status') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}
+                                            {{ __('Status') }}: {{ $statusLabel }}
                                         </flux:badge>
                                         @if ($issue->component_area)
                                             <flux:badge color="zinc" variant="outline" class="text-xs print:text-xs print:px-1.5 print:py-0.5">
@@ -260,7 +480,7 @@
 
                                     <!-- Description -->
                                     @if ($issue->description)
-                                        <div class="prose prose-sm dark:prose-invert print:prose-sm max-w-none mb-3 print:mb-2 text-sm">
+                                        <div class="max-w-none mb-3 print:mb-2 text-sm">
                                             <x-user-content :content="$issue->description" />
                                         </div>
                                     @endif
@@ -288,7 +508,8 @@
                                             @foreach ($issue->attachments as $attachment)
                                                 <button 
                                                     type="button"
-                                                    @click="selectedImage = '{{ asset('storage/' . $attachment->path) }}'; showModal = true"
+                                                    @click="openModal('selectedImage', '{{ asset('storage/' . $attachment->path) }}', $event); showModal = true"
+                                                    aria-label="{{ __('View image: :filename', ['filename' => $attachment->original_filename]) }}"
                                                     class="print:hidden rounded border border-zinc-300 overflow-hidden hover:shadow-md transition aspect-square"
                                                 >
                                                     <img 
@@ -306,8 +527,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                </flux:card>
-                            </button>
+                            </flux:card>
                         @endforeach
                     </div>
                 </section>
@@ -315,11 +535,11 @@
 
             <!-- WCAG Mapping -->
             @if ($stats['wcag_mapping']->count() > 0)
-                <section class="print:page-break-inside-avoid">
+                <section id="accessibility-standards" class="print:page-break-inside-avoid">
                     <div class="mb-6 print:mb-4">
-                        <flux:heading level="2" class="print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Accessibility Standards') }}</flux:heading>
+                        <flux:heading level="2" class="print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Affected WCAG requirements') }}</flux:heading>
                         <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-2 print:mt-1">
-                            {{ __('Which accessibility standards are affected') }}
+                            {{ __('These WCAG requirements are affected by the issues above.') }}
                         </flux:text>
                     </div>
                     
@@ -328,11 +548,16 @@
                             @php 
                                 $criterion = $mappings->first()['criterion'];
                                 $criterionData = $criterion->only('id', 'number', 'name_en', 'name_sv', 'level', 'description_en', 'description_sv', 'url');
-                                $issuesData = $mappings->map(fn($m) => $m['issue']->only('id', 'title', 'severity'))->all();
+                                $issuesData = $mappings->map(fn($m) => [
+                                    ...$m['issue']->only('id', 'title', 'severity'),
+                                    'severity_label' => __(Str::title(str_replace(['_', '-'], ' ', $m['issue']->severity))),
+                                ])->all();
                             @endphp
                             <button
                                 type="button"
-                                @click="selectedCriterion = @json(array_merge($criterionData, ['issues' => $issuesData])); showCriterionModal = true"
+                                data-criterion="{{ json_encode(array_merge($criterionData, ['issues' => $issuesData])) }}"
+                                @click="openModal('selectedCriterion', JSON.parse($el.dataset.criterion), $event)"
+                                aria-label="{{ __('View criterion details: :criterion', ['criterion' => $criterion->number]) }}"
                                 class="w-full text-left border-l-4 border-blue-500 print:border-blue-700 pl-4 print:pl-3 py-2 print:py-1.5 bg-blue-50 dark:bg-blue-900/20 print:bg-white print:border print:border-blue-300 rounded hover:bg-blue-100 dark:hover:bg-blue-900/40 print:hover:bg-white transition print:hover:border-blue-400"
                             >
                                 <flux:heading level="3" class="text-sm print:text-sm font-semibold">
@@ -346,13 +571,14 @@
                                 @if ($mappings->count() > 0)
                                     <ul class="text-xs mt-1.5 print:mt-1 space-y-0.5 print:space-y-0">
                                         @foreach ($mappings->take(3) as $mapping)
-                                            <li>• {{ Str::limit($mapping['issue']->title, 60) }}</li>
+                                            <li><span class="rounded bg-white/80 px-1.5 py-0.5 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{{ Str::limit($mapping['issue']->title, 60) }}</span></li>
                                         @endforeach
                                         @if ($mappings->count() > 3)
                                             <li class="italic text-zinc-500">{{ __('+ :count more', ['count' => $mappings->count() - 3]) }}</li>
                                         @endif
                                     </ul>
                                 @endif
+                                <div class="mt-3 text-xs font-medium text-blue-700 dark:text-blue-300 print:hidden">{{ __('View criterion') }} →</div>
                             </button>
                         @endforeach
                     </div>
@@ -370,9 +596,9 @@
 
         <!-- Footer -->
         <footer class="border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300 mt-12 print:mt-8 py-6 print:py-4 text-center print:page-break-before-avoid">
-            <div class="max-w-4xl mx-auto px-6">
+            <div class="max-w-5xl mx-auto px-6">
                 <flux:text class="text-sm">
-                    {{ __('This is a shared accessibility report. Last updated:') }} <strong>{{ $project->updated_at->format('Y-m-d H:i') }}</strong>
+                    {{ __('This is a shared accessibility report. Last updated: :date', ['date' => $project->updated_at->format('Y-m-d H:i')]) }}
                 </flux:text>
                 <flux:button 
                     type="button"
@@ -388,7 +614,14 @@
         <!-- Issue Detail Modal -->
         <div
             x-show="selectedIssue !== null"
-            @keydown.escape.window="selectedIssue = null; showIssueModal = false"
+            @keydown.escape.stop="closeModal('selectedIssue')"
+            @keydown="trapFocus($event)"
+            @click.self="closeModal('selectedIssue')"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="issue-modal-title"
+            tabindex="-1"
+            x-ref="selectedIssueModal"
             class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print:hidden"
             style="display: none;"
         >
@@ -396,11 +629,12 @@
                 <!-- Header -->
                 <div class="flex justify-between items-start p-6 border-b border-zinc-200 dark:border-zinc-700">
                     <div class="flex-1 min-w-0">
-                        <h2 class="text-xl font-semibold text-zinc-900 dark:text-white" x-text="selectedIssue?.title || ''"></h2>
+                        <h2 id="issue-modal-title" class="text-xl font-semibold text-zinc-900 dark:text-white" x-text="selectedIssue?.title || ''"></h2>
                     </div>
                     <button
                         type="button"
-                        @click="selectedIssue = null"
+                        @click="closeModal('selectedIssue')"
+                        aria-label="{{ __('Close') }}"
                         class="ml-4 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 flex-shrink-0"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -416,22 +650,40 @@
                         <span
                             class="px-3 py-1 rounded-full text-sm font-medium text-white"
                             :class="selectedIssue?.severity === 'critical' ? 'bg-red-500' : selectedIssue?.severity === 'major' ? 'bg-amber-500' : selectedIssue?.severity === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'"
-                            x-text="selectedIssue?.severity ? selectedIssue.severity.charAt(0).toUpperCase() + selectedIssue.severity.slice(1) : ''"
+                            x-text="selectedIssue?.severity_label || ''"
                         ></span>
                         <span x-show="selectedIssue?.difficulty" class="px-3 py-1 rounded-full text-sm font-medium bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white">
                             <span class="font-semibold">{{ __('Difficulty') }}:</span>
-                            <span x-text="selectedIssue?.difficulty ? selectedIssue.difficulty.charAt(0).toUpperCase() + selectedIssue.difficulty.slice(1) : ''"></span>
+                            <span x-text="selectedIssue?.difficulty_label || ''"></span>
                         </span>
                         <span x-show="selectedIssue?.status" class="px-3 py-1 rounded-full text-sm font-medium bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white">
                             <span class="font-semibold">{{ __('Status') }}:</span>
-                            <span x-text="selectedIssue?.status ? selectedIssue.status.charAt(0).toUpperCase() + selectedIssue.status.slice(1) : ''"></span>
+                            <span x-text="selectedIssue?.status_label || ''"></span>
                         </span>
                         <span x-show="selectedIssue?.component_area" class="px-3 py-1 rounded-full text-sm font-medium bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white" x-text="selectedIssue?.component_area || ''"></span>
                     </div>
 
-                    <!-- Description -->
-                    <div x-show="selectedIssue?.description" class="prose prose-sm dark:prose-invert max-w-none">
-                        <div class="text-sm text-zinc-700 dark:text-zinc-300" x-html="selectedIssue?.description || ''"></div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                            <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-2">{{ __('Problem') }}</h3>
+                            <div x-show="selectedIssue?.description" class="user-content max-w-none text-sm text-zinc-700 dark:text-zinc-300">
+                                <div x-html="selectedIssue?.description || ''"></div>
+                            </div>
+                        </div>
+                        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                            <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-2">{{ __('Impact') }}</h3>
+                            <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ __('This issue can prevent users from perceiving, understanding, or using the audited page or service as intended.') }}</p>
+                        </div>
+                        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700 md:col-span-2">
+                            <h3 class="font-semibold text-sm text-zinc-900 dark:text-white mb-2">{{ __('Recommended action') }}</h3>
+                            <p x-show="!selectedIssue?.solution_suggestions" class="text-sm text-zinc-700 dark:text-zinc-300">{{ __('Prioritize remediation based on severity and verify the fix against the linked WCAG requirement.') }}</p>
+                            <div x-show="selectedIssue?.solution_suggestions" class="user-content max-w-none text-sm text-zinc-700 dark:text-zinc-300" x-html="selectedIssue?.solution_suggestions || ''"></div>
+                        </div>
+                    </div>
+
+                    <div x-show="selectedIssue?.page_name" class="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-700 dark:bg-zinc-700/40 dark:text-zinc-300">
+                        <span class="font-semibold text-zinc-900 dark:text-white">{{ __('Affected page or service') }}:</span>
+                        <span x-text="selectedIssue?.page_name || ''"></span>
                     </div>
 
                     <!-- WCAG Criteria -->
@@ -462,7 +714,9 @@
                         <div class="space-y-2">
                             <template x-for="attachment in selectedIssue?.attachments || []" :key="attachment.filename">
                                 <div class="border border-zinc-200 dark:border-zinc-700 rounded p-2">
-                                    <img :src="attachment.path" :alt="attachment.filename" class="rounded max-w-full h-auto cursor-pointer hover:opacity-75 transition" @click="selectedImage = attachment.path; showModal = true" />
+                                    <button type="button" class="block w-full" @click="openModal('selectedImage', attachment.path, $event); showModal = true" :aria-label="'{{ __('View image') }}: ' + attachment.filename">
+                                        <img :src="attachment.path" :alt="attachment.filename" class="rounded max-w-full h-auto cursor-pointer hover:opacity-75 transition" />
+                                    </button>
                                 </div>
                             </template>
                         </div>
@@ -474,7 +728,14 @@
         <!-- WCAG Criterion Detail Modal -->
         <div
             x-show="selectedCriterion !== null"
-            @keydown.escape.window="selectedCriterion = null; showCriterionModal = false"
+            @keydown.escape.stop="closeModal('selectedCriterion')"
+            @keydown="trapFocus($event)"
+            @click.self="closeModal('selectedCriterion')"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="criterion-modal-title"
+            tabindex="-1"
+            x-ref="selectedCriterionModal"
             class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print:hidden"
             style="display: none;"
         >
@@ -482,7 +743,7 @@
                 <!-- Header -->
                 <div class="flex justify-between items-start p-6 border-b border-zinc-200 dark:border-zinc-700">
                     <div class="flex-1 min-w-0">
-                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
+                        <h2 id="criterion-modal-title" class="text-lg font-semibold text-zinc-900 dark:text-white">
                             <span class="text-blue-600 dark:text-blue-400 font-bold" x-text="selectedCriterion?.number || ''"></span>
                             –
                             <span x-text="selectedCriterion?.name_sv || selectedCriterion?.name_en || ''"></span>
@@ -490,7 +751,8 @@
                     </div>
                     <button
                         type="button"
-                        @click="selectedCriterion = null"
+                        @click="closeModal('selectedCriterion')"
+                        aria-label="{{ __('Close') }}"
                         class="ml-4 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 flex-shrink-0"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,7 +767,7 @@
                     <div x-show="selectedCriterion?.url" class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
                         <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ __('View on W3C') }}</span>
                         <a x-show="selectedCriterion?.url" :href="selectedCriterion?.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
-                            Öppna →
+                            {{ __('Open') }} →
                         </a>
                     </div>
 
@@ -545,16 +807,24 @@
         <!-- Image Modal -->
         <div
             x-show="showModal"
-            @keydown.escape.window="showModal = false"
+            @keydown.escape.stop="closeModal('selectedImage')"
+            @keydown="trapFocus($event)"
+            @click.self="closeModal('selectedImage')"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="image-modal-title"
+            tabindex="-1"
+            x-ref="selectedImageModal"
             class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print:hidden"
             style="display: none;"
         >
             <div class="bg-white dark:bg-zinc-800 rounded-lg max-w-2xl w-full flex flex-col">
                 <div class="flex justify-between items-center p-4 border-b border-zinc-200 dark:border-zinc-700">
-                    <h3 class="font-semibold text-zinc-900 dark:text-white">{{ __('Full Size View') }}</h3>
+                    <h3 id="image-modal-title" class="font-semibold text-zinc-900 dark:text-white">{{ __('Full Size View') }}</h3>
                     <button
                         type="button"
-                        @click="showModal = false"
+                        @click="closeModal('selectedImage')"
+                        aria-label="{{ __('Close') }}"
                         class="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,5 +841,7 @@
                 </div>
             </div>
         </div>
+        @livewireScripts
+        @fluxScripts
     </body>
 </html>

@@ -1,24 +1,44 @@
 <x-app-layout>
     <div class="min-h-screen bg-white dark:bg-zinc-900">
     <div class="max-w-6xl mx-auto px-4 py-8">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <flux:heading level="1">{{ $project->name }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:text>
             </div>
-            <div class="flex gap-2">
-                <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="ghost">{{ __('Preview') }}</flux:button>
-                <flux:modal.trigger name="share-modal">
-                    <flux:button icon="link">{{ __('Share') }}</flux:button>
-                </flux:modal.trigger>
-                <a href="{{ route('accessibility-projects.edit', $project) }}">
-                    <flux:button variant="outline" icon="pencil">{{ __('Edit') }}</flux:button>
-                </a>
-                <form action="{{ route('accessibility-projects.destroy', $project) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <flux:button type="submit" variant="danger" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
-                </form>
+            <div class="flex items-center gap-2">
+                <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="primary">
+                    {{ __('Preview') }}
+                </flux:button>
+
+                <flux:dropdown align="end">
+                    <flux:button variant="outline" icon="ellipsis-horizontal">
+                        {{ __('Actions') }}
+                    </flux:button>
+
+                    <flux:menu>
+                        <flux:menu.item href="{{ route('accessibility-reports.create', $project) }}" icon="document-text" wire:navigate>
+                            {{ __('Generate Report') }}
+                        </flux:menu.item>
+                        <flux:menu.item href="{{ route('project-members.index', $project) }}" icon="users" wire:navigate>
+                            {{ __('Manage Members') }}
+                        </flux:menu.item>
+                        <flux:modal.trigger name="share-modal">
+                            <flux:menu.item icon="link">{{ __('Share') }}</flux:menu.item>
+                        </flux:modal.trigger>
+                        <flux:menu.item href="{{ route('accessibility-projects.edit', $project) }}" icon="pencil" wire:navigate>
+                            {{ __('Edit') }}
+                        </flux:menu.item>
+                        <flux:menu.separator />
+                        <form action="{{ route('accessibility-projects.destroy', $project) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                            @csrf
+                            @method('DELETE')
+                            <flux:menu.item as="button" type="submit" variant="danger" icon="trash">
+                                {{ __('Delete') }}
+                            </flux:menu.item>
+                        </form>
+                    </flux:menu>
+                </flux:dropdown>
             </div>
         </div>
 
@@ -28,65 +48,6 @@
                 <x-user-content :content="$project->description" />
             </section>
         @endif
-
-        @php
-            $currentMember = $project->members->firstWhere('user_id', auth()->id());
-            $canManageMembers = $currentMember?->role === 'owner';
-        @endphp
-
-        <section class="space-y-4">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <flux:heading level="2">{{ __('Members') }}</flux:heading>
-                    <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                        {{ __('People with access to this project') }}
-                    </flux:text>
-                </div>
-                @if ($canManageMembers)
-                    <flux:modal.trigger name="members-modal">
-                        <flux:button variant="primary" icon="user-plus">{{ __('Manage Members') }}</flux:button>
-                    </flux:modal.trigger>
-                @endif
-            </div>
-
-            <div class="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
-                @foreach ($project->members as $member)
-                    <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex items-center gap-3">
-                            <flux:avatar :name="$member->user->name" size="sm" />
-                            <div>
-                                <flux:text class="font-medium">{{ $member->user->name }}</flux:text>
-                                <flux:text class="text-sm text-zinc-500">{{ $member->user->email }}</flux:text>
-                            </div>
-                        </div>
-
-                        @if ($canManageMembers)
-                            <div class="flex flex-wrap items-center gap-2">
-                                <form action="{{ route('project-members.update', [$project, $member]) }}" method="POST" class="flex items-center gap-2">
-                                    @csrf
-                                    @method('PUT')
-                                    <flux:select name="role" size="sm" aria-label="{{ __('Role for :name', ['name' => $member->user->name]) }}">
-                                        <option value="owner" @selected($member->role === 'owner')>{{ __('Owner') }}</option>
-                                        <option value="editor" @selected($member->role === 'editor')>{{ __('Editor') }}</option>
-                                        <option value="viewer" @selected($member->role === 'viewer')>{{ __('Viewer') }}</option>
-                                    </flux:select>
-                                    <flux:button type="submit" variant="ghost" size="sm" icon="check" aria-label="{{ __('Save role') }}" />
-                                </form>
-                                <form action="{{ route('project-members.destroy', [$project, $member]) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <flux:button type="submit" variant="ghost" size="sm" icon="trash" class="text-red-600" aria-label="{{ __('Remove member') }}" onclick="return confirm('{{ __('Remove :name from this project?', ['name' => $member->user->name]) }}')" />
-                                </form>
-                            </div>
-                        @else
-                            <flux:badge :color="$member->role === 'owner' ? 'amber' : 'zinc'">
-                                {{ __(Str::title($member->role)) }}
-                            </flux:badge>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        </section>
 
         <flux:separator class="my-8" />
 
@@ -302,48 +263,6 @@
 
     </div>
 </div>
-
-@if ($canManageMembers)
-    <flux:modal name="members-modal" class="md:w-[32rem]">
-        <div class="space-y-6">
-            <div>
-                <flux:heading level="2">{{ __('Manage Members') }}</flux:heading>
-                <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                    {{ __('Add people from your team to this project.') }}
-                </flux:text>
-            </div>
-
-            <flux:separator />
-
-            <form action="{{ route('project-members.store', $project) }}" method="POST" class="space-y-4">
-                @csrf
-                <flux:field>
-                    <flux:label>{{ __('Email address') }}</flux:label>
-                    <flux:input type="email" name="email" required placeholder="{{ __('name@example.com') }}" />
-                    <flux:description>{{ __('Only users from your team can be added.') }}</flux:description>
-                    <flux:error name="email" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>{{ __('Role') }}</flux:label>
-                    <flux:select name="role">
-                        <option value="editor">{{ __('Editor') }}</option>
-                        <option value="viewer">{{ __('Viewer') }}</option>
-                        <option value="owner">{{ __('Owner') }}</option>
-                    </flux:select>
-                    <flux:error name="role" />
-                </flux:field>
-
-                <div class="flex justify-end gap-2">
-                    <flux:modal.close>
-                        <flux:button variant="ghost" type="button">{{ __('Cancel') }}</flux:button>
-                    </flux:modal.close>
-                    <flux:button type="submit" variant="primary" icon="user-plus">{{ __('Add Member') }}</flux:button>
-                </div>
-            </form>
-        </div>
-    </flux:modal>
-@endif
 
 <!-- Share Modal -->
 <flux:modal name="share-modal" class="md:w-96">

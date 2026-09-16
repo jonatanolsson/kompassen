@@ -39,6 +39,9 @@ test('can view report creation form', function () {
 
     $response->assertStatus(200);
     $response->assertSee(__('Generate Report'));
+    $response->assertSee('<html', false);
+    $response->assertSee('data-flux-sidebar', false);
+    $response->assertSee('/livewire/livewire.js', false);
 });
 
 test('can generate report with issues', function () {

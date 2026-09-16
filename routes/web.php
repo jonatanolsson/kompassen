@@ -64,6 +64,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('accessibility-projects.destroy');
 
     // Project members
+    Route::get('accessibility-projects/{project}/members', [ProjectMemberController::class, 'index'])
+        ->name('project-members.index');
     Route::post('accessibility-projects/{project}/members', [ProjectMemberController::class, 'store'])
         ->scopeBindings()
         ->name('project-members.store');

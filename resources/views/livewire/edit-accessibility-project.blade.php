@@ -44,9 +44,9 @@
                         <flux:field>
                             <flux:label>{{ __('Target WCAG Level') }}</flux:label>
                             <flux:select wire:model="target_wcag_level" required>
-                                <option value="A">{{ __('WCAG 2.1 Level A') }}</option>
-                                <option value="AA">{{ __('WCAG 2.1 Level AA') }}</option>
-                                <option value="AAA">{{ __('WCAG 2.1 Level AAA') }}</option>
+                                <option value="A">{{ __('WCAG :version Level :level', ['version' => $target_wcag_version, 'level' => 'A']) }}</option>
+                                <option value="AA">{{ __('WCAG :version Level :level', ['version' => $target_wcag_version, 'level' => 'AA']) }}</option>
+                                <option value="AAA">{{ __('WCAG :version Level :level', ['version' => $target_wcag_version, 'level' => 'AAA']) }}</option>
                             </flux:select>
                             <flux:error name="target_wcag_level" />
                         </flux:field>

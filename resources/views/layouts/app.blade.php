@@ -100,6 +100,30 @@
 
                 <!-- Page Content -->
                 <flux:main container class="flex-1">
+                    @if (session('success'))
+                        <flux:callout class="mb-6" color="green" icon="check-circle">
+                            <flux:callout.text>{{ session('success') }}</flux:callout.text>
+                        </flux:callout>
+                    @endif
+
+                    @if (session('error'))
+                        <flux:callout class="mb-6" color="red" icon="exclamation-triangle">
+                            <flux:callout.text>{{ session('error') }}</flux:callout.text>
+                        </flux:callout>
+                    @endif
+
+                    @if ($errors->any())
+                        <flux:callout class="mb-6" color="red" icon="exclamation-triangle">
+                            <flux:callout.text>
+                                <ul class="list-disc space-y-1 ps-5">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </flux:callout.text>
+                        </flux:callout>
+                    @endif
+
                     {{ $slot }}
                 </flux:main>
             </div>

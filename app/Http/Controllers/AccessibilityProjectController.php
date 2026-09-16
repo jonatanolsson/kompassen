@@ -66,7 +66,7 @@ class AccessibilityProjectController extends Controller
         ]);
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Project created successfully.');
+            ->with('success', __('Project created successfully.'));
     }
 
     public function show(AccessibilityProject $project)
@@ -79,7 +79,6 @@ class AccessibilityProjectController extends Controller
             'issues.wcagCriteria',
             'issues.assignedTo',
             'shareLinks',
-            'members.user',
             'methodologies',
         ]);
 
@@ -125,7 +124,7 @@ class AccessibilityProjectController extends Controller
         $project->update($validated);
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Project updated successfully.');
+            ->with('success', __('Project updated successfully.'));
     }
 
     public function destroy(AccessibilityProject $project)
@@ -139,6 +138,6 @@ class AccessibilityProjectController extends Controller
         $project->delete();
 
         return redirect()->route('accessibility-projects.index')
-            ->with('success', 'Project deleted successfully.');
+            ->with('success', __('Project deleted successfully.'));
     }
 }

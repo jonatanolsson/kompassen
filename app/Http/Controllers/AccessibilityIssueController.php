@@ -68,7 +68,7 @@ class AccessibilityIssueController extends Controller
         }
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Issue created successfully.');
+            ->with('success', __('Issue created successfully.'));
     }
 
     public function edit(AccessibilityProject $project, AccessibilityIssue $issue)
@@ -134,7 +134,7 @@ class AccessibilityIssueController extends Controller
         }
 
         return redirect()->route('accessibility-projects.show', $project)
-            ->with('success', 'Issue updated successfully.');
+            ->with('success', __('Issue updated successfully.'));
     }
 
     public function destroy(AccessibilityProject $project, AccessibilityIssue $issue)
