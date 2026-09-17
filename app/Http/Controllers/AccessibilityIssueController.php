@@ -21,7 +21,7 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('update', $project);
 
-        $wcagCriteria = WcagSuccessCriterion::all();
+        $wcagCriteria = WcagSuccessCriterion::wcag()->get();
 
         return view('accessibility.issues.create', compact('project', 'wcagCriteria'));
     }
@@ -52,7 +52,8 @@ class AccessibilityIssueController extends Controller
             'component_area' => 'nullable|string|max:255',
             'status' => 'required|in:open,resolved,wont_fix',
             'wcag_criteria' => 'nullable|array',
-            'wcag_criteria.*' => 'exists:wcag_success_criteria,id',
+            'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
+                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
             'attachments' => 'nullable|array',
             'attachments.*' => 'image|mimes:jpeg,png,gif,webp|max:5120',
         ]);
@@ -75,7 +76,7 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('update', $project);
 
-        $wcagCriteria = WcagSuccessCriterion::all();
+        $wcagCriteria = WcagSuccessCriterion::wcag()->get();
         $selectedCriteria = $issue->wcagCriteria()
             ->get()
             ->map(fn ($criterion) => [
@@ -107,7 +108,8 @@ class AccessibilityIssueController extends Controller
             'component_area' => 'nullable|string|max:255',
             'status' => 'required|in:open,resolved,wont_fix',
             'wcag_criteria' => 'nullable|array',
-            'wcag_criteria.*' => 'exists:wcag_success_criteria,id',
+            'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
+                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
             'wcag_failure_types' => 'nullable|array',
             'wcag_comments' => 'nullable|array',
             'wcag_code_snippets' => 'nullable|array',

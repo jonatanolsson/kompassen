@@ -4,7 +4,11 @@ namespace App\Livewire;
 
 use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,11 +16,50 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class WcagKnowledgeBase extends Component
 {
+    use AuthorizesRequests;
+
     public ?string $selectedCriterionId = null;
 
     public string $search = '';
 
-    // Example form fields
+    public string $standardFilter = '';
+
+    public ?string $editingCriterionId = null;
+
+    public string $criterionStandard = 'WCAG 2.1';
+
+    public string $criterionNumber = '';
+
+    public string $criterionLevel = 'A';
+
+    public string $criterionNameEn = '';
+
+    public string $criterionNameSv = '';
+
+    public string $criterionDescriptionEn = '';
+
+    public string $criterionDescriptionSv = '';
+
+    public string $criterionUrl = '';
+
+    public ?string $editingResourceId = null;
+
+    public string $resourceType = 'resource_link';
+
+    public string $resourceCode = '';
+
+    public string $resourceTitleEn = '';
+
+    public string $resourceTitleSv = '';
+
+    public string $resourceDescriptionEn = '';
+
+    public string $resourceDescriptionSv = '';
+
+    public string $resourceUrl = '';
+
+    public int $resourceOrder = 0;
+
     public string $exampleTitle = '';
 
     public string $exampleDescription = '';
@@ -32,25 +75,46 @@ class WcagKnowledgeBase extends Component
 
     public ?string $editingExampleId = null;
 
-    #[Computed]
-    public function criteria()
+    public function mount(): void
     {
-        return WcagSuccessCriterion::query()
-            ->when($this->search, function ($q) {
-                $q->where(function ($q) {
-                    $q->where('number', 'like', "%{$this->search}%")
-                        ->orWhere('name_en', 'like', "%{$this->search}%")
-                        ->orWhere('name_sv', 'like', "%{$this->search}%");
-                });
-            })
-            ->orderBy('number')
-            ->withCount('examples')
-            ->get()
-            ->groupBy(fn ($c) => explode('.', $c->number)[0]);
+        $this->authorize('viewAny', WcagSuccessCriterion::class);
     }
 
     #[Computed]
-    public function selectedCriterion()
+    public function criteria(): Collection
+    {
+        return WcagSuccessCriterion::query()
+            ->when($this->standardFilter !== '', fn (Builder $query): Builder => $query->where('standard', $this->standardFilter))
+            ->when($this->search !== '', function (Builder $query): void {
+                $search = '%'.trim($this->search).'%';
+
+                $query->where(function (Builder $query) use ($search): void {
+                    $query->where('number', 'like', $search)
+                        ->orWhere('standard', 'like', $search)
+                        ->orWhere('name_en', 'like', $search)
+                        ->orWhere('name_sv', 'like', $search);
+                });
+            })
+            ->orderBy('standard')
+            ->orderBy('number')
+            ->withCount('examples')
+            ->get()
+            ->groupBy('standard');
+    }
+
+    #[Computed]
+    public function standards(): array
+    {
+        return WcagSuccessCriterion::query()
+            ->select('standard')
+            ->distinct()
+            ->orderBy('standard')
+            ->pluck('standard')
+            ->all();
+    }
+
+    #[Computed]
+    public function selectedCriterion(): ?WcagSuccessCriterion
     {
         if (! $this->selectedCriterionId) {
             return null;
@@ -64,6 +128,190 @@ class WcagKnowledgeBase extends Component
     {
         $this->selectedCriterionId = $this->selectedCriterionId === $id ? null : $id;
         $this->resetExampleForm();
+        $this->resetResourceForm();
+    }
+
+    public function startCreatingCriterion(): void
+    {
+        $this->authorize('create', WcagSuccessCriterion::class);
+        $this->resetCriterionForm();
+        $this->resetValidation();
+    }
+
+    public function editCriterion(string $id): void
+    {
+        $criterion = WcagSuccessCriterion::query()->findOrFail($id);
+        $this->authorize('update', $criterion);
+
+        $this->editingCriterionId = $criterion->id;
+        $this->criterionStandard = $criterion->standard;
+        $this->criterionNumber = $criterion->number;
+        $this->criterionLevel = $criterion->level;
+        $this->criterionNameEn = $criterion->name_en;
+        $this->criterionNameSv = $criterion->name_sv;
+        $this->criterionDescriptionEn = $criterion->description_en;
+        $this->criterionDescriptionSv = $criterion->description_sv;
+        $this->criterionUrl = $criterion->url;
+        $this->resetValidation();
+    }
+
+    public function saveCriterion(): void
+    {
+        $criterion = $this->editingCriterionId
+            ? WcagSuccessCriterion::query()->findOrFail($this->editingCriterionId)
+            : null;
+
+        $this->authorize($criterion ? 'update' : 'create', $criterion ?? WcagSuccessCriterion::class);
+
+        $validated = $this->validate([
+            'criterionStandard' => ['required', 'string', 'max:100'],
+            'criterionNumber' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('wcag_success_criteria', 'number')
+                    ->where(fn ($query) => $query->where('standard', $this->criterionStandard))
+                    ->ignore($criterion?->id),
+            ],
+            'criterionLevel' => ['required', 'string', 'max:50'],
+            'criterionNameEn' => ['required', 'string', 'max:255'],
+            'criterionNameSv' => ['required', 'string', 'max:255'],
+            'criterionDescriptionEn' => ['required', 'string'],
+            'criterionDescriptionSv' => ['required', 'string'],
+            'criterionUrl' => ['required', 'url', 'max:500'],
+        ]);
+
+        $data = [
+            'standard' => trim($validated['criterionStandard']),
+            'number' => trim($validated['criterionNumber']),
+            'level' => trim($validated['criterionLevel']),
+            'name_en' => trim($validated['criterionNameEn']),
+            'name_sv' => trim($validated['criterionNameSv']),
+            'description_en' => $validated['criterionDescriptionEn'],
+            'description_sv' => $validated['criterionDescriptionSv'],
+            'url' => $validated['criterionUrl'],
+        ];
+
+        if ($criterion) {
+            $criterion->update($data);
+            $savedCriterionId = $criterion->id;
+        } else {
+            $savedCriterionId = WcagSuccessCriterion::create($data)->id;
+        }
+
+        $this->selectedCriterionId = $savedCriterionId;
+        $this->resetCriterionForm();
+        unset($this->criteria, $this->standards, $this->selectedCriterion);
+        $this->dispatch('close-modal', name: 'criterion-form-modal');
+        $this->dispatch('toast', message: __('Knowledge base entry saved.'), variant: 'success');
+    }
+
+    public function deleteCriterion(string $id): void
+    {
+        $criterion = WcagSuccessCriterion::query()->findOrFail($id);
+        $this->authorize('delete', $criterion);
+
+        if ($criterion->issues()->exists()) {
+            $this->dispatch('toast', message: __('Cannot delete a criterion used by issues.'), variant: 'error');
+
+            return;
+        }
+
+        $criterion->delete();
+        unset($this->criteria, $this->standards, $this->selectedCriterion);
+
+        if ($this->selectedCriterionId === $id) {
+            $this->selectedCriterionId = null;
+        }
+
+        $this->dispatch('toast', message: __('Knowledge base entry deleted.'), variant: 'success');
+    }
+
+    public function startCreatingResource(): void
+    {
+        $this->authorize('update', $this->selectedCriterionModel());
+        $this->resetResourceForm();
+        $this->resetValidation();
+    }
+
+    public function editResource(string $id): void
+    {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
+        $resource = $criterion->relatedResources()->whereKey($id)->firstOrFail();
+        $this->editingResourceId = $resource->id;
+        $this->resourceType = $resource->type;
+        $this->resourceCode = $resource->code ?? '';
+        $this->resourceTitleEn = $resource->title_en;
+        $this->resourceTitleSv = $resource->title_sv;
+        $this->resourceDescriptionEn = $resource->description_en ?? '';
+        $this->resourceDescriptionSv = $resource->description_sv ?? '';
+        $this->resourceUrl = $resource->url ?? '';
+        $this->resourceOrder = $resource->order;
+        $this->resetValidation();
+    }
+
+    public function saveResource(): void
+    {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
+        $resource = $this->editingResourceId
+            ? $criterion->relatedResources()->whereKey($this->editingResourceId)->firstOrFail()
+            : null;
+
+        $validated = $this->validate([
+            'resourceType' => ['required', Rule::in(array_keys($this->resourceTypeOptions()))],
+            'resourceCode' => ['nullable', 'string', 'max:50'],
+            'resourceTitleEn' => ['required', 'string', 'max:255'],
+            'resourceTitleSv' => ['required', 'string', 'max:255'],
+            'resourceDescriptionEn' => ['nullable', 'string'],
+            'resourceDescriptionSv' => ['nullable', 'string'],
+            'resourceUrl' => ['required', 'url', 'max:500'],
+            'resourceOrder' => ['required', 'integer', 'min:0', 'max:999'],
+        ]);
+
+        $data = [
+            'type' => $validated['resourceType'],
+            'code' => $validated['resourceCode'] ?: null,
+            'title_en' => trim($validated['resourceTitleEn']),
+            'title_sv' => trim($validated['resourceTitleSv']),
+            'description_en' => $validated['resourceDescriptionEn'] ?: null,
+            'description_sv' => $validated['resourceDescriptionSv'] ?: null,
+            'url' => $validated['resourceUrl'],
+            'order' => $validated['resourceOrder'],
+        ];
+
+        if ($resource) {
+            $resource->update($data);
+        } else {
+            $criterion->relatedResources()->create($data);
+        }
+
+        $this->resetResourceForm();
+        unset($this->selectedCriterion);
+        $this->dispatch('close-modal', name: 'resource-form-modal');
+        $this->dispatch('toast', message: __('Related resource saved.'), variant: 'success');
+    }
+
+    public function deleteResource(string $id): void
+    {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
+        $criterion->relatedResources()->whereKey($id)->firstOrFail()->delete();
+        unset($this->selectedCriterion);
+        $this->dispatch('toast', message: __('Related resource deleted.'), variant: 'success');
+    }
+
+    public function resourceTypeOptions(): array
+    {
+        return [
+            'wai_failure' => __('WAI Failure'),
+            'project_issue' => __('Project Issue'),
+            'resource_link' => __('Resource Link'),
+        ];
     }
 
     public function startCreatingExample(): void
@@ -185,6 +433,39 @@ class WcagKnowledgeBase extends Component
     public function cancelEdit(): void
     {
         $this->resetExampleForm();
+    }
+
+    private function selectedCriterionModel(): WcagSuccessCriterion
+    {
+        return WcagSuccessCriterion::query()->findOrFail($this->selectedCriterionId);
+    }
+
+    public function resetCriterionForm(): void
+    {
+        $this->editingCriterionId = null;
+        $this->criterionStandard = 'WCAG 2.1';
+        $this->criterionNumber = '';
+        $this->criterionLevel = 'A';
+        $this->criterionNameEn = '';
+        $this->criterionNameSv = '';
+        $this->criterionDescriptionEn = '';
+        $this->criterionDescriptionSv = '';
+        $this->criterionUrl = '';
+        $this->resetValidation();
+    }
+
+    public function resetResourceForm(): void
+    {
+        $this->editingResourceId = null;
+        $this->resourceType = 'resource_link';
+        $this->resourceCode = '';
+        $this->resourceTitleEn = '';
+        $this->resourceTitleSv = '';
+        $this->resourceDescriptionEn = '';
+        $this->resourceDescriptionSv = '';
+        $this->resourceUrl = '';
+        $this->resourceOrder = 0;
+        $this->resetValidation();
     }
 
     private function resetExampleForm(): void

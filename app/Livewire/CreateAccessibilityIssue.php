@@ -61,7 +61,8 @@ class CreateAccessibilityIssue extends Component
             'component_area' => 'nullable|string|max:255',
             'status' => 'required|in:open,resolved,wont_fix',
             'wcag_criteria' => 'nullable|array',
-            'wcag_criteria.*' => 'exists:wcag_success_criteria,id',
+            'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
+                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
             'attachments' => 'nullable|array',
             'attachments.*' => 'image|mimes:jpeg,png,gif,webp|max:5120',
         ];
@@ -118,7 +119,7 @@ class CreateAccessibilityIssue extends Component
     {
         $project = AccessibilityProject::findOrFail($this->projectId);
         $pages = $project->pages;
-        $wcagCriteria = WcagSuccessCriterion::all();
+        $wcagCriteria = WcagSuccessCriterion::wcag()->get();
 
         return view('livewire.create-accessibility-issue', compact('project', 'pages', 'wcagCriteria'));
     }

@@ -47,18 +47,20 @@
                                         @endif
                                     </div>
                                     <div x-show="editing" class="mt-1">
-                                        <input
-                                            type="text"
+                                        <flux:input
                                             x-model="notes"
-                                            class="w-full text-sm px-2 py-1 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                                             placeholder="{{ __('e.g. version 2024, Windows 11...') }}"
                                         />
                                         <div class="flex gap-2 mt-1">
-                                            <button
+                                            <flux:button
+                                                type="button"
+                                                size="xs"
+                                                variant="subtle"
                                                 @click="$wire.updateNotes('{{ $method->id }}', notes); editing = false"
-                                                class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                                            >{{ __('Save') }}</button>
-                                            <button @click="editing = false" class="text-xs text-zinc-500 hover:underline">{{ __('Cancel') }}</button>
+                                            >{{ __('Save') }}</flux:button>
+                                            <flux:button type="button" size="xs" variant="ghost" @click="editing = false">
+                                                {{ __('Cancel') }}
+                                            </flux:button>
                                         </div>
                                     </div>
                                 </div>

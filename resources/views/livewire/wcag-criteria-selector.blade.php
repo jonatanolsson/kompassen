@@ -160,16 +160,19 @@ new class extends Component
     public function wcagCriteria()
     {
         if (empty($this->searchQuery)) {
-            return WcagSuccessCriterion::orderBy('number')->get();
+            return WcagSuccessCriterion::wcag()->orderBy('number')->get();
         }
 
         $search = '%'.trim($this->searchQuery).'%';
 
-        return WcagSuccessCriterion::where('number', 'like', $search)
-            ->orWhere('name_sv', 'like', $search)
-            ->orWhere('name_en', 'like', $search)
-            ->orWhere('description_sv', 'like', $search)
-            ->orWhere('description_en', 'like', $search)
+        return WcagSuccessCriterion::wcag()
+            ->where(function ($query) use ($search): void {
+                $query->where('number', 'like', $search)
+                    ->orWhere('name_sv', 'like', $search)
+                    ->orWhere('name_en', 'like', $search)
+                    ->orWhere('description_sv', 'like', $search)
+                    ->orWhere('description_en', 'like', $search);
+            })
             ->orderBy('number')
             ->get();
     }
@@ -198,43 +201,33 @@ new class extends Component
         <div class="mt-4 flex flex-wrap gap-2">
             @foreach ($this->getSelectedCriteria() as $criterion)
                 <div class="group relative">
-                    <button
+                    <flux:button
                         type="button"
                         wire:click="openFailureModal('{{ $criterion->id }}')"
-                        class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition cursor-pointer"
+                        variant="primary"
+                        size="sm"
+                        class="rounded-full"
                         title="{{ __('Click to edit') }}"
                     >
                         <span>{{ $criterion->number }} — {{ $criterion->name_sv ?? $criterion->name_en }}</span>
-                    </button>
-                    <button 
+                    </flux:button>
+                    <flux:button
                         type="button"
                         wire:click="removeCriterion('{{ $criterion->id }}')"
-                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
+                        variant="danger"
+                        size="xs"
+                        icon="x-mark"
+                        class="absolute -end-2 -top-2 opacity-0 transition group-hover:opacity-100"
+                        aria-label="{{ __('Remove') }}"
                         title="{{ __('Remove') }}"
-                    >
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
+                    />
                 </div>
             @endforeach
         </div>
     @endif
 
     <!-- Modal -->
-    @if ($open)
-        <div 
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
-            @click.self="$wire.closeModal()"
-        >
-            <!-- Backdrop -->
-            <div 
-                class="absolute inset-0 bg-black/50"
-                @click="$wire.closeModal()"
-            ></div>
-
-            <!-- Modal Content -->
-            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-700">
+    <flux:modal name="wcag-criteria-selector-modal" wire:model="open" scroll="body" class="w-full max-w-5xl">
                 <!-- Header -->
                 <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6 flex items-center justify-between">
                     <flux:heading level="2">{{ __('Select WCAG Criteria') }}</flux:heading>
@@ -242,12 +235,11 @@ new class extends Component
                 </div>
 
                 <!-- Search Bar -->
-                <div class="sticky top-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-4">
-                    <input 
-                        wire:model.debounce-500ms="searchQuery"
-                        type="text"
+                <div class="sticky top-0 border-b border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
+                    <flux:input
+                        wire:model.live.debounce.500ms="searchQuery"
                         placeholder="{{ __('Search criteria...') }}"
-                        class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
+                        icon="magnifying-glass"
                     />
                     @if (!empty($searchQuery))
                         <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
@@ -272,14 +264,15 @@ new class extends Component
                                         </p>
                                         <div class="space-y-1 ml-2">
                                             @foreach ($group as $criterion)
-                                                <button 
+                                                <flux:button
                                                     type="button"
                                                     wire:click="$set('selectedDetailId', '{{ $criterion->id }}')"
-                                                    class="w-full text-left p-2 rounded-lg transition text-xs {{ $selectedDetailId === $criterion->id ? 'bg-blue-100 dark:bg-blue-900 border-l-2 border-blue-500' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800' }}"
+                                                    variant="{{ $selectedDetailId === $criterion->id ? 'primary' : 'ghost' }}"
+                                                    class="w-full justify-start text-left text-xs"
                                                 >
                                                     <span class="font-semibold">{{ $criterion->number }}</span>
                                                     <span class="text-zinc-600 dark:text-zinc-400">({{ $criterion->level }})</span>
-                                                </button>
+                                                </flux:button>
                                             @endforeach
                                         </div>
                                     </div>
@@ -301,7 +294,7 @@ new class extends Component
                                 @endphp
                                 <div class="space-y-4">
                                     <!-- Criterion Detail -->
-                                    <div class="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                                    <flux:card class="space-y-4">
                                         <div class="flex items-start justify-between mb-3">
                                             <div>
                                                 <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Criterion') }}</flux:text>
@@ -309,18 +302,18 @@ new class extends Component
                                             </div>
                                             <flux:badge variant="primary">WCAG {{ $detail->level }}</flux:badge>
                                         </div>
-                                        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                                        <flux:text class="text-sm font-semibold">
                                             {{ $detail->name_sv ?? $detail->name_en }}
-                                        </p>
-                                        <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                                        </flux:text>
+                                        <flux:text size="sm" class="leading-relaxed">
                                             {{ $detail->description_sv ?? $detail->description_en }}
-                                        </p>
-                                        <div class="mt-4">
+                                        </flux:text>
+                                        <div>
                                             <flux:button type="button" wire:click="selectCriterion('{{ $detail->id }}')" variant="primary" class="w-full">
                                                 {{ __('Add to Selection') }}
                                             </flux:button>
                                         </div>
-                                    </div>
+                                    </flux:card>
 
                                     <!-- Failures -->
                                     @if ($failures->count() > 0)
@@ -343,9 +336,9 @@ new class extends Component
                                                             </p>
                                                         @endif
                                                         @if ($failure->url)
-                                                            <a href="{{ $failure->url }}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
+                                                            <flux:link href="{{ $failure->url }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex text-xs">
                                                                 {{ __('View on W3C') }} →
-                                                            </a>
+                                                            </flux:link>
                                                         @endif
                                                     </div>
                                                 @endforeach
@@ -361,11 +354,11 @@ new class extends Component
                                             </flux:text>
                                             <div class="space-y-2">
                                                 @foreach ($links as $link)
-                                                    <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block bg-zinc-100 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition">
-                                                        <p class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                                                    <flux:link href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block rounded-lg border border-zinc-300 bg-zinc-100 p-3 transition hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600">
+                                                        <flux:text size="sm" class="font-semibold">
                                                             {{ $link->title_sv ?? $link->title_en }} →
-                                                        </p>
-                                                    </a>
+                                                        </flux:text>
+                                                    </flux:link>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -383,106 +376,78 @@ new class extends Component
                 </div>
 
                 <!-- Footer -->
-                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
-                    <button 
-                        type="button"
-                        wire:click="closeModal"
-                        class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
-                    >
-                        {{ __('Done') }}
-                    </button>
+                <div class="sticky bottom-0 flex justify-end gap-3 border-t border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="ghost">
+                            {{ __('Done') }}
+                        </flux:button>
+                    </flux:modal.close>
                 </div>
-            </div>
-        </div>
-    @endif
+    </flux:modal>
 
     <!-- Failure Details Modal -->
-    @if ($showFailureModal && $failureModalCriterionId)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-black/50" wire:click="closeFailureModal"></div>
-
-            <!-- Modal Content -->
-            <div class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+    <flux:modal name="wcag-failure-details-modal" wire:model="showFailureModal" scroll="body" class="w-full max-w-6xl">
                 <!-- Header -->
-                <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 p-6">
+                <div class="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
+                        <flux:heading level="2">
                             {{ __('Add Failure Details') }}
-                        </h2>
-                        <button 
-                            type="button"
-                            wire:click="closeFailureModal"
-                            class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 focus:outline-none"
-                        >
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        </flux:heading>
                     </div>
+                    <flux:modal.close>
+                        <flux:button type="button" variant="ghost" icon="x-mark" size="sm" aria-label="{{ __('Close modal') }}" />
+                    </flux:modal.close>
                 </div>
 
                 <!-- Form -->
                 <div class="p-6 space-y-4">
                     <!-- Failure Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    <flux:field>
+                        <flux:label>
                             {{ __('Failure Type') }}
-                        </label>
-                        <input 
-                            type="text"
+                        </flux:label>
+                        <flux:input
                             wire:model="failureType"
                             placeholder="{{ __('E.g., F3, F13, or custom description') }}"
-                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                         />
-                    </div>
+                    </flux:field>
 
                     <!-- Comment -->
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    <flux:field>
+                        <flux:label>
                             {{ __('Comment') }}
-                        </label>
-                        <textarea 
+                        </flux:label>
+                        <flux:textarea
                             wire:model="failureComment"
                             placeholder="{{ __('Describe why/how this criterion fails') }}"
                             rows="6"
-                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                        ></textarea>
-                    </div>
+                        />
+                    </flux:field>
 
                     <!-- Code Snippet -->
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    <flux:field>
+                        <flux:label>
                             {{ __('Code Snippet') }} <span class="text-xs text-zinc-500">({{ __('optional') }})</span>
-                        </label>
-                        <textarea 
+                        </flux:label>
+                        <flux:textarea
                             wire:model="failureCodeSnippet"
                             placeholder="{{ __('Example code that fails') }}"
                             rows="8"
-                            class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs"
-                        ></textarea>
-                    </div>
+                            class="font-mono text-xs"
+                        />
+                    </flux:field>
                 </div>
 
                 <!-- Footer -->
-                <div class="sticky bottom-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 p-6 flex justify-end gap-3">
-                    <button 
-                        type="button"
-                        wire:click="closeFailureModal"
-                        class="px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition font-semibold"
-                    >
+                <div class="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="ghost">
                         {{ __('Cancel') }}
-                    </button>
-                    <button 
-                        type="button"
-                        wire:click="saveFailureDetails"
-                        class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition font-semibold"
-                    >
+                        </flux:button>
+                    </flux:modal.close>
+                    <flux:button type="button" wire:click="saveFailureDetails" variant="primary">
                         {{ __('Confirm & Add') }}
-                    </button>
+                    </flux:button>
                 </div>
-            </div>
-        </div>
-    @endif
+    </flux:modal>
 </div>
-

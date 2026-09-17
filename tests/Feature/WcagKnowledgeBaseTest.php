@@ -7,6 +7,7 @@ use App\Models\WcagCriterionExampleLink;
 use App\Models\WcagRelatedResource;
 use App\Models\WcagSuccessCriterion;
 use Database\Seeders\WcagRelatedResourcesSeeder;
+use Database\Seeders\WcagSuccessCriteriaSeeder;
 use Livewire\Livewire;
 
 test('knowledge base shows resources related to selected criterion', function () {
@@ -32,6 +33,7 @@ test('knowledge base shows resources related to selected criterion', function ()
         ->test(WcagKnowledgeBase::class)
         ->call('selectCriterion', $criterion->id)
         ->assertSee('DIGG: Webbriktlinjer')
+        ->assertSee(__('Actions'))
         ->assertSee(__('Related Resources'));
 });
 
@@ -121,11 +123,96 @@ test('related resource seeder is idempotent and uses current digg links', functi
         'description_sv' => 'Textalternativ',
         'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/non-text-content',
     ]);
+    WcagSuccessCriterion::create([
+        'number' => '1.4.3',
+        'level' => 'AA',
+        'name_en' => 'Contrast (Minimum)',
+        'name_sv' => 'Kontrast (minimum)',
+        'description_en' => 'Text has sufficient contrast.',
+        'description_sv' => 'Text har tillräcklig kontrast.',
+        'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum',
+    ]);
 
     $seeder = app(WcagRelatedResourcesSeeder::class);
     $seeder->run();
     $seeder->run();
 
-    expect(WcagRelatedResource::count())->toBe(4)
-        ->and(WcagRelatedResource::where('url', 'like', 'https://www.digg.se/webbriktlinjer/%')->count())->toBe(1);
+    expect(WcagRelatedResource::count())->toBe(7)
+        ->and(WcagRelatedResource::where('url', 'like', 'https://www.digg.se/webbriktlinjer/%')->count())->toBe(2)
+        ->and(WcagRelatedResource::where('url', 'like', '%beskriv-med-text-allt-innehall-som-inte-ar-text')->count())->toBe(1)
+        ->and(WcagRelatedResource::where('url', 'like', '%anvand-tillracklig-kontrast-mellan-text-och-bakgrund')->count())->toBe(1);
+});
+
+test('knowledge base entries support standards beyond wcag', function () {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(WcagKnowledgeBase::class)
+        ->call('startCreatingCriterion')
+        ->set('criterionStandard', 'EN 301 549')
+        ->set('criterionNumber', '9.1.1')
+        ->set('criterionLevel', 'Applicable')
+        ->set('criterionNameEn', 'Web content accessibility')
+        ->set('criterionNameSv', 'Tillgänglighet för webbinnehåll')
+        ->set('criterionDescriptionEn', 'A European accessibility requirement.')
+        ->set('criterionDescriptionSv', 'Ett europeiskt tillgänglighetskrav.')
+        ->set('criterionUrl', 'https://www.etsi.org/standards')
+        ->call('saveCriterion');
+
+    $criterion = WcagSuccessCriterion::query()
+        ->where('standard', 'EN 301 549')
+        ->where('number', '9.1.1')
+        ->firstOrFail();
+
+    expect($criterion->level)->toBe('Applicable');
+
+    $component
+        ->call('editCriterion', $criterion->id)
+        ->set('criterionNameSv', 'Webbinnehållets tillgänglighet')
+        ->call('saveCriterion');
+
+    expect($criterion->fresh()->name_sv)->toBe('Webbinnehållets tillgänglighet');
+});
+
+test('knowledge base resources can be created and edited', function () {
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternative',
+        'description_sv' => 'Textalternativ',
+        'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/non-text-content',
+    ]);
+
+    $component = Livewire::actingAs(User::factory()->create())
+        ->test(WcagKnowledgeBase::class)
+        ->call('selectCriterion', $criterion->id)
+        ->call('startCreatingResource')
+        ->set('resourceType', 'resource_link')
+        ->set('resourceTitleEn', 'DIGG guidance')
+        ->set('resourceTitleSv', 'DIGG-vägledning')
+        ->set('resourceDescriptionEn', 'Guidance')
+        ->set('resourceDescriptionSv', 'Vägledning')
+        ->set('resourceUrl', 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer')
+        ->call('saveResource');
+
+    $resource = WcagRelatedResource::query()
+        ->where('wcag_success_criterion_id', $criterion->id)
+        ->firstOrFail();
+
+    $component
+        ->call('editResource', $resource->id)
+        ->set('resourceTitleSv', 'Uppdaterad DIGG-vägledning')
+        ->call('saveResource');
+
+    expect($resource->fresh()->title_sv)->toBe('Uppdaterad DIGG-vägledning');
+});
+
+test('wcag seeder uses canonical w3c understanding links', function () {
+    app(WcagSuccessCriteriaSeeder::class)->run();
+
+    expect(WcagSuccessCriterion::query()->where('standard', 'WCAG 2.1')->count())->toBe(50)
+        ->and(WcagSuccessCriterion::query()->where('url', 'like', '%.html')->count())->toBe(0)
+        ->and(WcagSuccessCriterion::query()->where('url', 'like', 'https://www.w3.org/WAI/WCAG21/Understanding/%')->count())->toBe(50);
 });

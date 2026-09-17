@@ -137,18 +137,11 @@
 
                         <div class="space-y-2 max-h-96 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
                             @forelse ($wcagCriteria as $criterion)
-                                <label class="flex items-start gap-3 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        wire:model="wcag_criteria" 
-                                        value="{{ $criterion->id }}"
-                                        class="mt-1"
-                                    />
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-medium text-sm">{{ $criterion->code }}</div>
-                                        <div class="text-xs text-zinc-600 dark:text-zinc-400">{{ Str::limit($criterion->name, 80) }}</div>
-                                    </div>
-                                </label>
+                                <flux:checkbox
+                                    wire:model="wcag_criteria"
+                                    value="{{ $criterion->id }}"
+                                    :label="$criterion->code.' — '.Str::limit($criterion->name, 80)"
+                                />
                             @empty
                                 <flux:text class="text-zinc-500">{{ __('No WCAG criteria available') }}</flux:text>
                             @endforelse

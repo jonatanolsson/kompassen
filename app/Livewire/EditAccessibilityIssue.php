@@ -171,7 +171,8 @@ class EditAccessibilityIssue extends Component
             ])
             ->toArray();
 
-        $availableCriteria = WcagSuccessCriterion::all()
+        $availableCriteria = WcagSuccessCriterion::wcag()
+            ->get()
             ->when($this->wcagSearch, function ($criteria) {
                 return $criteria->filter(function ($c) {
                     return str_contains(

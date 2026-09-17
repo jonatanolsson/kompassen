@@ -16,8 +16,21 @@ class WcagRelatedResourcesSeeder extends Seeder
             'https://webbriktlinjer.se/r/forgrund-bakgrundsfarg-kontrast/',
         ])->delete();
 
+        WcagRelatedResource::query()
+            ->where('type', 'resource_link')
+            ->whereHas('wcagSuccessCriterion', fn ($query) => $query->where('standard', 'WCAG 2.1'))
+            ->whereIn('title_en', [
+                'DIGG: Web Guidelines',
+                'DIGG: Web Guidelines - Alt Text',
+                'DIGG: Web Guidelines - Text and Background Contrast',
+                'DIGG: Web Guidelines - Keyboard Accessibility',
+            ])
+            ->delete();
+
         $addResource = function (string $criterionNumber, array $resource): void {
-            $criterion = WcagSuccessCriterion::where('number', $criterionNumber)->first();
+            $criterion = WcagSuccessCriterion::where('standard', 'WCAG 2.1')
+                ->where('number', $criterionNumber)
+                ->first();
 
             if (! $criterion) {
                 return;
@@ -69,22 +82,6 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 2,
         ]);
 
-        $addResource('1.1.1', [
-            'type' => 'resource_link',
-            'title_en' => 'W3C: Understanding Success Criterion 1.1.1',
-            'title_sv' => 'W3C: Förståelse av framgångskriterium 1.1.1',
-            'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/non-text-content',
-            'order' => 3,
-        ]);
-
-        $addResource('1.1.1', [
-            'type' => 'resource_link',
-            'title_en' => 'DIGG: Web Guidelines - Alt Text',
-            'title_sv' => 'DIGG: Webbriktlinjer - Alt-text',
-            'url' => 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/beskriv-med-text-allt-innehall-som-inte-ar-text',
-            'order' => 4,
-        ]);
-
         $addResource('1.4.3', [
             'type' => 'wai_failure',
             'code' => 'F24',
@@ -93,30 +90,6 @@ class WcagRelatedResourcesSeeder extends Seeder
             'description_en' => 'Background images without sufficient contrast can make text unreadable.',
             'description_sv' => 'Bakgrundsbilder utan tillräcklig kontrast kan göra text svårläst.',
             'url' => 'https://www.w3.org/WAI/WCAG21/Techniques/failures/F24',
-            'order' => 1,
-        ]);
-
-        $addResource('1.4.3', [
-            'type' => 'resource_link',
-            'title_en' => 'W3C: Understanding Success Criterion 1.4.3',
-            'title_sv' => 'W3C: Förståelse av framgångskriterium 1.4.3',
-            'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum',
-            'order' => 2,
-        ]);
-
-        $addResource('1.4.3', [
-            'type' => 'resource_link',
-            'title_en' => 'DIGG: Web Guidelines - Text and Background Contrast',
-            'title_sv' => 'DIGG: Webbriktlinjer - Kontrast mellan text och bakgrund',
-            'url' => 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/anvand-tillracklig-kontrast-mellan-text-och-bakgrund',
-            'order' => 3,
-        ]);
-
-        $addResource('2.1.1', [
-            'type' => 'resource_link',
-            'title_en' => 'DIGG: Web Guidelines - Keyboard Accessibility',
-            'title_sv' => 'DIGG: Webbriktlinjer - All funktionalitet ska kunna användas med tangentbord',
-            'url' => 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/all-funktionalitet-ska-kunna-anvandas-med-tangentbord',
             'order' => 1,
         ]);
 
@@ -196,5 +169,85 @@ class WcagRelatedResourcesSeeder extends Seeder
             'url' => 'https://www.w3.org/WAI/WCAG21/Techniques/failures/F77',
             'order' => 2,
         ]);
+
+        $diggSlugs = [
+            '1.1.1' => 'beskriv-med-text-allt-innehall-som-inte-ar-text',
+            '1.2.1' => 'erbjud-alternativ-till-inspelningar-som-bestar-av-enbart-ljud-eller-enbart-video',
+            '1.2.2' => 'texta-ljudet-i-inspelade-filmer',
+            '1.2.3' => 'syntolka-eller-erbjud-alternativ-till-videoinspelningar',
+            '1.2.4' => 'teknik-for-hantering-av-undertexter',
+            '1.2.5' => 'syntolka-videoinspelningar',
+            '1.3.1' => 'formedla-information-struktur-och-relationer-i-koden',
+            '1.3.2' => 'presentera-innehallet-i-en-meningsfull-ordning',
+            '1.3.3' => 'gor-inte-instruktioner-beroende-av-sensoriska-kannetecken',
+            '1.3.4' => 'se-till-att-innehallet-anpassas-efter-skarmens-riktning',
+            '1.3.5' => 'ange-syftet-for-formularfalt-i-koden',
+            '1.4.1' => 'anvand-inte-enbart-farg-for-att-formedla-information',
+            '1.4.2' => 'gor-det-mojligt-att-pausa-stanga-av-eller-sanka-ljud',
+            '1.4.3' => 'anvand-tillracklig-kontrast-mellan-text-och-bakgrund',
+            '1.4.4' => 'se-till-att-text-gar-att-forstora',
+            '1.4.5' => 'anvand-text-inte-bilder-av-text-for-att-visa-text',
+            '1.4.10' => 'skapa-en-flexibel-layout-som-fungerar-vid-forstoring-eller-pa-liten-skarm',
+            '1.4.11' => 'anvand-tillrackliga-kontraster-i-komponenter-och-grafik',
+            '1.4.12' => 'se-till-att-det-gar-att-oka-avstand-mellan-tecken-rader-stycken-och-ord',
+            '1.4.13' => 'innehall-som-visas-vid-hover-eller-fokus',
+            '2.1.1' => 'all-funktionalitet-ska-kunna-anvandas-med-tangentbord',
+            '2.1.2' => 'ingen-tangentbordsfalla',
+            '2.1.4' => 'var-forsiktig-med-kortkommandon',
+            '2.2.1' => 'gor-det-mojligt-att-justera-tidsbegransningar',
+            '2.2.2' => 'gor-det-mojligt-att-pausa-eller-stanga-av-rorelser',
+            '2.3.1' => 'orsaka-inte-epileptiska-anfall-genom-blinkande',
+            '2.4.1' => 'gor-det-mojligt-att-hoppa-forbi-aterkommande-innehall',
+            '2.4.2' => 'skriv-beskrivande-sidtitlar',
+            '2.4.3' => 'ha-en-meningsfull-fokusordning',
+            '2.4.4' => 'skriv-tydliga-lankar',
+            '2.4.5' => 'erbjud-flera-satt-att-navigera',
+            '2.4.6' => 'skriv-beskrivande-rubriker-och-ledtexter',
+            '2.4.7' => 'gor-det-synligt-vad-som-ar-i-fokus',
+            '2.5.1' => 'erbjud-alternativ-till-komplexa-finger--eller-pekarrorelser',
+            '2.5.2' => 'gor-det-mojligt-att-angra-klick',
+            '2.5.3' => 'se-till-att-text-pa-knappar-och-kontroller-overensstammer-med-maskinlasbara-namn',
+            '2.5.4' => 'erbjud-alternativ-till-rorelsestyrning',
+            '3.1.1' => 'ange-sidans-sprak-i-koden',
+            '3.1.2' => 'ange-sprakforandringar-i-koden',
+            '3.2.1' => 'ingen-kontextforandring-vid-fokus',
+            '3.2.2' => 'utfor-inga-ovantade-forandringar-vid-inmatning',
+            '3.2.3' => 'var-konsekvent-i-navigation',
+            '3.2.4' => 'konsekvent-benamning',
+            '3.3.1' => 'visa-var-ett-fel-uppstatt-och-beskriv-det-tydligt',
+            '3.3.2' => 'skapa-tydliga-faltetiketter-ledtexter',
+            '3.3.3' => 'ge-forslag-pa-hur-fel-kan-rattas-till',
+            '3.3.4' => 'ge-mojlighet-att-angra-korrigera-eller-bekrafta-vid-viktiga-transaktioner',
+            '4.1.1' => 'se-till-att-koden-validerar',
+            '4.1.2' => 'se-till-att-komponenter-fungerar-i-hjalpmedel',
+            '4.1.3' => 'se-till-att-hjalpmedel-kan-presentera-meddelanden-som-inte-ar-i-fokus',
+        ];
+
+        WcagSuccessCriterion::query()
+            ->where('standard', 'WCAG 2.1')
+            ->orderBy('number')
+            ->each(function (WcagSuccessCriterion $criterion) use ($addResource, $diggSlugs): void {
+                $addResource($criterion->number, [
+                    'type' => 'resource_link',
+                    'title_en' => 'W3C: Understanding Success Criterion '.$criterion->number,
+                    'title_sv' => 'W3C: Förståelse av framgångskriterium '.$criterion->number,
+                    'description_en' => 'Official W3C Understanding guidance for this success criterion.',
+                    'description_sv' => 'Officiell W3C-förståelse och vägledning för detta framgångskriterium.',
+                    'url' => $criterion->url,
+                    'order' => 10,
+                ]);
+
+                $diggUrl = 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/'.($diggSlugs[$criterion->number] ?? '');
+
+                $addResource($criterion->number, [
+                    'type' => 'resource_link',
+                    'title_en' => 'DIGG: Web Guidelines - '.$criterion->number.' '.$criterion->name_en,
+                    'title_sv' => 'DIGG: Webbriktlinjer - '.$criterion->number.' '.$criterion->name_sv,
+                    'description_en' => 'Swedish public-sector guidance for digital accessibility.',
+                    'description_sv' => 'Svensk vägledning för digital tillgänglighet i offentlig sektor.',
+                    'url' => $diggUrl,
+                    'order' => 11,
+                ]);
+            });
     }
 }

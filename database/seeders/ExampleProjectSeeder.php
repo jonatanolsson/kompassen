@@ -253,6 +253,7 @@ class ExampleProjectSeeder extends Seeder
 
             foreach ($issueData['criteria'] as $criterion) {
                 $criterionModel = WcagSuccessCriterion::query()
+                    ->where('standard', 'WCAG 2.1')
                     ->where('number', $criterion['number'])
                     ->firstOrFail();
 

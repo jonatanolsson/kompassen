@@ -3,16 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['number', 'level', 'name_en', 'name_sv', 'description_en', 'description_sv', 'url'])]
+#[Fillable(['standard', 'number', 'level', 'name_en', 'name_sv', 'description_en', 'description_sv', 'url'])]
 class WcagSuccessCriterion extends Model
 {
     use HasFactory;
+
+    protected $attributes = [
+        'standard' => 'WCAG 2.1',
+        'level' => 'A',
+    ];
 
     protected $keyType = 'string';
 
@@ -38,6 +44,11 @@ class WcagSuccessCriterion extends Model
             'wcag_success_criterion_id',
             'accessibility_issue_id'
         );
+    }
+
+    public function scopeWcag(Builder $query): Builder
+    {
+        return $query->where('standard', 'WCAG 2.1');
     }
 
     public function examples(): HasMany
