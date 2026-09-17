@@ -139,6 +139,11 @@ För att återskapa en lokal databas med seedad data:
 ./vendor/bin/sail artisan migrate:fresh --seed
 ```
 
+Seedningen skapar också exempelprojektet **Nordiska E-tjänster** med fem
+publika och autentiserade sidor, åtta realistiska tillgänglighetsproblem,
+kopplade WCAG-kriterier, testmetodik och blandade statusar för att kunna
+prova projekt-, problem- och rapportflöden lokalt.
+
 ## Vanliga kommandon
 
 Starta lokal utveckling med server, kö, loggar och Vite:

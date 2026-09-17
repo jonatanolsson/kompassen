@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\TestingMethodology;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class TestingMethodologySeeder extends Seeder
 {
@@ -48,7 +49,13 @@ class TestingMethodologySeeder extends Seeder
         ];
 
         foreach ($methodologies as $data) {
-            TestingMethodology::firstOrCreate(['name' => $data['name']], $data);
+            TestingMethodology::firstOrCreate(
+                ['name' => $data['name']],
+                [
+                    ...$data,
+                    'id' => Str::ulid(),
+                ],
+            );
         }
     }
 }

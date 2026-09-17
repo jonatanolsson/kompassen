@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             WcagSuccessCriteriaSeeder::class,
             WcagRelatedResourcesSeeder::class,
             TestingMethodologySeeder::class,
+            ExampleProjectSeeder::class,
         ]);
     }
 }
