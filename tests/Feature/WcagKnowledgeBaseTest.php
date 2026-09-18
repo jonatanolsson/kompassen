@@ -213,6 +213,41 @@ test('wcag seeder uses canonical w3c understanding links', function () {
     app(WcagSuccessCriteriaSeeder::class)->run();
 
     expect(WcagSuccessCriterion::query()->where('standard', 'WCAG 2.1')->count())->toBe(50)
+        ->and(WcagSuccessCriterion::query()->where('standard', 'WCAG 2.2')->count())->toBe(58)
+        ->and(WcagSuccessCriterion::query()
+            ->where('standard', 'WCAG 2.2')
+            ->where('number', '4.1.1')
+            ->exists())->toBeFalse()
+        ->and(WcagSuccessCriterion::query()
+            ->where('standard', 'WCAG 2.2')
+            ->where('number', '3.3.8')
+            ->exists())->toBeTrue()
+        ->and(WcagSuccessCriterion::query()->where('standard', 'EN 301 549')->count())->toBe(27)
+        ->and(WcagSuccessCriterion::wcag()->where('number', '5.2')->exists())->toBeFalse()
         ->and(WcagSuccessCriterion::query()->where('url', 'like', '%.html')->count())->toBe(0)
-        ->and(WcagSuccessCriterion::query()->where('url', 'like', 'https://www.w3.org/WAI/WCAG21/Understanding/%')->count())->toBe(50);
+        ->and(WcagSuccessCriterion::query()->where('url', 'like', 'https://www.w3.org/WAI/WCAG21/Understanding/%')->count())->toBe(50)
+        ->and(WcagSuccessCriterion::query()->where('url', 'like', 'https://www.w3.org/WAI/WCAG22/Understanding/%')->count())->toBe(58);
+});
+
+test('related resources cover WCAG 2.2 and standalone EN 301 549 requirements', function () {
+    app(WcagSuccessCriteriaSeeder::class)->run();
+    app(WcagRelatedResourcesSeeder::class)->run();
+
+    $wcag22Criterion = WcagSuccessCriterion::query()
+        ->where('standard', 'WCAG 2.2')
+        ->where('number', '3.3.8')
+        ->firstOrFail();
+    $enCriterion = WcagSuccessCriterion::query()
+        ->where('standard', 'EN 301 549')
+        ->where('number', '5.2')
+        ->firstOrFail();
+
+    expect($wcag22Criterion->relatedResources)
+        ->toHaveCount(1)
+        ->and($wcag22Criterion->relatedResources->first()->url)
+        ->toContain('/WAI/WCAG22/Understanding/accessible-authentication-minimum')
+        ->and($enCriterion->relatedResources)
+        ->toHaveCount(1)
+        ->and($enCriterion->relatedResources->first()->url)
+        ->toContain('en_301549v040101p.pdf');
 });

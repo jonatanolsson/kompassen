@@ -167,11 +167,11 @@
                                     <div class="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
                                         <div class="min-w-0 flex-1">
                                             @if ($resource->url)
-                                                <flux:link href="{{ $resource->url }}" target="_blank" icon-trailing="arrow-top-right-on-square" class="block truncate text-sm">
+                                                <flux:link href="{{ $resource->url }}" target="_blank" icon-trailing="arrow-top-right-on-square" class="block min-w-0 max-w-full whitespace-normal break-words text-sm">
                                                     {{ $resource->title_sv ?: $resource->title_en }}
                                                 </flux:link>
                                             @else
-                                                <flux:text class="truncate text-sm font-medium">{{ $resource->title_sv ?: $resource->title_en }}</flux:text>
+                                                <flux:text class="whitespace-normal break-words text-sm font-medium">{{ $resource->title_sv ?: $resource->title_en }}</flux:text>
                                             @endif
                                             @if ($resource->description_sv || $resource->description_en)
                                                 <flux:text size="sm" class="mt-0.5 truncate text-zinc-600 dark:text-zinc-400">

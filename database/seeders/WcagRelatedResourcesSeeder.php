@@ -27,8 +27,8 @@ class WcagRelatedResourcesSeeder extends Seeder
             ])
             ->delete();
 
-        $addResource = function (string $criterionNumber, array $resource): void {
-            $criterion = WcagSuccessCriterion::where('standard', 'WCAG 2.1')
+        $addResource = function (string $standard, string $criterionNumber, array $resource): void {
+            $criterion = WcagSuccessCriterion::where('standard', $standard)
                 ->where('number', $criterionNumber)
                 ->first();
 
@@ -60,7 +60,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             $resourceModel->save();
         };
 
-        $addResource('1.1.1', [
+        $addResource('WCAG 2.1', '1.1.1', [
             'type' => 'wai_failure',
             'code' => 'F3',
             'title_en' => 'Failure of Success Criterion 1.1.1 due to using CSS to include images',
@@ -71,7 +71,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('1.1.1', [
+        $addResource('WCAG 2.1', '1.1.1', [
             'type' => 'wai_failure',
             'code' => 'F13',
             'title_en' => 'Failure of Success Criterion 1.1.1 due to missing a text alternative',
@@ -82,7 +82,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 2,
         ]);
 
-        $addResource('1.4.3', [
+        $addResource('WCAG 2.1', '1.4.3', [
             'type' => 'wai_failure',
             'code' => 'F24',
             'title_en' => 'Failure of Success Criterion 1.4.3 due to insufficient contrast',
@@ -93,7 +93,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('2.2.1', [
+        $addResource('WCAG 2.1', '2.2.1', [
             'type' => 'wai_failure',
             'code' => 'F41',
             'title_en' => 'Failure of Success Criterion 2.2.1 due to using meta refresh to reload the page',
@@ -104,7 +104,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('2.2.2', [
+        $addResource('WCAG 2.1', '2.2.2', [
             'type' => 'wai_failure',
             'code' => 'F16',
             'title_en' => 'Failure of Success Criterion 2.2.2 due to including scrolling content without a mechanism to pause and restart it',
@@ -115,7 +115,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('2.5.1', [
+        $addResource('WCAG 2.1', '2.5.1', [
             'type' => 'wai_failure',
             'code' => 'F105',
             'title_en' => 'Failure of Success Criterion 2.5.1 due to providing functionality via a path-based gesture without a simple pointer alternative',
@@ -126,7 +126,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('2.5.3', [
+        $addResource('WCAG 2.1', '2.5.3', [
             'type' => 'wai_failure',
             'code' => 'F96',
             'title_en' => 'Failure due to the accessible name not containing the visible label text',
@@ -137,7 +137,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('3.2.3', [
+        $addResource('WCAG 2.1', '3.2.3', [
             'type' => 'wai_failure',
             'code' => 'F66',
             'title_en' => 'Failure of Success Criterion 3.2.3 due to presenting navigation links in a different relative order on different pages',
@@ -148,7 +148,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('4.1.1', [
+        $addResource('WCAG 2.1', '4.1.1', [
             'type' => 'wai_failure',
             'code' => 'F70',
             'title_en' => 'Failure of Success Criterion 4.1.1 due to incorrect use of start and end tags or attribute markup',
@@ -159,7 +159,7 @@ class WcagRelatedResourcesSeeder extends Seeder
             'order' => 1,
         ]);
 
-        $addResource('4.1.1', [
+        $addResource('WCAG 2.1', '4.1.1', [
             'type' => 'wai_failure',
             'code' => 'F77',
             'title_en' => 'Failure of Success Criterion 4.1.1 due to duplicate values of type ID',
@@ -224,10 +224,10 @@ class WcagRelatedResourcesSeeder extends Seeder
         ];
 
         WcagSuccessCriterion::query()
-            ->where('standard', 'WCAG 2.1')
+            ->whereIn('standard', ['WCAG 2.1', 'WCAG 2.2'])
             ->orderBy('number')
             ->each(function (WcagSuccessCriterion $criterion) use ($addResource, $diggSlugs): void {
-                $addResource($criterion->number, [
+                $addResource($criterion->standard, $criterion->number, [
                     'type' => 'resource_link',
                     'title_en' => 'W3C: Understanding Success Criterion '.$criterion->number,
                     'title_sv' => 'W3C: Förståelse av framgångskriterium '.$criterion->number,
@@ -237,9 +237,13 @@ class WcagRelatedResourcesSeeder extends Seeder
                     'order' => 10,
                 ]);
 
-                $diggUrl = 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/'.($diggSlugs[$criterion->number] ?? '');
+                if (! isset($diggSlugs[$criterion->number])) {
+                    return;
+                }
 
-                $addResource($criterion->number, [
+                $diggUrl = 'https://www.digg.se/webbriktlinjer/alla-webbriktlinjer/'.$diggSlugs[$criterion->number];
+
+                $addResource($criterion->standard, $criterion->number, [
                     'type' => 'resource_link',
                     'title_en' => 'DIGG: Web Guidelines - '.$criterion->number.' '.$criterion->name_en,
                     'title_sv' => 'DIGG: Webbriktlinjer - '.$criterion->number.' '.$criterion->name_sv,
@@ -247,6 +251,21 @@ class WcagRelatedResourcesSeeder extends Seeder
                     'description_sv' => 'Svensk vägledning för digital tillgänglighet i offentlig sektor.',
                     'url' => $diggUrl,
                     'order' => 11,
+                ]);
+            });
+
+        WcagSuccessCriterion::query()
+            ->where('standard', 'EN 301 549')
+            ->orderBy('number')
+            ->each(function (WcagSuccessCriterion $criterion) use ($addResource): void {
+                $addResource('EN 301 549', $criterion->number, [
+                    'type' => 'resource_link',
+                    'title_en' => 'ETSI: EN 301 549 '.$criterion->number,
+                    'title_sv' => 'ETSI: EN 301 549 '.$criterion->number,
+                    'description_en' => 'Official ETSI source for this EN 301 549 requirement.',
+                    'description_sv' => 'Officiell ETSI-källa för detta krav i EN 301 549.',
+                    'url' => $criterion->url,
+                    'order' => 10,
                 ]);
             });
     }

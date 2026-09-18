@@ -119,11 +119,159 @@ class WcagSuccessCriteriaSeeder extends Seeder
             '4.1.3' => 'status-messages',
         ];
 
-        foreach ($criteria as &$criterion) {
-            $criterion['standard'] = 'WCAG 2.1';
-            $criterion['url'] = 'https://www.w3.org/WAI/WCAG21/Understanding/'.$w3cSlugs[$criterion['number']];
+        $wcag21Criteria = array_map(function (array $criterion) use ($w3cSlugs): array {
+            return [
+                ...$criterion,
+                'standard' => 'WCAG 2.1',
+                'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/'.$w3cSlugs[$criterion['number']],
+            ];
+        }, $criteria);
+
+        $wcag22Criteria = array_values(array_filter(
+            $wcag21Criteria,
+            fn (array $criterion): bool => $criterion['number'] !== '4.1.1',
+        ));
+
+        foreach ($wcag22Criteria as &$criterion) {
+            $criterion['standard'] = 'WCAG 2.2';
+            $criterion['url'] = str_replace('WCAG21', 'WCAG22', $criterion['url']);
         }
         unset($criterion);
+
+        $wcag22Criteria = [
+            ...$wcag22Criteria,
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '2.4.11',
+                'level' => 'AA',
+                'name_en' => 'Focus Not Obscured (Minimum)',
+                'name_sv' => 'Fokus inte dolt (minimum)',
+                'description_en' => 'When a user interface component receives keyboard focus, it is not entirely hidden due to author-created content.',
+                'description_sv' => 'När en användargränssnittskomponent får tangentbordsfokus är den inte helt dold av innehåll som skapats av författaren.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '2.4.12',
+                'level' => 'AAA',
+                'name_en' => 'Focus Not Obscured (Enhanced)',
+                'name_sv' => 'Fokus inte dolt (förstärkt)',
+                'description_en' => 'When a user interface component receives keyboard focus, no part of the component is hidden by author-created content.',
+                'description_sv' => 'När en användargränssnittskomponent får tangentbordsfokus är ingen del av komponenten dold av innehåll som skapats av författaren.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-enhanced',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '2.4.13',
+                'level' => 'AAA',
+                'name_en' => 'Focus Appearance',
+                'name_sv' => 'Fokusutseende',
+                'description_en' => 'Visible keyboard focus indicators meet minimum size and contrast requirements.',
+                'description_sv' => 'Synliga tangentbordsfokusindikatorer uppfyller minimikraven för storlek och kontrast.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '2.5.7',
+                'level' => 'AA',
+                'name_en' => 'Dragging Movements',
+                'name_sv' => 'Dragrörelser',
+                'description_en' => 'Functionality that uses dragging can also be operated with a single pointer without dragging, unless dragging is essential.',
+                'description_sv' => 'Funktionalitet som använder dragning kan också användas med en enda pekare utan dragning, om dragning inte är avgörande.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '2.5.8',
+                'level' => 'AA',
+                'name_en' => 'Target Size (Minimum)',
+                'name_sv' => 'Målstorlek (minimum)',
+                'description_en' => 'Pointer input targets are at least 24 by 24 CSS pixels, subject to defined exceptions.',
+                'description_sv' => 'Mål för pekarinmatning är minst 24 gånger 24 CSS-pixlar, med angivna undantag.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '3.2.6',
+                'level' => 'A',
+                'name_en' => 'Consistent Help',
+                'name_sv' => 'Konsekvent hjälp',
+                'description_en' => 'Repeated help mechanisms occur in the same relative order across pages in a set of web pages.',
+                'description_sv' => 'Upprepade hjälpfunktioner förekommer i samma relativa ordning på sidor inom en uppsättning webbsidor.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/consistent-help',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '3.3.7',
+                'level' => 'A',
+                'name_en' => 'Redundant Entry',
+                'name_sv' => 'Upprepad inmatning',
+                'description_en' => 'Information previously entered in the same process is auto-populated or available for selection, unless an exception applies.',
+                'description_sv' => 'Information som tidigare angetts i samma process fylls i automatiskt eller finns tillgänglig för val, om inget undantag gäller.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/redundant-entry',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '3.3.8',
+                'level' => 'AA',
+                'name_en' => 'Accessible Authentication (Minimum)',
+                'name_sv' => 'Tillgänglig autentisering (minimum)',
+                'description_en' => 'An authentication step does not require a cognitive function test unless an accessible alternative or exception applies.',
+                'description_sv' => 'Ett autentiseringssteg kräver inte ett kognitivt funktionstest om inte ett tillgängligt alternativ eller undantag gäller.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum',
+            ],
+            [
+                'standard' => 'WCAG 2.2',
+                'number' => '3.3.9',
+                'level' => 'AAA',
+                'name_en' => 'Accessible Authentication (Enhanced)',
+                'name_sv' => 'Tillgänglig autentisering (förstärkt)',
+                'description_en' => 'No cognitive function test is required for authentication unless an exception applies.',
+                'description_sv' => 'Inget kognitivt funktionstest krävs för autentisering om inte ett undantag gäller.',
+                'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-enhanced',
+            ],
+        ];
+
+        $en301549Criteria = [
+            ['number' => '5.1', 'name_en' => 'Functional performance', 'name_sv' => 'Funktionell prestanda', 'description_en' => 'ICT provides accessible operation for people with a range of disabilities, including where personal assistive technology cannot be attached.', 'description_sv' => 'IKT erbjuder tillgänglig användning för personer med olika funktionsnedsättningar, även när personliga hjälpmedel inte kan anslutas.'],
+            ['number' => '5.2', 'name_en' => 'Activation of accessibility features', 'name_sv' => 'Aktivering av tillgänglighetsfunktioner', 'description_en' => 'Documented accessibility features can be activated without relying on a method that does not support the relevant need.', 'description_sv' => 'Dokumenterade tillgänglighetsfunktioner kan aktiveras utan att förlita sig på en metod som inte stödjer det relevanta behovet.'],
+            ['number' => '5.3', 'name_en' => 'Biometrics', 'name_sv' => 'Biometri', 'description_en' => 'ICT does not rely on a biological characteristic as the only means of user identification or control.', 'description_sv' => 'IKT förlitar sig inte på en biologisk egenskap som enda sätt att identifiera användaren eller styra IKT.'],
+            ['number' => '5.4', 'name_en' => 'Preservation of accessibility information', 'name_sv' => 'Bevarande av tillgänglighetsinformation', 'description_en' => 'Accessibility information is preserved when ICT converts information between formats or media.', 'description_sv' => 'Tillgänglighetsinformation bevaras när IKT konverterar information mellan format eller medier.'],
+            ['number' => '5.6', 'name_en' => 'Locking or toggle controls', 'name_sv' => 'Lås- och växlingskontroller', 'description_en' => 'The state of locking and toggle controls is discernible without relying only on vision.', 'description_sv' => 'Tillståndet för lås- och växlingskontroller kan uppfattas utan att enbart förlita sig på synen.'],
+            ['number' => '5.7', 'name_en' => 'Key repeat', 'name_sv' => 'Tangentupprepning', 'description_en' => 'Key repeat behavior can be controlled or does not prevent accessible operation.', 'description_sv' => 'Tangentupprepning kan kontrolleras eller hindrar inte tillgänglig användning.'],
+            ['number' => '5.8', 'name_en' => 'Double-strike key acceptance', 'name_sv' => 'Godkännande av dubbla tangenttryckningar', 'description_en' => 'Accidental repeated key presses do not prevent users from completing the intended operation.', 'description_sv' => 'Oavsiktliga upprepade tangenttryckningar hindrar inte användare från att slutföra avsedd användning.'],
+            ['number' => '5.9', 'name_en' => 'Simultaneous user actions', 'name_sv' => 'Samtidiga användaråtgärder', 'description_en' => 'ICT supports applicable simultaneous or sequential user actions needed for accessible operation.', 'description_sv' => 'IKT stödjer tillämpliga samtidiga eller sekventiella användaråtgärder som krävs för tillgänglig användning.'],
+            ['number' => '5.10', 'name_en' => 'Privacy', 'name_sv' => 'Integritet', 'description_en' => 'Accessibility features do not unnecessarily expose personal data or the user’s use of assistive technology.', 'description_sv' => 'Tillgänglighetsfunktioner avslöjar inte i onödan personuppgifter eller användarens användning av hjälpmedelsteknik.'],
+            ['number' => '6.1', 'name_en' => 'Audio bandwidth for speech', 'name_sv' => 'Ljudbandbredd för tal', 'description_en' => 'Two-way voice communication supports the required audio bandwidth for accessible speech.', 'description_sv' => 'Tvåvägs röstkommunikation stödjer erforderlig ljudbandbredd för tillgängligt tal.'],
+            ['number' => '6.2', 'name_en' => 'Real-time text functionality', 'name_sv' => 'Realtidstextfunktionalitet', 'description_en' => 'Two-way voice communication provides applicable real-time text functionality.', 'description_sv' => 'Tvåvägs röstkommunikation tillhandahåller tillämplig realtidstextfunktionalitet.'],
+            ['number' => '6.3', 'name_en' => 'Caller identification', 'name_sv' => 'Uppringaridentifiering', 'description_en' => 'Caller identification information is available in an accessible form where provided.', 'description_sv' => 'Information om uppringaren är tillgänglig i en tillgänglig form när den tillhandahålls.'],
+            ['number' => '6.4', 'name_en' => 'Alternatives to voice-based services', 'name_sv' => 'Alternativ till röstbaserade tjänster', 'description_en' => 'An accessible alternative is available where a service relies on voice communication.', 'description_sv' => 'Ett tillgängligt alternativ finns när en tjänst förlitar sig på röstkommunikation.'],
+            ['number' => '6.6', 'name_en' => 'Interoperability with emergency services', 'name_sv' => 'Interoperabilitet med räddningstjänster', 'description_en' => 'Applicable ICT supports accessible communication with emergency services.', 'description_sv' => 'Tillämplig IKT stödjer tillgänglig kommunikation med räddningstjänster.'],
+            ['number' => '8.1', 'name_en' => 'General hardware requirements', 'name_sv' => 'Allmänna krav på hårdvara', 'description_en' => 'Hardware provides accessible operation and access to required accessibility features.', 'description_sv' => 'Hårdvara erbjuder tillgänglig användning och åtkomst till nödvändiga tillgänglighetsfunktioner.'],
+            ['number' => '8.2', 'name_en' => 'Hardware products with speech output', 'name_sv' => 'Hårdvaruprodukter med talutgång', 'description_en' => 'Hardware with speech output provides accessible speech output and controls.', 'description_sv' => 'Hårdvara med talutgång erbjuder tillgänglig talutgång och tillgängliga kontroller.'],
+            ['number' => '8.5', 'name_en' => 'Tickets, fare cards, and keycards', 'name_sv' => 'Biljetter, färdbevis och passerkort', 'description_en' => 'Tickets, fare cards, and keycards can be used accessibly where applicable.', 'description_sv' => 'Biljetter, färdbevis och passerkort kan användas tillgängligt när det är tillämpligt.'],
+            ['number' => '12.1.1', 'name_en' => 'Accessibility and compatibility features', 'name_sv' => 'Tillgänglighets- och kompatibilitetsfunktioner', 'description_en' => 'Product documentation describes accessibility and compatibility features.', 'description_sv' => 'Produktdokumentation beskriver tillgänglighets- och kompatibilitetsfunktioner.'],
+            ['number' => '12.1.2', 'name_en' => 'Accessible documentation', 'name_sv' => 'Tillgänglig dokumentation', 'description_en' => 'Product documentation is provided in an accessible format.', 'description_sv' => 'Produktdokumentation tillhandahålls i ett tillgängligt format.'],
+            ['number' => '12.2.2', 'name_en' => 'Information on accessibility and compatibility features', 'name_sv' => 'Information om tillgänglighets- och kompatibilitetsfunktioner', 'description_en' => 'Support information explains the accessibility and compatibility features of the ICT.', 'description_sv' => 'Supportinformation förklarar IKT:s tillgänglighets- och kompatibilitetsfunktioner.'],
+            ['number' => '12.2.3', 'name_en' => 'Effective communication', 'name_sv' => 'Effektiv kommunikation', 'description_en' => 'Support channels provide effective communication for users with disabilities.', 'description_sv' => 'Supportkanaler erbjuder effektiv kommunikation för användare med funktionsnedsättning.'],
+            ['number' => '12.2.4', 'name_en' => 'Accessible support documentation', 'name_sv' => 'Tillgänglig supportdokumentation', 'description_en' => 'Support documentation is available in an accessible format.', 'description_sv' => 'Supportdokumentation finns i ett tillgängligt format.'],
+            ['number' => '13.1.1', 'name_en' => 'Access to relay services', 'name_sv' => 'Åtkomst till förmedlingstjänster', 'description_en' => 'ICT provides accessible access to applicable relay services.', 'description_sv' => 'IKT erbjuder tillgänglig åtkomst till tillämpliga förmedlingstjänster.'],
+            ['number' => '13.1.2', 'name_en' => 'Access to emergency services', 'name_sv' => 'Åtkomst till räddningstjänster', 'description_en' => 'ICT provides accessible access to applicable emergency services.', 'description_sv' => 'IKT erbjuder tillgänglig åtkomst till tillämpliga räddningstjänster.'],
+            ['number' => '13.2.1', 'name_en' => 'Real-time text emergency communication', 'name_sv' => 'Realtidstext för nödkommunikation', 'description_en' => 'Emergency communication supports applicable real-time text functionality.', 'description_sv' => 'Nödkommunikation stödjer tillämplig realtidstextfunktionalitet.'],
+            ['number' => '13.2.2', 'name_en' => 'Caller location for emergency services', 'name_sv' => 'Uppringarens position vid nödsamtal', 'description_en' => 'Applicable emergency communication provides caller location information.', 'description_sv' => 'Tillämplig nödkommunikation tillhandahåller information om uppringarens position.'],
+            ['number' => '13.2.3', 'name_en' => 'Video relay for emergency services', 'name_sv' => 'Videoförmedling för räddningstjänster', 'description_en' => 'Applicable emergency communication supports accessible video relay.', 'description_sv' => 'Tillämplig nödkommunikation stödjer tillgänglig videoförmedling.'],
+        ];
+
+        $criteria = [
+            ...$wcag21Criteria,
+            ...$wcag22Criteria,
+            ...array_map(fn (array $criterion): array => [
+                ...$criterion,
+                'standard' => 'EN 301 549',
+                'level' => 'N/A',
+                'url' => 'https://www.etsi.org/deliver/etsi_en/301500_301599/301549/04.01.01_60/en_301549v040101p.pdf',
+            ], $en301549Criteria),
+        ];
 
         foreach ($criteria as $criterion) {
             $criterionModel = WcagSuccessCriterion::firstOrNew(
