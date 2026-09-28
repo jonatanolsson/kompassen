@@ -1,0 +1,182 @@
+<?php
+
+use App\Livewire\CreateAccessibilityIssue;
+use App\Livewire\EditAccessibilityIssue;
+use App\Models\AccessibilityProject;
+use App\Models\ProjectMember;
+use App\Models\Team;
+use App\Models\User;
+use App\Models\WcagSuccessCriterion;
+use Livewire\Livewire;
+
+test('user can link multiple knowledge base examples when creating an issue', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'editor',
+    ]);
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
+    ]);
+    $firstExample = $criterion->examples()->create(['title' => 'Image alternative']);
+    $secondExample = $criterion->examples()->create(['title' => 'Decorative image']);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->set('title', 'Missing image alternatives')
+        ->set('mermaid_diagram', "flowchart LR\n    A[Issue] --> B[Impact]")
+        ->set('wcag_criteria.0', (string) $criterion->id)
+        ->set('example_ids.0', (string) $firstExample->id)
+        ->set('example_ids.1', (string) $secondExample->id)
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $issue = $project->issues()->latest()->firstOrFail();
+
+    expect($issue->examples->pluck('id')->all())
+        ->toBe([(string) $firstExample->id, (string) $secondExample->id])
+        ->and($issue->mermaid_diagram)->toContain('flowchart LR');
+});
+
+test('user can change linked knowledge base examples when editing an issue', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'editor',
+    ]);
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
+    ]);
+    $firstExample = $criterion->examples()->create(['title' => 'Image alternative']);
+    $secondExample = $criterion->examples()->create(['title' => 'Decorative image']);
+    $issue = $project->issues()->create([
+        'title' => 'Missing image alternatives',
+        'description' => 'Images need alternatives.',
+        'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
+    $issue->wcagCriteria()->attach($criterion);
+    $issue->examples()->attach($firstExample);
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSet('example_ids', [(string) $firstExample->id])
+        ->set('wcag_criteria', [])
+        ->assertSet('example_ids', [])
+        ->set('wcag_criteria.0', (string) $criterion->id)
+        ->set('example_ids.0', (string) $secondExample->id)
+        ->set('mermaid_diagram', "flowchart TD\n    A[Issue] --> B[Resolution]")
+        ->call('update')
+        ->assertRedirect(route('accessibility-issues.edit', [$project, $issue]));
+
+    expect($issue->refresh()->examples->pluck('id')->all())
+        ->toBe([(string) $secondExample->id])
+        ->and($issue->mermaid_diagram)->toContain('flowchart TD');
+});
+
+test('issue example selection is limited to selected WCAG criteria', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'editor',
+    ]);
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
+    ]);
+    $otherCriterion = WcagSuccessCriterion::create([
+        'number' => '1.2.1',
+        'level' => 'A',
+        'name_en' => 'Audio-only and Video-only',
+        'name_sv' => 'Enbart ljud och enbart video',
+        'description_en' => 'Alternatives are provided.',
+        'description_sv' => 'Alternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/audio-only-and-video-only-prerecorded',
+    ]);
+    $otherExample = $otherCriterion->examples()->create(['title' => 'Unrelated example']);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->set('title', 'Invalid example link')
+        ->set('wcag_criteria.0', (string) $criterion->id)
+        ->set('example_ids.0', (string) $otherExample->id)
+        ->call('submit')
+        ->assertHasErrors(['example_ids.0']);
+
+    expect($project->issues()->count())->toBe(0);
+});
+
+test('issue detail shows linked knowledge base examples', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'editor',
+    ]);
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
+    ]);
+    $example = $criterion->examples()->create([
+        'title' => 'Use meaningful alternative text',
+        'description' => 'Describe the purpose of the image.',
+        'code_snippet' => '<img src="hero.jpg" alt="Product overview">',
+        'code_language' => 'html',
+    ]);
+    $issue = $project->issues()->create([
+        'title' => 'Missing image alternatives',
+        'description' => 'Images need alternatives.',
+        'mermaid_diagram' => "flowchart LR\n    A[Issue] --> B[Impact]",
+        'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
+    $issue->examples()->attach($example);
+
+    $this->actingAs($user)
+        ->get(route('accessibility-issues.show', [$project, $issue]))
+        ->assertSuccessful()
+        ->assertSee(__('Knowledge Base Examples'))
+        ->assertSee(__('Issue diagram'))
+        ->assertSee('data-mermaid-diagram')
+        ->assertSee('Use meaningful alternative text')
+        ->assertSee('Describe the purpose of the image.');
+});
