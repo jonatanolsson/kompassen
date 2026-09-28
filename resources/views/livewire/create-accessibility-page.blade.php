@@ -1,6 +1,6 @@
 
-    <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="product-page">
+        <div class="product-section w-full">
             <div class="mb-8">
                 <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Add Page or Service') }}</flux:heading>
                 <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Add a page or service to audit in this project.') }}</flux:text>

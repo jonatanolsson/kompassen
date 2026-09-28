@@ -1,7 +1,7 @@
 <x-app-layout>
-    <div class="min-h-screen bg-white dark:bg-zinc-900">
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <div class="flex items-start justify-between mb-8">
+    <div class="product-page">
+    <div class="w-full">
+        <div class="product-page-header">
             <div>
                 <flux:heading level="1" class="mb-2">{{ $issue->title }}</flux:heading>
                 <div class="flex gap-2">
@@ -39,69 +39,45 @@
 
                             <flux:menu.separator />
 
-                            <!-- Mark as fixed -->
-                            <flux:menu.item
-                                as="button"
-                                onclick="submitResolution('fixed', 'resolve-fixed-form')"
-                                icon="check"
-                            >
-                                {{ __('Mark as fixed') }}
-                            </flux:menu.item>
-
-                            <!-- Mark as wontfix -->
-                            <flux:menu.item
-                                as="button"
-                                onclick="submitResolution('wontfix', 'resolve-wontfix-form')"
-                                icon="x-mark"
-                                class="text-red-600"
-                            >
-                                {{ __('Mark as wontfix') }}
-                            </flux:menu.item>
+                            <flux:modal.trigger name="resolve-issue-modal">
+                                <flux:menu.item icon="check-circle">
+                                    {{ __('Change resolution') }}
+                                </flux:menu.item>
+                            </flux:modal.trigger>
                         </flux:menu.group>
                     </flux:menu>
                 </flux:dropdown>
-
-                <!-- Hidden forms for resolution -->
-                <form id="resolve-fixed-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="resolution_status" value="" />
-                    <input type="hidden" name="resolution_notes" value="" />
-                </form>
-
-                <form id="resolve-wontfix-form" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="resolution_status" value="" />
-                    <input type="hidden" name="resolution_notes" value="" />
-                </form>
             </div>
-
-            <script>
-                function submitResolution(status, formId) {
-                    if (!confirm('{{ __('Are you sure you want to change resolution status?') }}')) return false;
-                    const notes = prompt('{{ __('Add resolution notes (optional)') }}');
-                    const form = document.getElementById(formId);
-                    if (!form) return false;
-                    form.querySelector('input[name="resolution_status"]').value = status;
-                    form.querySelector('input[name="resolution_notes"]').value = notes ? notes : '';
-                    form.submit();
-                }
-            </script>
         </div>
 
         <flux:separator class="my-6" />
 
         <!-- Description -->
         @if ($issue->description)
-            <div class="mb-8">
+            <div class="product-section mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>
                 <x-markdown :markdown="$issue->description" />
             </div>
         @endif
 
+        @if ($issue->mermaid_diagram)
+            <div class="product-section mb-8">
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <flux:heading level="2">{{ __('Issue diagram') }}</flux:heading>
+                    <flux:badge color="zinc">Mermaid</flux:badge>
+                </div>
+                <pre
+                    id="issue-mermaid-{{ $issue->id }}"
+                    data-mermaid-diagram
+                    role="img"
+                    aria-label="{{ __('Issue diagram') }}"
+                    class="mermaid min-h-24 overflow-auto rounded-lg bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                >{{ $issue->mermaid_diagram }}</pre>
+            </div>
+        @endif
+
         @if ($issue->resolution_notes)
-            <div class="mb-8">
+            <div class="product-section mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Resolution Notes') }}</flux:heading>
                 <flux:text class="whitespace-pre-line">{{ $issue->resolution_notes }}</flux:text>
             </div>
@@ -109,7 +85,7 @@
 
         <!-- Images -->
         @if ($issue->attachments->count() > 0)
-            <div class="mb-8">
+            <div class="product-section mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     @foreach ($issue->attachments as $attachment)
@@ -129,7 +105,7 @@
         @endif
 
         <!-- Details -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+        <div class="product-section mb-8 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
             @if ($issue->page)
                 <div>
                     <flux:heading level="3" class="text-sm mb-2">{{ __('Page/Service') }}</flux:heading>
@@ -167,7 +143,7 @@
 
         <!-- WCAG Criteria -->
         @if ($wcagCriteria->count() > 0)
-            <div class="mb-8">
+            <div class="product-section mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
                 <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($wcagCriteria as $criterion)
@@ -201,17 +177,141 @@
             </div>
         @endif
 
+        <div class="product-section mb-8">
+            @if ($issue->examples->isNotEmpty())
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                        <flux:heading level="2">{{ __('Knowledge Base Examples') }}</flux:heading>
+                        <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
+                            {{ __('Reusable guidance linked to this issue.') }}
+                        </flux:text>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <flux:badge color="blue">{{ $issue->examples->count() }}</flux:badge>
+                        @can('update', $project)
+                            <flux:button
+                                href="{{ route('accessibility-issues.edit', [$project, $issue]) }}"
+                                variant="ghost"
+                                size="sm"
+                                icon="pencil"
+                                wire:navigate
+                            >
+                                {{ __('Edit examples') }}
+                            </flux:button>
+                        @endcan
+                    </div>
+                </div>
+                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                    @foreach ($issue->examples as $example)
+                        <article class="space-y-3 py-4 first:pt-0 last:pb-0">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <flux:heading level="3" class="text-base">{{ $example->title }}</flux:heading>
+                                    @if ($example->criterion)
+                                        <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+                                            {{ $example->criterion->standard }} · {{ $example->criterion->number }} · {{ $example->criterion->name_sv ?? $example->criterion->name_en }}
+                                        </flux:text>
+                                    @endif
+                                </div>
+                                @if ($example->code_language)
+                                    <flux:badge size="sm" color="zinc">{{ strtoupper($example->code_language) }}</flux:badge>
+                                @endif
+                            </div>
+
+                            @if ($example->description)
+                                <div class="text-sm text-zinc-700 dark:text-zinc-300">
+                                    <x-user-content :content="$example->description" />
+                                </div>
+                            @endif
+
+                            @if ($example->attachments->isNotEmpty())
+                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                    @foreach ($example->attachments as $attachment)
+                                        <a
+                                            href="{{ asset('storage/'.$attachment->path) }}"
+                                            target="_blank"
+                                            class="group overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800"
+                                        >
+                                            <img
+                                                src="{{ asset('storage/'.$attachment->path) }}"
+                                                alt="{{ $attachment->alt_text ?: $attachment->original_filename }}"
+                                                class="aspect-video w-full object-cover transition duration-200 group-hover:scale-105"
+                                            />
+                                            <span class="block truncate px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                                                {{ $attachment->original_filename }}
+                                            </span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @if ($example->code_snippet)
+                                <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+                                    <div class="bg-zinc-100 px-3 py-1.5 dark:bg-zinc-800">
+                                        <flux:text size="xs" class="font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                                            {{ __('Code Snippet') }}
+                                        </flux:text>
+                                    </div>
+                                    @if ($example->code_language === 'mermaid')
+                                        <pre
+                                            id="issue-mermaid-{{ $example->id }}"
+                                            data-mermaid-diagram
+                                            role="img"
+                                            aria-label="{{ $example->title }}"
+                                            class="mermaid min-h-24 overflow-auto bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                                        >{{ $example->code_snippet }}</pre>
+                                    @else
+                                        <pre class="max-h-56 overflow-auto bg-zinc-950 px-4 py-3 text-sm text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if ($example->referenceLinks->isNotEmpty())
+                                <div class="flex flex-wrap gap-x-4 gap-y-2">
+                                    @foreach ($example->referenceLinks as $link)
+                                        <flux:link href="{{ $link->url }}" target="_blank" class="text-sm" icon-trailing="arrow-top-right-on-square">
+                                            {{ $link->label ?: $link->url }}
+                                        </flux:link>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <flux:heading level="2">{{ __('Knowledge Base Examples') }}</flux:heading>
+                        <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
+                            {{ __('No examples linked to this issue yet.') }}
+                        </flux:text>
+                    </div>
+                    @can('update', $project)
+                        <flux:button
+                            href="{{ route('accessibility-issues.edit', [$project, $issue]) }}"
+                            variant="outline"
+                            size="sm"
+                            icon="plus"
+                            wire:navigate
+                        >
+                            {{ __('Add examples') }}
+                        </flux:button>
+                    @endcan
+                </div>
+            @endif
+        </div>
+
         <flux:separator class="my-6" />
 
         <!-- Metadata -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="product-section grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
             <div>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Created') }}</flux:text>
-                <flux:text>{{ $issue->created_at->format('Y-m-d H:i') }}</flux:text>
+                <flux:text>{{ $issue->created_at->translatedFormat('j M Y H:i') }}</flux:text>
             </div>
             <div>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Last Updated') }}</flux:text>
-                <flux:text>{{ $issue->updated_at->format('Y-m-d H:i') }}</flux:text>
+                <flux:text>{{ $issue->updated_at->translatedFormat('j M Y H:i') }}</flux:text>
             </div>
             <div>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Issue ID') }}</flux:text>
@@ -220,6 +320,41 @@
         </div>
     </div>
 </div>
+
+<flux:modal name="resolve-issue-modal" class="md:w-[32rem]">
+    <form action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="space-y-6">
+        @csrf
+        @method('PATCH')
+
+        <div>
+            <flux:heading level="2">{{ __('Change resolution') }}</flux:heading>
+            <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Choose a resolution status and add context for the audit trail.') }}</flux:text>
+        </div>
+
+        <flux:field>
+            <flux:label>{{ __('Status') }}</flux:label>
+            <flux:select name="resolution_status">
+                <option value="open">{{ __('Open') }}</option>
+                <option value="fixed" @selected($issue->resolution_status === 'fixed')>{{ __('Mark as fixed') }}</option>
+                <option value="wontfix" @selected($issue->resolution_status === 'wontfix')>{{ __('Mark as wontfix') }}</option>
+            </flux:select>
+            <flux:error name="resolution_status" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>{{ __('Resolution Notes') }}</flux:label>
+            <flux:textarea name="resolution_notes" rows="4">{{ old('resolution_notes', $issue->resolution_notes) }}</flux:textarea>
+            <flux:error name="resolution_notes" />
+        </flux:field>
+
+        <div class="flex justify-end gap-2">
+            <flux:modal.close>
+                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+            </flux:modal.close>
+            <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
+        </div>
+    </form>
+</flux:modal>
 
 <!-- Export Modal Component -->
 <livewire:export-issue-modal :project="$project" :issue="$issue" />

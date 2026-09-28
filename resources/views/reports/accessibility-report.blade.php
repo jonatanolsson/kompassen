@@ -338,7 +338,7 @@
             </section>
 
             <footer role="contentinfo">
-                <p>{{ __('Report generated on :date', ['date' => now()->format('Y-m-d H:i')]) }}</p>
+                <p>{{ __('Report generated on :date', ['date' => now()->translatedFormat('j M Y H:i')]) }}</p>
             </footer>
         </div>
     </main>

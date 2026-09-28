@@ -1,7 +1,6 @@
 <x-app-layout>
-    <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-            <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+    <div class="product-page space-y-6">
+            <div class="product-page-header">
                 <div>
                     <flux:heading level="1">{{ __('Accessibility Projects') }}</flux:heading>
                     <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
@@ -13,7 +12,7 @@
                 </a>
             </div>
 
-            <form method="GET" action="{{ route('accessibility-projects.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <form method="GET" action="{{ route('accessibility-projects.index') }}" class="product-section flex flex-col gap-4 sm:flex-row sm:items-end">
                 <flux:field class="flex-1 sm:max-w-xl">
                     <flux:label>{{ __('Search projects') }}</flux:label>
                     <flux:input
@@ -34,7 +33,7 @@
             </form>
 
             @if ($projects->isEmpty())
-                <flux:card class="p-12 text-center">
+                <div class="product-section p-12 text-center">
                     <flux:icon name="folder-open" class="mx-auto mb-4 size-10 text-zinc-400" />
                     <flux:heading level="2" size="sm">
                         {{ $search !== '' ? __('No projects match your search.') : __('No projects yet. Create one to get started.') }}
@@ -44,7 +43,7 @@
                             {{ __('Create your first project to start an accessibility audit.') }}
                         </flux:text>
                     @endif
-                </flux:card>
+                </div>
             @else
                 <div
                     x-data="{
@@ -58,7 +57,10 @@
                     }"
                     class="space-y-3"
                 >
-                    <div class="flex justify-end">
+                    <div class="flex items-center justify-between gap-4">
+                        <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">
+                            {{ $projects->count() }} {{ __('Projects') }}
+                        </flux:text>
                         <div class="relative">
                             <flux:button
                                 type="button"
@@ -91,7 +93,7 @@
                         </div>
                     </div>
 
-                    <div class="w-full overflow-x-auto px-1 py-2 sm:px-2">
+                    <div class="product-section w-full overflow-x-auto p-1 sm:p-2">
                     <flux:table class="w-full min-w-[760px]">
                             <flux:table.columns>
                                 <flux:table.cell class="min-w-56 whitespace-nowrap">{{ __('Project') }}</flux:table.cell>
@@ -140,7 +142,7 @@
                                         </flux:badge>
                                     </flux:table.cell>
                                     <flux:table.cell class="min-w-32 whitespace-nowrap py-4 text-sm text-zinc-500 dark:text-zinc-400">
-                                        {{ $project->updated_at->format('Y-m-d') }}
+                                        {{ $project->updated_at->translatedFormat('j M Y') }}
                                     </flux:table.cell>
                                     <flux:table.cell class="min-w-32 py-4">
                                         <div class="flex items-center gap-1">
@@ -168,6 +170,5 @@
                     </div>
                 </div>
             @endif
-        </div>
     </div>
 </x-app-layout>

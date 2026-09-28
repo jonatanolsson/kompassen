@@ -3,20 +3,26 @@
 namespace App\Livewire;
 
 use App\Models\WcagCriterionExample;
+use App\Models\WcagCriterionExampleAttachment;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class WcagKnowledgeBase extends Component
 {
     use AuthorizesRequests;
+    use WithFileUploads;
 
     public ?string $selectedCriterionId = null;
 
@@ -67,6 +73,21 @@ class WcagKnowledgeBase extends Component
     public string $exampleCode = '';
 
     public string $exampleCodeLanguage = 'html';
+
+    /**
+     * @var array<int, TemporaryUploadedFile>
+     */
+    public array $exampleAttachments = [];
+
+    /**
+     * @var array<int, string>
+     */
+    public array $exampleAttachmentAltTexts = [];
+
+    /**
+     * @var array<int, array{id: string, path: string, original_filename: string, alt_text: ?string}>
+     */
+    public array $existingExampleAttachments = [];
 
     /**
      * @var array<int, array{url: string, label: string}>
@@ -120,7 +141,7 @@ class WcagKnowledgeBase extends Component
             return null;
         }
 
-        return WcagSuccessCriterion::with(['examples.referenceLinks', 'relatedResources'])
+        return WcagSuccessCriterion::with(['examples.referenceLinks', 'examples.attachments', 'relatedResources'])
             ->find($this->selectedCriterionId);
     }
 
@@ -215,6 +236,13 @@ class WcagKnowledgeBase extends Component
             $this->dispatch('toast', message: __('Cannot delete a criterion used by issues.'), variant: 'error');
 
             return;
+        }
+
+        $criterion->load('examples.attachments');
+        foreach ($criterion->examples as $example) {
+            foreach ($example->attachments as $attachment) {
+                Storage::disk('public')->delete($attachment->path);
+            }
         }
 
         $criterion->delete();
@@ -316,18 +344,26 @@ class WcagKnowledgeBase extends Component
 
     public function startCreatingExample(): void
     {
+        $this->authorize('update', $this->selectedCriterionModel());
         $this->resetExampleForm();
         $this->resetValidation();
     }
 
     public function saveExample(): void
     {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
         $this->validate([
             'selectedCriterionId' => ['required', 'exists:wcag_success_criteria,id'],
             'exampleTitle' => ['required', 'string', 'max:255'],
             'exampleDescription' => ['nullable', 'string'],
             'exampleCode' => ['nullable', 'string'],
             'exampleCodeLanguage' => ['nullable', 'string', 'max:50'],
+            'exampleAttachments' => ['array', 'max:10'],
+            'exampleAttachments.*' => ['image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
+            'exampleAttachmentAltTexts' => ['array'],
+            'exampleAttachmentAltTexts.*' => ['required', 'string', 'max:255'],
             'exampleLinks' => ['array', 'max:10'],
             'exampleLinks.*' => ['array'],
             'exampleLinks.*.url' => ['nullable', 'url', 'max:500'],
@@ -348,20 +384,20 @@ class WcagKnowledgeBase extends Component
             'code_snippet' => $this->exampleCode ?: null,
             'code_language' => $this->exampleCodeLanguage ?: 'html',
             'url' => $links->first()['url'] ?? null,
-            'url_label' => $links->first()['label'] ?: null,
+            'url_label' => ($links->first()['label'] ?? null) ?: null,
         ];
 
-        DB::transaction(function () use ($data, $links): void {
+        DB::transaction(function () use ($criterion, $data, $links): void {
             if ($this->editingExampleId) {
                 $example = WcagCriterionExample::query()
                     ->whereKey($this->editingExampleId)
-                    ->where('wcag_success_criterion_id', $this->selectedCriterionId)
+                    ->whereBelongsTo($criterion, 'criterion')
                     ->firstOrFail();
                 $example->update($data);
             } else {
                 $example = WcagCriterionExample::create([
                     ...$data,
-                    'wcag_success_criterion_id' => $this->selectedCriterionId,
+                    'wcag_success_criterion_id' => $criterion->id,
                 ]);
             }
 
@@ -372,6 +408,21 @@ class WcagKnowledgeBase extends Component
                     'sort_order' => $index,
                 ])->all()
             );
+
+            foreach ($this->exampleAttachments as $index => $file) {
+                $filename = Str::ulid().'.'.$file->extension();
+                $path = $file->storeAs('wcag-examples/'.$example->id, $filename, 'public');
+
+                $example->attachments()->create([
+                    'filename' => $filename,
+                    'original_filename' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                    'path' => $path,
+                    'alt_text' => trim($this->exampleAttachmentAltTexts[$index] ?? ''),
+                    'sort_order' => $index,
+                ]);
+            }
         });
 
         $this->resetExampleForm();
@@ -382,9 +433,13 @@ class WcagKnowledgeBase extends Component
 
     public function editExample(string $id): void
     {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
         $example = WcagCriterionExample::query()
             ->whereKey($id)
-            ->where('wcag_success_criterion_id', $this->selectedCriterionId)
+            ->whereBelongsTo($criterion, 'criterion')
+            ->with('attachments')
             ->firstOrFail();
 
         $this->editingExampleId = $id;
@@ -406,6 +461,24 @@ class WcagKnowledgeBase extends Component
             )
             ->values()
             ->all();
+        $this->existingExampleAttachments = $example->attachments
+            ->map(fn (WcagCriterionExampleAttachment $attachment): array => [
+                'id' => $attachment->id,
+                'path' => $attachment->path,
+                'original_filename' => $attachment->original_filename,
+                'alt_text' => $attachment->alt_text,
+            ])
+            ->all();
+        $this->exampleAttachments = [];
+        $this->exampleAttachmentAltTexts = [];
+        $this->resetValidation();
+    }
+
+    public function updatedExampleAttachments(): void
+    {
+        foreach ($this->exampleAttachments as $index => $file) {
+            $this->exampleAttachmentAltTexts[$index] ??= '';
+        }
     }
 
     public function addExampleLink(): void
@@ -421,13 +494,42 @@ class WcagKnowledgeBase extends Component
 
     public function deleteExample(string $id): void
     {
-        WcagCriterionExample::query()
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
+        $example = WcagCriterionExample::query()
             ->whereKey($id)
-            ->where('wcag_success_criterion_id', $this->selectedCriterionId)
-            ->firstOrFail()
-            ->delete();
+            ->whereBelongsTo($criterion, 'criterion')
+            ->with('attachments')
+            ->firstOrFail();
+
+        foreach ($example->attachments as $attachment) {
+            Storage::disk('public')->delete($attachment->path);
+        }
+
+        $example->delete();
         unset($this->selectedCriterion);
         $this->dispatch('toast', message: __('Example deleted.'), variant: 'success');
+    }
+
+    public function deleteExampleAttachment(string $id): void
+    {
+        $criterion = $this->selectedCriterionModel();
+        $this->authorize('update', $criterion);
+
+        $example = WcagCriterionExample::query()
+            ->whereKey($this->editingExampleId)
+            ->whereBelongsTo($criterion, 'criterion')
+            ->firstOrFail();
+        $attachment = $example->attachments()->whereKey($id)->firstOrFail();
+
+        Storage::disk('public')->delete($attachment->path);
+        $attachment->delete();
+        $this->existingExampleAttachments = array_values(array_filter(
+            $this->existingExampleAttachments,
+            fn (array $existing): bool => $existing['id'] !== $id
+        ));
+        unset($this->selectedCriterion);
     }
 
     public function cancelEdit(): void
@@ -475,6 +577,9 @@ class WcagKnowledgeBase extends Component
         $this->exampleDescription = '';
         $this->exampleCode = '';
         $this->exampleCodeLanguage = 'html';
+        $this->exampleAttachments = [];
+        $this->exampleAttachmentAltTexts = [];
+        $this->existingExampleAttachments = [];
         $this->exampleLinks = [];
     }
 

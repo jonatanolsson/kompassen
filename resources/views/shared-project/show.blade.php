@@ -78,7 +78,7 @@
                         <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400 sm:grid-cols-3 print:grid-cols-3 print:mt-3 print:text-zinc-700">
                             <div>
                                 <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Audit Date') }}</dt>
-                                <dd>{{ $project->audit_date?->format('Y-m-d') ?? __('Not specified') }}</dd>
+                                <dd>{{ $project->audit_date?->translatedFormat('j M Y') ?? __('Not specified') }}</dd>
                             </div>
                             <div>
                                 <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Target WCAG Level') }}</dt>
@@ -86,7 +86,7 @@
                             </div>
                             <div>
                                 <dt class="font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{{ __('Last updated') }}</dt>
-                                <dd>{{ $project->updated_at->format('Y-m-d H:i') }}</dd>
+                                <dd>{{ $project->updated_at->translatedFormat('j M Y H:i') }}</dd>
                             </div>
                         </dl>
                         @if ($project->description)
@@ -598,7 +598,7 @@
         <footer class="border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300 mt-12 print:mt-8 py-6 print:py-4 text-center print:page-break-before-avoid">
             <div class="max-w-5xl mx-auto px-6">
                 <flux:text class="text-sm">
-                    {{ __('This is a shared accessibility report. Last updated: :date', ['date' => $project->updated_at->format('Y-m-d H:i')]) }}
+                    {{ __('This is a shared accessibility report. Last updated: :date', ['date' => $project->updated_at->translatedFormat('j M Y H:i')]) }}
                 </flux:text>
                 <flux:button 
                     type="button"

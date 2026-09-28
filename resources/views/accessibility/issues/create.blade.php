@@ -32,6 +32,20 @@
                 </flux:field>
 
                 <flux:field>
+                    <flux:label>{{ __('Mermaid diagram') }}</flux:label>
+                    <flux:textarea
+                        name="mermaid_diagram"
+                        rows="8"
+                        placeholder="flowchart LR&#10;    A[Observed issue] --> B[Impact]"
+                        class="font-mono text-sm"
+                    >{{ old('mermaid_diagram') }}</flux:textarea>
+                    <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                        {{ __('Optional Mermaid source. It will be rendered on the issue detail page.') }}
+                    </flux:text>
+                    <flux:error name="mermaid_diagram" />
+                </flux:field>
+
+                <flux:field>
                     <flux:label>{{ __('Images') }}</flux:label>
                     <flux:input type="file" name="attachments[]" multiple accept="image/*" />
                     <flux:error name="attachments" />

@@ -1,7 +1,7 @@
 <x-app-layout>
-    <div class="min-h-screen bg-white dark:bg-zinc-900">
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <div class="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
+    <div class="product-page">
+    <div class="w-full">
+        <div class="product-page-header">
             <div>
                 <flux:heading level="1">{{ $project->name }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:text>
@@ -43,7 +43,7 @@
         </div>
 
         @if ($project->description)
-            <section class="mb-8">
+            <section class="product-section mb-8">
                 <flux:heading level="2" class="mb-3">{{ __('Description') }}</flux:heading>
                 <x-user-content :content="$project->description" />
             </section>
@@ -52,7 +52,7 @@
         <flux:separator class="my-8" />
 
         <!-- Pages Section -->
-        <div class="mb-8">
+        <div class="product-section mb-8">
             <div class="flex items-center justify-between mb-4">
                 <flux:heading level="2">{{ __('Pages & Services') }}</flux:heading>
                 <flux:button href="{{ route('accessibility-pages.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Add Page or Service') }}</flux:button>
@@ -108,7 +108,7 @@
         <flux:separator class="my-8" />
 
         <!-- Issues Section -->
-        <div>
+        <div class="product-section">
             <div class="flex items-center justify-between mb-4">
             <flux:heading level="2">{{ __('Issues') }}</flux:heading>
                 <flux:button href="{{ route('accessibility-issues.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Report Issue') }}</flux:button>
@@ -196,7 +196,7 @@
                                 </div>
                             </flux:table.cell>
 
-                            <flux:table.cell>{{ $issue->created_at->format('Y-m-d') }}</flux:table.cell>
+                            <flux:table.cell>{{ $issue->created_at->translatedFormat('j M Y') }}</flux:table.cell>
 
                             <flux:table.cell class="flex gap-2 items-center">
                                 <flux:dropdown align="end">
@@ -204,15 +204,14 @@
                                     <flux:menu>
                                         <flux:menu.item href="{{ route('accessibility-issues.show', [$project, $issue]) }}" icon="eye" wire:navigate>{{ __('View') }}</flux:menu.item>
                                         <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:menu.item>
-                                        <flux:menu.item as="button" icon="check" onclick="document.getElementById('resolve-fixed-{{ $issue->id }}').submit()">{{ __('Mark as fixed') }}</flux:menu.item>
-                                        <flux:menu.item as="button" icon="x-mark" class="text-red-600" onclick="document.getElementById('resolve-wontfix-{{ $issue->id }}').submit()">{{ __('Mark as wontfix') }}</flux:menu.item>
+                                        <flux:modal.trigger name="resolve-project-issue-{{ $issue->id }}">
+                                            <flux:menu.item icon="check-circle">{{ __('Change resolution') }}</flux:menu.item>
+                                        </flux:modal.trigger>
                                         <flux:menu.separator />
                                         <flux:menu.item as="button" icon="trash" variant="danger" onclick="if(confirm('{{ __('Are you sure?') }}')){ document.getElementById('destroy-{{ $issue->id }}').submit(); }">{{ __('Delete') }}</flux:menu.item>
                                     </flux:menu>
                                 </flux:dropdown>
 
-                                <form id="resolve-fixed-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('PATCH')<input type="hidden" name="resolution_status" value="fixed" /><input type="hidden" name="resolution_notes" value="" /></form>
-                                <form id="resolve-wontfix-{{ $issue->id }}" action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('PATCH')<input type="hidden" name="resolution_status" value="wontfix" /><input type="hidden" name="resolution_notes" value="" /></form>
                                 <form id="destroy-{{ $issue->id }}" action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
                             </flux:table.cell>
                         </flux:table.row>
@@ -254,6 +253,41 @@
                     </flux:table.rows>
                 </flux:table>
             @endif
+
+            @foreach ($project->issues as $issue)
+                <flux:modal name="resolve-project-issue-{{ $issue->id }}" class="md:w-[32rem]">
+                    <form action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PATCH')
+
+                        <div>
+                            <flux:heading level="2">{{ __('Change resolution') }}</flux:heading>
+                            <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Choose a resolution status and add context for the audit trail.') }}</flux:text>
+                        </div>
+
+                        <flux:field>
+                            <flux:label>{{ __('Status') }}</flux:label>
+                            <flux:select name="resolution_status">
+                                <option value="open">{{ __('Open') }}</option>
+                                <option value="fixed" @selected($issue->resolution_status === 'fixed')>{{ __('Mark as fixed') }}</option>
+                                <option value="wontfix" @selected($issue->resolution_status === 'wontfix')>{{ __('Mark as wontfix') }}</option>
+                            </flux:select>
+                        </flux:field>
+
+                        <flux:field>
+                            <flux:label>{{ __('Resolution Notes') }}</flux:label>
+                            <flux:textarea name="resolution_notes" rows="4">{{ $issue->resolution_notes }}</flux:textarea>
+                        </flux:field>
+
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close>
+                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            </flux:modal.close>
+                            <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
+                        </div>
+                    </form>
+                </flux:modal>
+            @endforeach
         </div>
 
         <flux:separator class="my-8" />
@@ -305,7 +339,7 @@
                                     </div>
                                     @if ($link->expires_at)
                                         <div class="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-                                        {{ __('Expires') }}: {{ $link->expires_at->format('Y-m-d H:i') }}
+                                        {{ __('Expires') }}: {{ $link->expires_at->translatedFormat('j M Y H:i') }}
                                         </div>
                                     @endif
                                 </div>
@@ -341,18 +375,6 @@
         </div>
     </div>
 </flux:modal>
-
-<script>
-    function submitResolution(status, formId) {
-        if (!confirm('{{ __('Are you sure you want to change resolution status?') }}')) return false;
-        const notes = prompt('{{ __('Add resolution notes (optional)') }}');
-        const form = document.getElementById(formId);
-        if (!form) return false;
-        form.querySelector('input[name="resolution_status"]').value = status;
-        form.querySelector('input[name="resolution_notes"]').value = notes ? notes : '';
-        form.submit();
-    }
-</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

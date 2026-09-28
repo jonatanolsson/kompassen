@@ -30,6 +30,11 @@ class AccessibilityIssueController extends Controller
     {
         $this->authorize('view', $project);
 
+        $issue->load([
+            'examples.criterion',
+            'examples.referenceLinks',
+            'examples.attachments',
+        ]);
         $wcagCriteria = $issue->wcagCriteria()->get();
 
         return view('accessibility.issues.show', compact('project', 'issue', 'wcagCriteria'));
@@ -42,6 +47,7 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'mermaid_diagram' => 'nullable|string|max:20000',
             'page_id' => [
                 'nullable',
                 Rule::exists('accessibility_pages', 'id')
@@ -98,6 +104,7 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'mermaid_diagram' => 'nullable|string|max:20000',
             'page_id' => [
                 'nullable',
                 Rule::exists('accessibility_pages', 'id')

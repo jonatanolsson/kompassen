@@ -64,3 +64,30 @@ test('reopening an issue clears its resolved timestamp', function () {
         ->and($issue->resolution_status)->toBe('open')
         ->and($issue->resolved_at)->toBeNull();
 });
+
+test('issue detail uses a resolution modal instead of browser prompts', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    $issue = $project->issues()->create([
+        'title' => 'Missing alternative text',
+        'description' => 'Images lack alternatives.',
+        'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('accessibility-issues.show', [$project, $issue]))
+        ->assertSuccessful()
+        ->assertSee(__('Change resolution'))
+        ->assertSee('resolve-issue-modal', false)
+        ->assertDontSee('prompt(', false);
+});

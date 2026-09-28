@@ -1,5 +1,5 @@
-<div>
-    <div class="flex flex-wrap items-start justify-between gap-4">
+<div class="product-page space-y-6">
+    <div class="product-page-header">
         <div>
             <flux:heading size="xl">{{ __('Knowledge Base') }}</flux:heading>
             <flux:subheading>{{ __('Browse and maintain accessibility standards, criteria, examples, and references.') }}</flux:subheading>
@@ -13,8 +13,13 @@
 
     <flux:separator variant="subtle" class="my-6" />
 
-    <div class="mb-6 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
-        <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search by number, standard, or name…') }}" icon="magnifying-glass" />
+    <div class="product-section grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+        <flux:input
+            wire:model.live.debounce.300ms="search"
+            :loading="false"
+            placeholder="{{ __('Search by number, standard, or name…') }}"
+            icon="magnifying-glass"
+        />
         <flux:select wire:model.live="standardFilter">
             <option value="">{{ __('All standards') }}</option>
             @foreach ($this->standards as $standard)
@@ -79,7 +84,7 @@
                                                 @endif
                                                 <span @class([
                                                     'rounded-full px-2 py-0.5 text-xs font-semibold',
-                                                    'bg-white/20 text-white dark:bg-zinc-900/15 dark:text-zinc-900' => $selectedCriterionId === $criterion->id,
+                                                    'bg-white/20 text-white' => $selectedCriterionId === $criterion->id,
                                                     'bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-100' => $selectedCriterionId !== $criterion->id && $criterion->level === 'A',
                                                     'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-100' => $selectedCriterionId !== $criterion->id && $criterion->level === 'AA',
                                                     'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-100' => $selectedCriterionId !== $criterion->id && $criterion->level !== 'A' && $criterion->level !== 'AA',
@@ -122,7 +127,6 @@
                                 @if ($criterion->name_sv !== $criterion->name_en)
                                     <flux:subheading>{{ $criterion->name_sv }}</flux:subheading>
                                 @endif
-                                <flux:text size="sm" class="mt-3 text-zinc-600 dark:text-zinc-400">{{ $criterion->description_sv ?? $criterion->description_en }}</flux:text>
                             </div>
                             <div class="flex shrink-0 items-center gap-1">
                                 @if ($criterion->url)
@@ -146,6 +150,9 @@
                                 </flux:button>
                             </div>
                         </div>
+                        <flux:text size="sm" class="mt-4 block w-full text-zinc-600 dark:text-zinc-400">
+                            {{ $criterion->description_sv ?? $criterion->description_en }}
+                        </flux:text>
                     </div>
 
                     <flux:separator />
@@ -294,15 +301,46 @@
                                             </div>
                                         @endif
 
+                                        @if ($example->attachments->isNotEmpty())
+                                            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                                @foreach ($example->attachments as $attachment)
+                                                    <a
+                                                        href="{{ asset('storage/'.$attachment->path) }}"
+                                                        target="_blank"
+                                                        class="group overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800"
+                                                    >
+                                                        <img
+                                                            src="{{ asset('storage/'.$attachment->path) }}"
+                                                            alt="{{ $attachment->alt_text ?: $attachment->original_filename }}"
+                                                            class="aspect-video w-full object-cover transition duration-200 group-hover:scale-105"
+                                                        />
+                                                        <span class="block truncate px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+                                                            {{ $attachment->original_filename }}
+                                                        </span>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
                                         @if ($example->code_snippet)
                                             <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
                                                 <div class="flex items-center justify-between bg-zinc-100 px-3 py-1.5 dark:bg-zinc-800">
                                                     <flux:text size="xs" class="font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                                                         {{ __('Code Snippet') }}
                                                     </flux:text>
-                                                    <flux:badge size="sm" color="zinc">{{ $example->code_language ?? 'html' }}</flux:badge>
+                                                    <flux:badge size="sm" color="zinc">{{ $example->code_language ?? 'html' }}                                                    </flux:badge>
                                                 </div>
-                                                <pre class="max-h-56 overflow-auto bg-zinc-950 px-4 py-3 text-sm text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
+                                                @if ($example->code_language === 'mermaid')
+                                                    <pre
+                                                        id="mermaid-{{ $example->id }}"
+                                                        data-mermaid-diagram
+                                                        role="img"
+                                                        aria-label="{{ $example->title }}"
+                                                        class="mermaid min-h-24 overflow-auto bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                                                    >{{ $example->code_snippet }}</pre>
+                                                @else
+                                                    <pre class="max-h-56 overflow-auto bg-zinc-950 px-4 py-3 text-sm text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
+                                                @endif
                                             </div>
                                         @endif
 
@@ -332,7 +370,7 @@
                 </flux:card>
 
                 <flux:modal name="example-form-modal" class="w-full max-w-2xl">
-                    <form wire:submit="saveExample" class="space-y-6">
+                    <form wire:submit="saveExample" enctype="multipart/form-data" class="space-y-6">
                         <div>
                             <flux:heading size="lg">
                                 {{ $editingExampleId ? __('Edit Example') : __('Add Example') }}
@@ -376,8 +414,73 @@
                                         <option value="php">{{ __('PHP') }}</option>
                                         <option value="blade">{{ __('Blade') }}</option>
                                         <option value="aria">{{ __('ARIA') }}</option>
+                                        <option value="mermaid">{{ __('Mermaid diagram') }}</option>
                                     </flux:select>
+                                    <flux:error name="exampleCodeLanguage" />
                                 </flux:field>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <flux:label>{{ __('Image attachments') }}</flux:label>
+                                    <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+                                        {{ __('Add screenshots or diagrams to illustrate the example. Max 5 MB per image.') }}
+                                    </flux:text>
+                                </div>
+                                <flux:file-upload wire:model="exampleAttachments" multiple accept="image/*" />
+                                <flux:error name="exampleAttachments" />
+                                <flux:error name="exampleAttachments.*" />
+
+                                @if (count($existingExampleAttachments) > 0)
+                                    <div class="space-y-2">
+                                        <flux:text size="sm" class="font-medium">{{ __('Current image attachments') }}</flux:text>
+                                        @foreach ($existingExampleAttachments as $attachment)
+                                            <div wire:key="existing-example-attachment-{{ $attachment['id'] }}" class="flex items-center gap-3 rounded-lg border border-zinc-200 p-2 dark:border-zinc-700">
+                                                <img
+                                                    src="{{ asset('storage/'.$attachment['path']) }}"
+                                                    alt="{{ $attachment['alt_text'] ?: $attachment['original_filename'] }}"
+                                                    class="size-14 rounded object-cover"
+                                                />
+                                                <div class="min-w-0 flex-1">
+                                                    <flux:text size="sm" class="truncate">{{ $attachment['original_filename'] }}</flux:text>
+                                                    @if ($attachment['alt_text'])
+                                                        <flux:text size="xs" class="truncate text-zinc-500 dark:text-zinc-400">{{ $attachment['alt_text'] }}</flux:text>
+                                                    @endif
+                                                </div>
+                                                <flux:button
+                                                    type="button"
+                                                    size="xs"
+                                                    variant="ghost"
+                                                    icon="trash"
+                                                    aria-label="{{ __('Delete image attachment') }}"
+                                                    wire:click="deleteExampleAttachment('{{ $attachment['id'] }}')"
+                                                    wire:confirm="{{ __('Delete this image attachment?') }}"
+                                                />
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @foreach ($this->exampleAttachments as $index => $uploadedFile)
+                                    <div wire:key="new-example-attachment-{{ $index }}" class="grid grid-cols-1 items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/50 p-3 sm:grid-cols-[5rem_minmax(0,1fr)] dark:border-blue-900 dark:bg-blue-950/20">
+                                        @if (str_starts_with($uploadedFile->getMimeType(), 'image/'))
+                                            <img
+                                                src="{{ $uploadedFile->temporaryUrl() }}"
+                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
+                                                class="aspect-square w-20 rounded object-cover"
+                                            />
+                                        @else
+                                            <div class="flex aspect-square w-20 items-center justify-center rounded bg-zinc-100 px-1 text-center text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                                                {{ $uploadedFile->getClientOriginalName() }}
+                                            </div>
+                                        @endif
+                                        <flux:field>
+                                            <flux:label>{{ __('Alt text') }}</flux:label>
+                                            <flux:input wire:model="exampleAttachmentAltTexts.{{ $index }}" placeholder="{{ __('Describe what the image shows') }}" />
+                                            <flux:error name="exampleAttachmentAltTexts.{{ $index }}" />
+                                        </flux:field>
+                                    </div>
+                                @endforeach
                             </div>
 
                             <div class="space-y-3">

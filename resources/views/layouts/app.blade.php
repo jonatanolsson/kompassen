@@ -15,10 +15,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
             @fluxAppearance
     </head>
-    <body class="font-sans antialiased">
-        <div class="flex min-h-screen">
+    <body class="font-sans antialiased text-zinc-900 dark:text-zinc-100">
+        <div class="flex min-h-screen bg-zinc-100 dark:bg-zinc-950">
             <!-- Sidebar -->
-            <flux:sidebar collapsible="mobile" class="bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700">
+            <flux:sidebar collapsible="mobile" class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
                 @php $brandLogo = \App\Models\AppSetting::get('brand_logo'); @endphp
@@ -27,7 +27,10 @@
                     @if ($brandLogo)
                         <img src="{{ Storage::url($brandLogo) }}" alt="{{ config('app.name') }}" class="max-h-8 max-w-full object-contain" />
                     @else
-                        <span class="text-lg font-semibold text-zinc-800 dark:text-white">{{ config('app.name') }}</span>
+                        <span class="flex items-center gap-2 text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">
+                            <span class="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">K</span>
+                            {{ config('app.name') }}
+                        </span>
                     @endif
                 </flux:sidebar.brand>
 
@@ -67,9 +70,9 @@
             </flux:sidebar>
 
             <!-- Main Content -->
-            <div class="flex flex-col flex-1">
+            <div class="flex min-w-0 flex-1 flex-col">
                 <!-- Header -->
-                <flux:header sticky container class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-600">
+                <flux:header sticky container class="border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
                     <flux:sidebar.toggle class="lg:hidden" icon="bars-2" />
 
                     <flux:heading level="2" size="lg" class="flex-1 truncate">
@@ -99,7 +102,7 @@
                 </flux:header>
 
                 <!-- Page Content -->
-                <flux:main container class="flex-1">
+                <flux:main class="flex-1 bg-zinc-100/70 dark:bg-zinc-950/70">
                     @if (session('success'))
                         <flux:callout class="mb-6" color="green" icon="check-circle">
                             <flux:callout.text>{{ session('success') }}</flux:callout.text>

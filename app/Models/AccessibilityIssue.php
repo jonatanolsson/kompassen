@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'mermaid_diagram', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;
@@ -74,6 +74,18 @@ class AccessibilityIssue extends Model
             'wcag_success_criterion_id'
         )->withPivot('failure_type', 'comment', 'code_snippet', 'screenshot_path')
             ->withTimestamps();
+    }
+
+    public function examples(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            WcagCriterionExample::class,
+            'accessibility_issue_example',
+            'accessibility_issue_id',
+            'wcag_criterion_example_id'
+        )->withPivot('sort_order')
+            ->orderBy('accessibility_issue_example.sort_order')
+            ->orderBy('wcag_criterion_examples.created_at');
     }
 
     public function attachments(): HasMany

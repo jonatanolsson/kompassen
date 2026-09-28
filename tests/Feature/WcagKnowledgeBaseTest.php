@@ -3,11 +3,14 @@
 use App\Livewire\WcagKnowledgeBase;
 use App\Models\User;
 use App\Models\WcagCriterionExample;
+use App\Models\WcagCriterionExampleAttachment;
 use App\Models\WcagCriterionExampleLink;
 use App\Models\WcagRelatedResource;
 use App\Models\WcagSuccessCriterion;
 use Database\Seeders\WcagRelatedResourcesSeeder;
 use Database\Seeders\WcagSuccessCriteriaSeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('knowledge base shows resources related to selected criterion', function () {
@@ -111,6 +114,108 @@ test('examples support multiple reference links', function () {
         ->where('wcag_criterion_example_id', $example->id)
         ->pluck('url')
         ->all())->toBe(['https://www.w3.org/updated-button']);
+});
+
+test('examples support image attachments with alt text', function () {
+    Storage::fake('public');
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternative',
+        'description_sv' => 'Textalternativ',
+    ]);
+
+    $component = Livewire::actingAs(User::factory()->create())
+        ->test(WcagKnowledgeBase::class)
+        ->call('selectCriterion', $criterion->id)
+        ->set('exampleTitle', 'Accessible image')
+        ->set('exampleAttachments', [UploadedFile::fake()->image('button.png')])
+        ->set('exampleAttachmentAltTexts', [0 => 'A button with a visible label'])
+        ->call('saveExample');
+
+    $attachment = WcagCriterionExampleAttachment::query()->firstOrFail();
+
+    expect($attachment->original_filename)->toBe('button.png')
+        ->and($attachment->alt_text)->toBe('A button with a visible label');
+
+    Storage::disk('public')->assertExists($attachment->path);
+    $component->assertSee('Accessible image');
+});
+
+test('example image attachments reject non-image files', function () {
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternative',
+        'description_sv' => 'Textalternativ',
+    ]);
+
+    Livewire::actingAs(User::factory()->create())
+        ->test(WcagKnowledgeBase::class)
+        ->call('selectCriterion', $criterion->id)
+        ->set('exampleTitle', 'Invalid attachment')
+        ->set('exampleAttachments', [UploadedFile::fake()->create('document.pdf', 100, 'application/pdf')])
+        ->set('exampleAttachmentAltTexts', [0 => 'A document'])
+        ->call('saveExample')
+        ->assertHasErrors(['exampleAttachments.0']);
+});
+
+test('example image attachments can be deleted with their stored file', function () {
+    Storage::fake('public');
+
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternative',
+        'description_sv' => 'Textalternativ',
+    ]);
+
+    $component = Livewire::actingAs(User::factory()->create())
+        ->test(WcagKnowledgeBase::class)
+        ->call('selectCriterion', $criterion->id)
+        ->set('exampleTitle', 'Removable image')
+        ->set('exampleAttachments', [UploadedFile::fake()->image('screen.png')])
+        ->set('exampleAttachmentAltTexts', [0 => 'A screen capture'])
+        ->call('saveExample');
+    $attachment = WcagCriterionExampleAttachment::query()->firstOrFail();
+    $example = $attachment->example;
+
+    $component
+        ->call('editExample', $example->id)
+        ->call('deleteExampleAttachment', $attachment->id);
+
+    expect(WcagCriterionExampleAttachment::query()->find($attachment->id))->toBeNull();
+    Storage::disk('public')->assertMissing($attachment->path);
+});
+
+test('examples support mermaid diagrams', function () {
+    $criterion = WcagSuccessCriterion::create([
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternative',
+        'description_sv' => 'Textalternativ',
+    ]);
+
+    $component = Livewire::actingAs(User::factory()->create())
+        ->test(WcagKnowledgeBase::class)
+        ->call('selectCriterion', $criterion->id)
+        ->set('exampleTitle', 'Audit flow')
+        ->set('exampleCode', 'flowchart LR; A[Start] --> B[Review]')
+        ->set('exampleCodeLanguage', 'mermaid')
+        ->call('saveExample')
+        ->assertSee('data-mermaid-diagram');
+
+    expect(WcagCriterionExample::query()->firstOrFail()->code_language)->toBe('mermaid');
+    $component->assertSee('flowchart LR');
 });
 
 test('related resource seeder is idempotent and uses current digg links', function () {

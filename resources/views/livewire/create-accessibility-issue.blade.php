@@ -1,6 +1,6 @@
 
-    <div class="min-h-screen bg-white dark:bg-zinc-900">
-        <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="product-page">
+        <div class="product-section w-full">
             <div class="mb-8">
                 <flux:heading level="1" class="text-2xl font-semibold tracking-tight">{{ __('Report Issue') }}</flux:heading>
                 <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Document an accessibility issue found during the audit.') }}</flux:text>
@@ -30,6 +30,20 @@
                                 placeholder="{{ __('Describe the issue in detail...') }}"
                             />
                             <flux:error name="description" />
+                        </flux:field>
+
+                        <flux:field>
+                            <flux:label>{{ __('Mermaid diagram') }}</flux:label>
+                            <flux:textarea
+                                wire:model="mermaid_diagram"
+                                rows="8"
+                                placeholder="flowchart LR&#10;    A[Observed issue] --> B[Impact]"
+                                class="font-mono text-sm"
+                            />
+                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                {{ __('Optional Mermaid source. It will be rendered on the issue detail page.') }}
+                            </flux:text>
+                            <flux:error name="mermaid_diagram" />
                         </flux:field>
 
                         <flux:field>
@@ -149,6 +163,65 @@
 
                         <flux:error name="wcag_criteria" />
                     </div>
+                </div>
+
+                <flux:separator />
+
+                <!-- Knowledge Base Examples -->
+                <div class="py-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <flux:heading level="2" class="mb-2 text-lg font-semibold">{{ __('Knowledge Base Examples') }}</flux:heading>
+                            <flux:text size="sm" class="text-zinc-600 dark:text-zinc-400">
+                                {{ __('Link one or more reusable examples to show what was found and how it can be addressed.') }}
+                            </flux:text>
+                        </div>
+                        @if (count($example_ids) > 0)
+                            <flux:badge color="blue">{{ count($example_ids) }}</flux:badge>
+                        @endif
+                    </div>
+
+                    @if (count($wcag_criteria) === 0)
+                        <flux:callout icon="information-circle" color="zinc" class="mt-4">
+                            <flux:callout.text>{{ __('Select one or more WCAG criteria first to see related examples.') }}</flux:callout.text>
+                        </flux:callout>
+                    @elseif ($availableExamples->isEmpty())
+                        <flux:callout icon="light-bulb" color="zinc" class="mt-4">
+                            <flux:callout.text>{{ __('No examples are available for the selected criteria yet.') }}</flux:callout.text>
+                        </flux:callout>
+                    @else
+                        <div class="mt-4 space-y-4">
+                            <flux:input
+                                wire:model.live.debounce.300ms="exampleSearch"
+                                :loading="false"
+                                icon="magnifying-glass"
+                                placeholder="{{ __('Search examples…') }}"
+                            />
+                            <div class="max-h-80 space-y-2 overflow-y-auto rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
+                                @foreach ($availableExamples as $example)
+                                    <div wire:key="create-issue-example-{{ $example->id }}" class="flex items-start gap-3 rounded-lg px-3 py-2 transition hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                                        <flux:checkbox
+                                            wire:model="example_ids"
+                                            value="{{ $example->id }}"
+                                            :label="$example->title"
+                                        />
+                                        <div class="min-w-0 pt-0.5">
+                                            <flux:text size="xs" class="text-zinc-500 dark:text-zinc-400">
+                                                {{ $example->criterion->number }} · {{ $example->criterion->name_sv ?? $example->criterion->name_en }}
+                                            </flux:text>
+                                            @if ($example->description)
+                                                <flux:text size="sm" class="mt-1 line-clamp-2 text-zinc-600 dark:text-zinc-400">
+                                                    {{ Str::limit(strip_tags($example->description), 160) }}
+                                                </flux:text>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <flux:error name="example_ids" />
+                            <flux:error name="example_ids.*" />
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Actions -->

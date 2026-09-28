@@ -5,6 +5,7 @@ use App\Models\ProjectMember;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WcagSuccessCriterion;
+use Illuminate\Support\Carbon;
 
 test('preview shows scope-aware metadata, statistics, and accessible modal structure', function () {
     $team = Team::factory()->create();
@@ -82,7 +83,7 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         ->assertSee(__('View details'))
         ->assertSee(__('Affected WCAG requirements'))
         ->assertSee('WCAG 2.1 nivå AA')
-        ->assertSee('2026-09-01')
+        ->assertSee(Carbon::parse('2026-09-01')->locale('sv')->translatedFormat('j M Y'))
         ->assertSee(__('Moderate'))
         ->assertSee(__('Minor'))
         ->assertSee(__('Out of Scope'))

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -44,5 +45,22 @@ class WcagCriterionExample extends Model
         return $this->hasMany(WcagCriterionExampleLink::class, 'wcag_criterion_example_id')
             ->orderBy('sort_order')
             ->orderBy('id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(WcagCriterionExampleAttachment::class, 'wcag_criterion_example_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function issues(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AccessibilityIssue::class,
+            'accessibility_issue_example',
+            'wcag_criterion_example_id',
+            'accessibility_issue_id'
+        )->withPivot('sort_order');
     }
 }

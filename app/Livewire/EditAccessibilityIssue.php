@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
+use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +34,9 @@ class EditAccessibilityIssue extends Component
     #[Validate('nullable|string')]
     public string $description = '';
 
+    #[Validate('nullable|string|max:20000')]
+    public string $mermaid_diagram = '';
+
     public ?string $page_id = null;
 
     #[Validate('nullable|string|max:255')]
@@ -51,6 +55,12 @@ class EditAccessibilityIssue extends Component
 
     public string $wcagSearch = '';
 
+    public array $wcag_criteria = [];
+
+    public array $example_ids = [];
+
+    public string $exampleSearch = '';
+
     #[Validate('nullable|array')]
     public array $attachments = [];
 
@@ -62,11 +72,14 @@ class EditAccessibilityIssue extends Component
         $this->issueId = $issue->id;
         $this->title = $issue->title;
         $this->description = $issue->description;
+        $this->mermaid_diagram = $issue->mermaid_diagram ?? '';
         $this->page_id = $issue->page_id;
-        $this->component_area = $issue->component_area;
+        $this->component_area = $issue->component_area ?? '';
         $this->severity = $issue->severity;
         $this->difficulty = $issue->difficulty;
         $this->status = $issue->status;
+        $this->wcag_criteria = $issue->wcagCriteria()->pluck('id')->all();
+        $this->example_ids = $issue->examples()->pluck('wcag_criterion_examples.id')->all();
     }
 
     public function update(): void
@@ -86,15 +99,28 @@ class EditAccessibilityIssue extends Component
             ],
         ]);
 
+        $this->validate([
+            'wcag_criteria' => ['nullable', 'array'],
+            'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
+                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
+            'example_ids' => ['nullable', 'array'],
+            'example_ids.*' => Rule::exists('wcag_criterion_examples', 'id')
+                ->where(fn ($query) => $query->whereIn('wcag_success_criterion_id', $this->wcag_criteria)),
+        ]);
+
         $issue->update([
             'title' => $this->title,
             'description' => $this->description,
+            'mermaid_diagram' => $this->mermaid_diagram,
             'page_id' => $this->page_id,
             'component_area' => $this->component_area,
             'severity' => $this->severity,
             'difficulty' => $this->difficulty,
             'status' => $this->status,
         ]);
+
+        $issue->wcagCriteria()->sync($this->wcag_criteria);
+        $issue->examples()->sync($this->examplePivotData($this->example_ids));
 
         // Handle file uploads
         if (! empty($this->attachments)) {
@@ -104,6 +130,11 @@ class EditAccessibilityIssue extends Component
 
         session()->flash('success', __('Issue updated successfully.'));
         $this->redirect(route('accessibility-issues.edit', [$project, $issue]), navigate: true);
+    }
+
+    public function updatedWcagCriteria(): void
+    {
+        $this->example_ids = $this->validExampleIds();
     }
 
     public function cancel(): void
@@ -191,10 +222,58 @@ class EditAccessibilityIssue extends Component
             ->values()
             ->toArray();
 
+        $availableExamples = WcagCriterionExample::query()
+            ->with('criterion')
+            ->whereIn('wcag_success_criterion_id', $this->wcag_criteria)
+            ->when(trim($this->exampleSearch) !== '', function ($query): void {
+                $search = '%'.trim($this->exampleSearch).'%';
+
+                $query->where(function ($query) use ($search): void {
+                    $query->where('title', 'like', $search)
+                        ->orWhere('description', 'like', $search);
+                });
+            })
+            ->orderBy('wcag_success_criterion_id')
+            ->orderBy('sort_order')
+            ->orderBy('created_at')
+            ->get();
+
         return view('livewire.edit-accessibility-issue', [
             'pages' => $pages,
             'databaseAttachments' => $attachmentsList,
             'availableCriteria' => $availableCriteria,
+            'availableExamples' => $availableExamples,
         ]);
+    }
+
+    /**
+     * @param  array<int, string>  $exampleIds
+     * @return array<string, array{sort_order: int}>
+     */
+    private function examplePivotData(array $exampleIds): array
+    {
+        return collect($exampleIds)
+            ->values()
+            ->mapWithKeys(fn (string $exampleId, int $index): array => [
+                $exampleId => ['sort_order' => $index],
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function validExampleIds(): array
+    {
+        if ($this->wcag_criteria === []) {
+            return [];
+        }
+
+        $validIds = WcagCriterionExample::query()
+            ->whereIn('wcag_success_criterion_id', $this->wcag_criteria)
+            ->pluck('id')
+            ->all();
+
+        return array_values(array_intersect($this->example_ids, $validIds));
     }
 }

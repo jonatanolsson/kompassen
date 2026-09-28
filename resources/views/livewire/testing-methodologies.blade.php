@@ -1,5 +1,5 @@
-<div class="space-y-8">
-    <div class="flex items-start justify-between gap-4">
+<div class="product-page space-y-8">
+    <div class="product-page-header">
         <div>
             <flux:heading level="1">{{ __('Testing Methodologies') }}</flux:heading>
             <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
@@ -14,12 +14,13 @@
     </div>
 
     @forelse ($this->methodologies as $category => $methodologies)
-        <section class="space-y-3">
+        <section class="product-section space-y-3">
             <flux:heading level="2" size="lg">
                 {{ $this->categoryOptions()[$category] ?? Str::headline($category) }}
             </flux:heading>
 
-            <flux:table>
+            <div class="overflow-x-auto">
+            <flux:table class="w-full min-w-[680px]">
                 <flux:table.columns>
                     <flux:table.cell>{{ __('Name') }}</flux:table.cell>
                     <flux:table.cell>{{ __('Description') }}</flux:table.cell>
@@ -59,6 +60,7 @@
                     </flux:table.row>
                 @endforeach
             </flux:table>
+            </div>
         </section>
     @empty
         <flux:callout icon="beaker" color="zinc">

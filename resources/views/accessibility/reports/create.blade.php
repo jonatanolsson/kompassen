@@ -1,16 +1,16 @@
-@php use App\Models\AccessibilityProject; @endphp
-
 <x-app-layout>
     <x-slot:title>{{ __('Generate Report for :project', ['project' => $project->name]) }}</x-slot:title>
 
-    <flux:header>
-        <flux:heading>{{ __('Generate Report for :project', ['project' => $project->name]) }}</flux:heading>
-        <flux:spacer/>
-        <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost" icon="arrow-left">{{ __('Back') }}</flux:button>
-    </flux:header>
+    <div class="product-page space-y-6">
+        <div class="product-page-header">
+            <div>
+                <flux:heading level="1">{{ __('Generate Report for :project', ['project' => $project->name]) }}</flux:heading>
+                <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Generated reports') }}</flux:text>
+            </div>
+            <flux:button href="{{ route('accessibility-reports.index', $project) }}" variant="ghost" icon="arrow-left">{{ __('Back') }}</flux:button>
+        </div>
 
-    <div>
-        <flux:card class="max-w-2xl">
+        <div class="product-section max-w-3xl">
             <form method="POST" action="{{ route('accessibility-reports.store', $project) }}" class="space-y-6">
                 @csrf
 
@@ -32,6 +32,6 @@
                     <flux:button type="submit" variant="primary">{{ __('Generate Report') }}</flux:button>
                 </div>
             </form>
-        </flux:card>
+        </div>
     </div>
 </x-app-layout>
