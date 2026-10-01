@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['team_id', 'name', 'description', 'client_logo', 'target_wcag_level', 'target_wcag_version', 'audit_date', 'status'])]
+#[Fillable(['team_id', 'name', 'description', 'client_logo', 'target_wcag_level', 'target_wcag_version', 'audit_date', 'status', 'report_options', 'report_site_url'])]
 class AccessibilityProject extends Model
 {
     use HasFactory;
@@ -23,6 +23,7 @@ class AccessibilityProject extends Model
     {
         return [
             'audit_date' => 'datetime',
+            'report_options' => 'array',
         ];
     }
 
@@ -79,7 +80,7 @@ class AccessibilityProject extends Model
             return [];
         }
 
-        return $this->pages
+        $domains = $this->pages
             ->pluck('url')
             ->filter()
             ->map(function (string $url): ?string {
@@ -88,8 +89,13 @@ class AccessibilityProject extends Model
                 return is_string($host) ? preg_replace('/^www\./', '', $host) : null;
             })
             ->filter()
-            ->unique()
-            ->values()
-            ->all();
+            ->unique();
+
+        $primaryHost = parse_url($this->report_site_url ?? '', PHP_URL_HOST);
+        if (is_string($primaryHost)) {
+            $domains->prepend(preg_replace('/^www\./', '', $primaryHost));
+        }
+
+        return $domains->unique()->values()->all();
     }
 }

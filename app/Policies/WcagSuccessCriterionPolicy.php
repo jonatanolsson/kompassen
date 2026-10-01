@@ -19,16 +19,16 @@ class WcagSuccessCriterionPolicy
 
     public function create(User $user): bool
     {
-        return $this->viewAny($user);
+        return false;
     }
 
     public function update(User $user, WcagSuccessCriterion $criterion): bool
     {
-        return $this->viewAny($user);
+        return false;
     }
 
     public function delete(User $user, WcagSuccessCriterion $criterion): bool
     {
-        return $this->viewAny($user);
+        return false;
     }
 }

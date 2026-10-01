@@ -24,9 +24,11 @@
                     <flux:menu>
                         <flux:menu.group>
                             <!-- Edit -->
-                            <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil-square" wire:navigate>
-                                {{ __('Edit') }}
-                            </flux:menu.item>
+                            @can('update', $project)
+                                <flux:menu.item href="{{ route('accessibility-issues.edit', [$project, $issue]) }}" icon="pencil-square" wire:navigate>
+                                    {{ __('Edit') }}
+                                </flux:menu.item>
+                            @endcan
 
                             <!-- Export -->
                             <flux:menu.item
@@ -39,11 +41,13 @@
 
                             <flux:menu.separator />
 
-                            <flux:modal.trigger name="resolve-issue-modal">
-                                <flux:menu.item icon="check-circle">
-                                    {{ __('Change resolution') }}
-                                </flux:menu.item>
-                            </flux:modal.trigger>
+                            @can('update', $project)
+                                <flux:modal.trigger name="resolve-issue-modal">
+                                    <flux:menu.item icon="check-circle">
+                                        {{ __('Change resolution') }}
+                                    </flux:menu.item>
+                                </flux:modal.trigger>
+                            @endcan
                         </flux:menu.group>
                     </flux:menu>
                 </flux:dropdown>
@@ -51,6 +55,18 @@
         </div>
 
         <flux:separator class="my-6" />
+
+        @if ($issue->page?->scope === 'out_of_scope')
+            <flux:callout color="amber" class="mb-6">
+                <flux:callout.text>{{ __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.') }}</flux:callout.text>
+            </flux:callout>
+        @endif
+
+        @if ($errors->has('resolution_notes') || $errors->has('resolution_status'))
+            <flux:callout color="red" class="mb-6">
+                <flux:callout.text>{{ __('Could not change status. Open the resolution action and correct the highlighted fields.') }}</flux:callout.text>
+            </flux:callout>
+        @endif
 
         <!-- Description -->
         @if ($issue->description)
@@ -126,17 +142,33 @@
                 @if ($issue->assignedTo)
                     <div class="flex items-center justify-between">
                         <flux:text>{{ $issue->assignedTo->name }}</flux:text>
-                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="assigned_to" value="">
-                            <flux:button type="submit" variant="ghost" size="sm" icon="x-mark">
-                                {{ __('Unassign') }}
-                            </flux:button>
-                        </form>
+                        @can('update', $project)
+                            <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="inline">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="assigned_to" value="">
+                                <flux:button type="submit" variant="ghost" size="sm" icon="x-mark">
+                                    {{ __('Unassign') }}
+                                </flux:button>
+                            </form>
+                        @endcan
                     </div>
                 @else
-                    <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
+                    @can('update', $project)
+                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="flex flex-wrap items-center gap-2">
+                            @csrf
+                            @method('PUT')
+                            <flux:select name="assigned_to" aria-label="{{ __('Assign to a member') }}" required>
+                                <option value="">{{ __('Select a project member') }}</option>
+                                @foreach ($projectMembers as $member)
+                                    <option value="{{ $member->user_id }}">{{ $member->user->name }}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:button type="submit" variant="outline" size="sm">{{ __('Assign') }}</flux:button>
+                        </form>
+                    @else
+                        <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
+                    @endcan
                 @endif
             </div>
         </div>
@@ -321,6 +353,7 @@
     </div>
 </div>
 
+@can('update', $project)
 <flux:modal name="resolve-issue-modal" class="md:w-[32rem]">
     <form action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="space-y-6">
         @csrf
@@ -344,6 +377,7 @@
         <flux:field>
             <flux:label>{{ __('Resolution Notes') }}</flux:label>
             <flux:textarea name="resolution_notes" rows="4">{{ old('resolution_notes', $issue->resolution_notes) }}</flux:textarea>
+            <flux:description>{{ __('A note is required when closing an issue.') }}</flux:description>
             <flux:error name="resolution_notes" />
         </flux:field>
 
@@ -355,6 +389,7 @@
         </div>
     </form>
 </flux:modal>
+@endcan
 
 <!-- Export Modal Component -->
 <livewire:export-issue-modal :project="$project" :issue="$issue" />

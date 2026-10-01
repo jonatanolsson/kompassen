@@ -7,6 +7,7 @@ use App\Models\TestingMethodology;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -18,7 +19,6 @@ class ProjectMethodologies extends Component
 
     public bool $showAddForm = false;
 
-    #[Validate('required|exists:testing_methodologies,id')]
     public string $selectedMethodologyId = '';
 
     #[Validate('nullable|string|max:1000')]
@@ -33,7 +33,14 @@ class ProjectMethodologies extends Component
     public function addMethodology(): void
     {
         $this->authorize('update', $this->project);
-        $this->validate();
+        $this->validate([
+            'selectedMethodologyId' => [
+                'required',
+                Rule::exists('testing_methodologies', 'id')
+                    ->where(fn ($query) => $query->whereNull('team_id')->orWhere('team_id', $this->project->team_id)),
+            ],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
 
         $this->project->methodologies()->syncWithoutDetaching([
             $this->selectedMethodologyId => [
@@ -48,12 +55,16 @@ class ProjectMethodologies extends Component
     public function removeMethodology(string $methodologyId): void
     {
         $this->authorize('update', $this->project);
+        $this->project->methodologies()->availableToTeam((string) $this->project->team_id)
+            ->wherePivot('methodology_id', $methodologyId)->firstOrFail();
         $this->project->methodologies()->detach($methodologyId);
     }
 
     public function updateNotes(string $methodologyId, string $notes): void
     {
         $this->authorize('update', $this->project);
+        $this->project->methodologies()->availableToTeam((string) $this->project->team_id)
+            ->wherePivot('methodology_id', $methodologyId)->firstOrFail();
         Validator::make(
             ['notes' => $notes],
             ['notes' => ['nullable', 'string', 'max:1000']],
@@ -66,10 +77,11 @@ class ProjectMethodologies extends Component
 
     public function render()
     {
-        $allMethodologies = TestingMethodology::orderBy('category')->orderBy('name')->get()
+        $allMethodologies = TestingMethodology::availableToTeam($this->project->team_id)
+            ->orderBy('category')->orderBy('name')->get()
             ->groupBy('category');
 
-        $projectMethodologies = $this->project->methodologies()
+        $projectMethodologies = $this->project->methodologies()->availableToTeam($this->project->team_id)
             ->orderBy('category')
             ->orderBy('name')
             ->get();

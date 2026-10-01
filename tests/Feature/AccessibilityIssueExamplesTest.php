@@ -7,6 +7,7 @@ use App\Models\ProjectMember;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WcagSuccessCriterion;
+use App\Services\IssueDiagramSvg;
 use Livewire\Livewire;
 
 test('user can link multiple knowledge base examples when creating an issue', function () {
@@ -20,6 +21,7 @@ test('user can link multiple knowledge base examples when creating an issue', fu
     ]);
 
     $criterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
         'number' => '1.1.1',
         'level' => 'A',
         'name_en' => 'Non-text Content',
@@ -30,12 +32,17 @@ test('user can link multiple knowledge base examples when creating an issue', fu
     ]);
     $firstExample = $criterion->examples()->create(['title' => 'Image alternative']);
     $secondExample = $criterion->examples()->create(['title' => 'Decorative image']);
+    $diagram = "flowchart LR\n    A[Issue] --> B[Impact]";
 
     Livewire::actingAs($user)
         ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee('1.1.1')
         ->set('title', 'Missing image alternatives')
-        ->set('mermaid_diagram', "flowchart LR\n    A[Issue] --> B[Impact]")
+        ->set('mermaid_diagram', $diagram)
+        ->set('mermaid_svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#dbeafe"/></svg>')
+        ->set('mermaid_source_hash', IssueDiagramSvg::hashSource($diagram))
         ->set('wcag_criteria.0', (string) $criterion->id)
+        ->assertSee('Image alternative')
         ->set('example_ids.0', (string) $firstExample->id)
         ->set('example_ids.1', (string) $secondExample->id)
         ->call('submit')
@@ -59,6 +66,7 @@ test('user can change linked knowledge base examples when editing an issue', fun
     ]);
 
     $criterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
         'number' => '1.1.1',
         'level' => 'A',
         'name_en' => 'Non-text Content',
@@ -78,15 +86,19 @@ test('user can change linked knowledge base examples when editing an issue', fun
     ]);
     $issue->wcagCriteria()->attach($criterion);
     $issue->examples()->attach($firstExample);
+    $diagram = "flowchart TD\n    A[Issue] --> B[Resolution]";
 
     Livewire::actingAs($user)
         ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSee('1.1.1')
         ->assertSet('example_ids', [(string) $firstExample->id])
         ->set('wcag_criteria', [])
         ->assertSet('example_ids', [])
         ->set('wcag_criteria.0', (string) $criterion->id)
         ->set('example_ids.0', (string) $secondExample->id)
-        ->set('mermaid_diagram', "flowchart TD\n    A[Issue] --> B[Resolution]")
+        ->set('mermaid_diagram', $diagram)
+        ->set('mermaid_svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#dbeafe"/></svg>')
+        ->set('mermaid_source_hash', IssueDiagramSvg::hashSource($diagram))
         ->call('update')
         ->assertRedirect(route('accessibility-issues.edit', [$project, $issue]));
 
@@ -179,4 +191,62 @@ test('issue detail shows linked knowledge base examples', function () {
         ->assertSee('data-mermaid-diagram')
         ->assertSee('Use meaningful alternative text')
         ->assertSee('Describe the purpose of the image.');
+});
+
+test('viewer can see issue assignment but not change it', function () {
+    $team = Team::factory()->create();
+    $viewer = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $viewer->id,
+        'role' => 'viewer',
+    ]);
+    $issue = $project->issues()->create([
+        'title' => 'Unassigned issue',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('accessibility-issues.show', [$project, $issue]))
+        ->assertSuccessful()
+        ->assertSee(__('Unassigned'))
+        ->assertDontSee('name="assigned_to"', false)
+        ->assertDontSee(__('Change resolution'));
+});
+
+test('HTTP issue creation accepts WCAG 2.2 criteria', function () {
+    $team = Team::factory()->create();
+    $owner = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $owner->id,
+        'role' => 'owner',
+    ]);
+    $criterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '2.4.11',
+        'level' => 'AA',
+        'name_en' => 'Focus Not Obscured (Minimum)',
+        'name_sv' => 'Fokus inte dolt (minimum)',
+        'description_en' => 'Focused components are not entirely hidden.',
+        'description_sv' => 'Fokuserade komponenter är inte helt dolda.',
+    ]);
+
+    $this->actingAs($owner)
+        ->post(route('accessibility-issues.store', $project), [
+            'title' => 'Keyboard focus is obscured',
+            'severity' => 'major',
+            'difficulty' => 'medium',
+            'status' => 'open',
+            'wcag_criteria' => [(string) $criterion->id],
+        ])
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $issue = $project->issues()->firstOrFail();
+
+    expect($issue->wcagCriteria()->whereKey($criterion->id)->exists())->toBeTrue();
 });

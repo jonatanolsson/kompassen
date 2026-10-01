@@ -32,7 +32,9 @@ new #[Layout('layouts.guest')] class extends Component
         $team = Team::create(['name' => $validated['name'].'\'s Team']);
         $validated['team_id'] = $team->id;
 
-        event(new Registered($user = User::create($validated)));
+        $user = User::create($validated);
+        $team->update(['owner_id' => $user->id]);
+        event(new Registered($user));
 
         Auth::login($user);
 

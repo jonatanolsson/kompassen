@@ -2,19 +2,18 @@
     <div class="product-page-header">
         <div>
             <flux:heading size="xl">{{ __('Knowledge Base') }}</flux:heading>
-            <flux:subheading>{{ __('Browse and maintain accessibility standards, criteria, examples, and references.') }}</flux:subheading>
+            <flux:subheading>{{ __('WCAG criteria and resources are read-only. Team editors may manage their own examples.') }}</flux:subheading>
         </div>
-        <flux:modal.trigger name="criterion-form-modal">
-            <flux:button variant="primary" icon="plus" wire:click="startCreatingCriterion">
-                {{ __('Add Criterion') }}
-            </flux:button>
-        </flux:modal.trigger>
+        @if (auth()->user()->isTeamOwner())
+            <flux:button href="{{ route('team.knowledge-editors.index') }}" variant="outline">{{ __('Knowledge editors') }}</flux:button>
+        @endif
     </div>
 
     <flux:separator variant="subtle" class="my-6" />
 
     <div class="product-section grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
         <flux:input
+            id="knowledge-search"
             wire:model.live.debounce.300ms="search"
             :loading="false"
             placeholder="{{ __('Search by number, standard, or name…') }}"
@@ -134,20 +133,34 @@
                                         {{ __('Open source link') }}
                                     </flux:button>
                                 @endif
+                                @can('update', $criterion)
                                 <flux:modal.trigger name="criterion-form-modal">
                                     <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editCriterion('{{ $criterion->id }}')">
                                         {{ __('Edit') }}
                                     </flux:button>
                                 </flux:modal.trigger>
-                                <flux:button
-                                    size="sm"
-                                    variant="ghost"
-                                    icon="trash"
-                                    wire:click="deleteCriterion('{{ $criterion->id }}')"
-                                    wire:confirm="{{ __('Delete this knowledge base entry?') }}"
-                                >
-                                    {{ __('Delete') }}
-                                </flux:button>
+                                <flux:modal.trigger name="delete-criterion-{{ $criterion->id }}">
+                                    <flux:button type="button" size="sm" variant="ghost" icon="trash">
+                                        {{ __('Delete') }}
+                                    </flux:button>
+                                </flux:modal.trigger>
+                                <flux:modal name="delete-criterion-{{ $criterion->id }}" class="md:w-[28rem]">
+                                    <div class="space-y-6">
+                                        <div>
+                                            <flux:heading level="2">{{ __('Delete this knowledge base entry?') }}</flux:heading>
+                                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                        </div>
+                                        <div class="flex justify-end gap-2">
+                                            <flux:modal.close>
+                                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                            </flux:modal.close>
+                                            <flux:button type="button" variant="danger" wire:click="deleteCriterion('{{ $criterion->id }}')">
+                                                {{ __('Delete') }}
+                                            </flux:button>
+                                        </div>
+                                    </div>
+                                </flux:modal>
+                                @endcan
                             </div>
                         </div>
                         <flux:text size="sm" class="mt-4 block w-full text-zinc-600 dark:text-zinc-400">
@@ -161,11 +174,13 @@
                     <div class="space-y-3 px-6 py-5">
                         <div class="flex items-center justify-between gap-4">
                             <flux:heading size="sm">{{ __('Related Resources') }}</flux:heading>
+                            @can('update', $criterion)
                             <flux:modal.trigger name="resource-form-modal">
                                 <flux:button size="sm" variant="primary" icon="plus" wire:click="startCreatingResource">
                                     {{ __('Add Resource') }}
                                 </flux:button>
                             </flux:modal.trigger>
+                            @endcan
                         </div>
 
                         @if ($criterion->relatedResources->isNotEmpty())
@@ -204,22 +219,40 @@
                                                         </flux:menu.item>
                                                         <flux:menu.separator />
                                                     @endif
+                                                    @can('update', $criterion)
                                                     <flux:modal.trigger name="resource-form-modal">
                                                         <flux:menu.item as="button" icon="pencil" wire:click="editResource('{{ $resource->id }}')">
                                                             {{ __('Edit') }}
                                                         </flux:menu.item>
                                                     </flux:modal.trigger>
-                                                    <flux:menu.item
-                                                        as="button"
-                                                        icon="trash"
-                                                        variant="danger"
-                                                        wire:click="deleteResource('{{ $resource->id }}')"
-                                                        wire:confirm="{{ __('Delete this related resource?') }}"
-                                                    >
-                                                        {{ __('Delete') }}
-                                                    </flux:menu.item>
+                                                    @endcan
+                                                    @can('update', $criterion)
+                                                    <flux:modal.trigger name="delete-resource-{{ $resource->id }}">
+                                                        <flux:menu.item as="button" icon="trash" variant="danger">
+                                                            {{ __('Delete') }}
+                                                        </flux:menu.item>
+                                                    </flux:modal.trigger>
+                                                    @endcan
                                                 </flux:menu>
                                             </flux:dropdown>
+                                            @can('update', $criterion)
+                                            <flux:modal name="delete-resource-{{ $resource->id }}" class="md:w-[28rem]">
+                                                <div class="space-y-6">
+                                                    <div>
+                                                        <flux:heading level="2">{{ __('Delete this related resource?') }}</flux:heading>
+                                                        <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                                    </div>
+                                                    <div class="flex justify-end gap-2">
+                                                        <flux:modal.close>
+                                                            <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                                        </flux:modal.close>
+                                                        <flux:button type="button" variant="danger" wire:click="deleteResource('{{ $resource->id }}')">
+                                                            {{ __('Delete') }}
+                                                        </flux:button>
+                                                    </div>
+                                                </div>
+                                            </flux:modal>
+                                            @endcan
                                         </div>
                                     </div>
                                 @endforeach
@@ -242,6 +275,7 @@
                                     <flux:badge size="sm" color="zinc">{{ $criterion->examples->count() }}</flux:badge>
                                 @endif
                             </div>
+                            @can('create', \App\Models\WcagCriterionExample::class)
                             <flux:modal.trigger name="example-form-modal">
                                 <flux:button
                                     size="sm"
@@ -252,6 +286,7 @@
                                     {{ __('Add Example') }}
                                 </flux:button>
                             </flux:modal.trigger>
+                            @endcan
                         </div>
 
                         @if ($criterion->examples->isNotEmpty())
@@ -273,6 +308,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex shrink-0 items-center gap-1">
+                                                @can('update', $example)
                                                 <flux:modal.trigger name="example-form-modal">
                                                     <flux:button
                                                         size="xs"
@@ -283,15 +319,28 @@
                                                         {{ __('Edit') }}
                                                     </flux:button>
                                                 </flux:modal.trigger>
-                                                <flux:button
-                                                    size="xs"
-                                                    variant="ghost"
-                                                    icon="trash"
-                                                    wire:click="deleteExample('{{ $example->id }}')"
-                                                    wire:confirm="{{ __('Delete this example?') }}"
-                                                >
-                                                    {{ __('Delete') }}
-                                                </flux:button>
+                                                <flux:modal.trigger name="delete-example-{{ $example->id }}">
+                                                    <flux:button type="button" size="xs" variant="ghost" icon="trash">
+                                                        {{ __('Delete') }}
+                                                    </flux:button>
+                                                </flux:modal.trigger>
+                                                <flux:modal name="delete-example-{{ $example->id }}" class="md:w-[28rem]">
+                                                    <div class="space-y-6">
+                                                        <div>
+                                                            <flux:heading level="2">{{ __('Delete this example?') }}</flux:heading>
+                                                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                                        </div>
+                                                        <div class="flex justify-end gap-2">
+                                                            <flux:modal.close>
+                                                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                                            </flux:modal.close>
+                                                            <flux:button type="button" variant="danger" wire:click="deleteExample('{{ $example->id }}')">
+                                                                {{ __('Delete') }}
+                                                            </flux:button>
+                                                        </div>
+                                                    </div>
+                                                </flux:modal>
+                                                @endcan
                                             </div>
                                         </div>
 
@@ -326,20 +375,29 @@
                                             <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
                                                 <div class="flex items-center justify-between bg-zinc-100 px-3 py-1.5 dark:bg-zinc-800">
                                                     <flux:text size="xs" class="font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                                                        {{ __('Code Snippet') }}
+                                                        {{ $example->code_language === 'mermaid' ? __('Rendered diagram') : __('Code Snippet') }}
                                                     </flux:text>
                                                     <flux:badge size="sm" color="zinc">{{ $example->code_language ?? 'html' }}                                                    </flux:badge>
                                                 </div>
                                                 @if ($example->code_language === 'mermaid')
-                                                    <pre
+                                                    <div
                                                         id="mermaid-{{ $example->id }}"
                                                         data-mermaid-diagram
+                                                        data-mermaid-source="{{ $example->code_snippet }}"
                                                         role="img"
                                                         aria-label="{{ $example->title }}"
                                                         class="mermaid min-h-24 overflow-auto bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
-                                                    >{{ $example->code_snippet }}</pre>
+                                                    ></div>
                                                 @else
                                                     <pre class="max-h-56 overflow-auto bg-zinc-950 px-4 py-3 text-sm text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
+                                                @endif
+                                                @if ($example->code_language === 'mermaid')
+                                                    <details class="border-t border-zinc-200 dark:border-zinc-700">
+                                                        <summary class="cursor-pointer px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                                                            {{ __('View source code') }}
+                                                        </summary>
+                                                        <pre class="max-h-56 overflow-auto border-t border-zinc-200 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 dark:border-zinc-700"><code>{{ $example->code_snippet }}</code></pre>
+                                                    </details>
                                                 @endif
                                             </div>
                                         @endif
@@ -369,8 +427,19 @@
 
                 </flux:card>
 
+                @can('create', \App\Models\WcagCriterionExample::class)
                 <flux:modal name="example-form-modal" class="w-full max-w-2xl">
-                    <form wire:submit="saveExample" enctype="multipart/form-data" class="space-y-6">
+                    <form
+                        x-data="issueDiagramForm('saveExample', {
+                            renderFailed: @js(__('The diagram could not be rendered. Check the Mermaid code and try again.')),
+                            unsupported: @js(__('The diagram contains unsupported content. Remove external links, images, or HTML and try again.')),
+                            cryptoUnavailable: @js(__('Secure diagram verification is unavailable. Use HTTPS or localhost and try again.')),
+                            sourceChanged: @js(__('The diagram changed during rendering. Save again.'))
+                        }, { source: 'exampleCode', svg: 'exampleSvg', hash: 'exampleSourceHash', language: 'exampleCodeLanguage' })"
+                        x-on:submit.prevent="save()"
+                        enctype="multipart/form-data"
+                        class="space-y-6"
+                    >
                         <div>
                             <flux:heading size="lg">
                                 {{ $editingExampleId ? __('Edit Example') : __('Add Example') }}
@@ -419,6 +488,7 @@
                                     <flux:error name="exampleCodeLanguage" />
                                 </flux:field>
                             </div>
+                            <p x-show="diagramError" x-text="diagramError" x-ref="diagramError" tabindex="-1" role="alert" class="text-sm text-red-600 dark:text-red-400"></p>
 
                             <div class="space-y-3">
                                 <div>
@@ -427,7 +497,12 @@
                                         {{ __('Add screenshots or diagrams to illustrate the example. Max 5 MB per image.') }}
                                     </flux:text>
                                 </div>
-                                <flux:file-upload wire:model="exampleAttachments" multiple accept="image/*" />
+                                <flux:file-upload wire:model="exampleAttachments" multiple accept="image/*">
+                                    <flux:file-upload.dropzone
+                                        heading="{{ __('Choose images or drop them here') }}"
+                                        text="{{ __('JPG, PNG, GIF or WebP. Max 5 MB per image.') }}"
+                                    />
+                                </flux:file-upload>
                                 <flux:error name="exampleAttachments" />
                                 <flux:error name="exampleAttachments.*" />
 
@@ -447,15 +522,31 @@
                                                         <flux:text size="xs" class="truncate text-zinc-500 dark:text-zinc-400">{{ $attachment['alt_text'] }}</flux:text>
                                                     @endif
                                                 </div>
-                                                <flux:button
-                                                    type="button"
-                                                    size="xs"
-                                                    variant="ghost"
-                                                    icon="trash"
-                                                    aria-label="{{ __('Delete image attachment') }}"
-                                                    wire:click="deleteExampleAttachment('{{ $attachment['id'] }}')"
-                                                    wire:confirm="{{ __('Delete this image attachment?') }}"
-                                                />
+                                                <flux:modal.trigger name="delete-example-attachment-{{ $attachment['id'] }}">
+                                                    <flux:button
+                                                        type="button"
+                                                        size="xs"
+                                                        variant="ghost"
+                                                        icon="trash"
+                                                        aria-label="{{ __('Delete image attachment') }}"
+                                                    />
+                                                </flux:modal.trigger>
+                                                <flux:modal name="delete-example-attachment-{{ $attachment['id'] }}" class="md:w-[28rem]">
+                                                    <div class="space-y-6">
+                                                        <div>
+                                                            <flux:heading level="2">{{ __('Delete this image attachment?') }}</flux:heading>
+                                                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                                        </div>
+                                                        <div class="flex justify-end gap-2">
+                                                            <flux:modal.close>
+                                                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                                            </flux:modal.close>
+                                                            <flux:button type="button" variant="danger" wire:click="deleteExampleAttachment('{{ $attachment['id'] }}')">
+                                                                {{ __('Delete') }}
+                                                            </flux:button>
+                                                        </div>
+                                                    </div>
+                                                </flux:modal>
                                             </div>
                                         @endforeach
                                     </div>
@@ -528,12 +619,13 @@
                             <flux:modal.close>
                                 <flux:button type="button" variant="ghost" wire:click="cancelEdit">{{ __('Cancel') }}</flux:button>
                             </flux:modal.close>
-                            <flux:button type="submit" variant="primary">
+                            <flux:button type="submit" variant="primary" x-bind:disabled="rendering">
                                 {{ $editingExampleId ? __('Update Example') : __('Add Example') }}
                             </flux:button>
                         </div>
                     </form>
                 </flux:modal>
+                @endcan
 
             @else
                 <flux:callout icon="book-open" color="zinc">
@@ -544,6 +636,7 @@
         </div>
     </div>
 
+    @can('create', \App\Models\WcagSuccessCriterion::class)
     <flux:modal name="criterion-form-modal" class="w-full max-w-3xl">
         <form wire:submit="saveCriterion" class="space-y-6">
             <div>
@@ -619,7 +712,9 @@
             </div>
         </form>
     </flux:modal>
+    @endcan
 
+    @can('create', \App\Models\WcagSuccessCriterion::class)
     <flux:modal name="resource-form-modal" class="w-full max-w-3xl">
         <form wire:submit="saveResource" class="space-y-6">
             <div>
@@ -696,4 +791,5 @@
             </div>
         </form>
     </flux:modal>
+    @endcan
 </div>

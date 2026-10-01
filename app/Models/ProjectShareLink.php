@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'created_by', 'token', 'expires_at'])]
+#[Fillable(['project_id', 'report_id', 'created_by', 'token', 'expires_at'])]
 class ProjectShareLink extends Model
 {
     use HasFactory;
@@ -28,10 +29,10 @@ class ProjectShareLink extends Model
         parent::boot();
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+                $model->{$model->getKeyName()} = (string) Str::uuid();
             }
             if (! $model->token) {
-                $model->token = (string) \Illuminate\Support\Str::uuid();
+                $model->token = (string) Str::uuid();
             }
         });
     }
@@ -41,6 +42,11 @@ class ProjectShareLink extends Model
         return $this->belongsTo(AccessibilityProject::class, 'project_id');
     }
 
+    public function report(): BelongsTo
+    {
+        return $this->belongsTo(AccessibilityReport::class, 'report_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -48,6 +54,6 @@ class ProjectShareLink extends Model
 
     public function isExpired(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return $this->expires_at === null || $this->expires_at->isPast();
     }
 }

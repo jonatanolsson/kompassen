@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\ProjectMember;
+use App\Services\ReportSiteIcon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -24,6 +25,8 @@ class CreateAccessibilityProject extends Component
 
     public ?string $audit_date = null;
 
+    public ?string $report_site_url = null;
+
     public $client_logo;
 
     protected function rules(): array
@@ -33,6 +36,7 @@ class CreateAccessibilityProject extends Component
             'description' => 'nullable|string',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'audit_date' => 'nullable|date',
+            'report_site_url' => ReportSiteIcon::primarySiteRules(),
             'client_logo' => 'nullable|image|max:2048',
         ];
     }
@@ -46,6 +50,7 @@ class CreateAccessibilityProject extends Component
             'description' => $validated['description'],
             'target_wcag_level' => $validated['target_wcag_level'],
             'audit_date' => $validated['audit_date'],
+            'report_site_url' => ReportSiteIcon::origin($validated['report_site_url'] ?? null),
         ];
 
         if ($this->client_logo) {

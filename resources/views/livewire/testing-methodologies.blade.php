@@ -3,14 +3,19 @@
         <div>
             <flux:heading level="1">{{ __('Testing Methodologies') }}</flux:heading>
             <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                {{ __('Manage the methods available when documenting project testing.') }}
+                {{ __('Shared methods are read-only. Team editors can manage methods for their team.') }}
             </flux:text>
         </div>
+        @if (auth()->user()->isTeamOwner())
+            <flux:button href="{{ route('team.knowledge-editors.index') }}" variant="outline">{{ __('Knowledge editors') }}</flux:button>
+        @endif
+        @can('create', \App\Models\TestingMethodology::class)
         <flux:modal.trigger name="testing-methodology-form-modal">
             <flux:button variant="primary" icon="plus" wire:click="openCreateForm">
                 {{ __('Add Testing Methodology') }}
             </flux:button>
         </flux:modal.trigger>
+        @endcan
     </div>
 
     @forelse ($this->methodologies as $category => $methodologies)
@@ -42,25 +47,46 @@
                         </flux:table.cell>
                         <flux:table.cell>{{ $methodology->projects_count }}</flux:table.cell>
                         <flux:table.cell class="flex gap-1">
+                            @can('update', $methodology)
                             <flux:modal.trigger name="testing-methodology-form-modal">
                                 <flux:button size="sm" variant="subtle" icon="pencil" wire:click="edit('{{ $methodology->id }}')">
                                     {{ __('Edit') }}
                                 </flux:button>
                             </flux:modal.trigger>
-                            <flux:button
-                                size="sm"
-                                variant="subtle"
-                                icon="trash"
-                                wire:click="delete('{{ $methodology->id }}')"
-                                wire:confirm="{{ __('Delete this testing methodology?') }}"
-                            >
-                                {{ __('Delete') }}
-                            </flux:button>
+                            @endcan
+                            @can('delete', $methodology)
+                            <flux:modal.trigger name="delete-testing-methodology-{{ $methodology->id }}">
+                                <flux:button type="button" size="sm" variant="subtle" icon="trash">
+                                    {{ __('Delete') }}
+                                </flux:button>
+                            </flux:modal.trigger>
+                            @endcan
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach
             </flux:table>
             </div>
+
+            @foreach ($methodologies as $methodology)
+                @can('delete', $methodology)
+                <flux:modal name="delete-testing-methodology-{{ $methodology->id }}" class="md:w-[28rem]">
+                    <div class="space-y-6">
+                        <div>
+                            <flux:heading level="2">{{ __('Delete this testing methodology?') }}</flux:heading>
+                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close>
+                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            </flux:modal.close>
+                            <flux:button type="button" variant="danger" wire:click="delete('{{ $methodology->id }}')">
+                                {{ __('Delete') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                </flux:modal>
+                @endcan
+            @endforeach
         </section>
     @empty
         <flux:callout icon="beaker" color="zinc">
@@ -68,6 +94,7 @@
         </flux:callout>
     @endforelse
 
+    @can('create', \App\Models\TestingMethodology::class)
     <flux:modal name="testing-methodology-form-modal" class="w-full max-w-2xl">
         <form wire:submit="save" class="space-y-6">
             <div>
@@ -75,7 +102,7 @@
                     {{ $editingMethodologyId ? __('Edit Testing Methodology') : __('Add Testing Methodology') }}
                 </flux:heading>
                 <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
-                    {{ __('This method will be available to all projects.') }}
+                    {{ __('This method will be available to projects in your team.') }}
                 </flux:text>
             </div>
 
@@ -119,4 +146,5 @@
             </div>
         </form>
     </flux:modal>
+    @endcan
 </div>

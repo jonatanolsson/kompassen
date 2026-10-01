@@ -6,7 +6,14 @@
                 <flux:text class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{{ __('Document an accessibility issue found during the audit.') }}</flux:text>
             </div>
 
-            <form wire:submit="submit" enctype="multipart/form-data" class="space-y-8">
+            <form
+                x-data="issueDiagramForm('submit', @js([
+                    'renderFailed' => __('The Mermaid diagram could not be rendered. Check the diagram syntax and try again.'),
+                    'unsupported' => __('This Mermaid diagram uses features that cannot be saved safely for reports, such as HTML labels, images or links. Simplify the diagram and try again.'),
+                    'cryptoUnavailable' => __('Your browser cannot verify the rendered diagram. Open the application over HTTPS and try again.'),
+                    'sourceChanged' => __('The Mermaid diagram changed while it was being rendered. Save again.'),
+                ]))"
+                x-on:submit.prevent="save"  enctype="multipart/form-data" class="space-y-8">
                 <!-- Issue Details -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Issue Information') }}</flux:heading>
@@ -32,6 +39,21 @@
                             <flux:error name="description" />
                         </flux:field>
 
+                        <details class="space-y-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
+                            <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
+                            <div class="mt-6 space-y-6">
+                        <flux:field>
+                            <flux:label>{{ __('Impact') }}</flux:label>
+                            <flux:editor
+                                wire:model="impact"
+                                placeholder="{{ __('Describe how the issue affects users...') }}"
+                            />
+                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                {{ __('Optional. Explain the consequences for users; shown in reports.') }}
+                            </flux:text>
+                            <flux:error name="impact" />
+                        </flux:field>
+
                         <flux:field>
                             <flux:label>{{ __('Mermaid diagram') }}</flux:label>
                             <flux:textarea
@@ -41,9 +63,21 @@
                                 class="font-mono text-sm"
                             />
                             <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
-                                {{ __('Optional Mermaid source. It will be rendered on the issue detail page.') }}
+                                {{ __('Optional Mermaid source. It is rendered in your browser when you save and stored as a sanitized SVG for reports.') }}
                             </flux:text>
                             <flux:error name="mermaid_diagram" />
+                            <div
+                                x-ref="diagramError"
+                                x-show="diagramError"
+                                x-cloak
+                                tabindex="-1"
+                                role="alert"
+                                class="text-sm font-medium text-red-600 dark:text-red-400"
+                                x-text="diagramError"
+                            ></div>
+                            <flux:text size="sm" x-show="rendering" x-cloak class="text-zinc-500 dark:text-zinc-400" aria-live="polite">
+                                {{ __('Rendering diagram…') }}
+                            </flux:text>
                         </flux:field>
 
                         <flux:field>
@@ -72,6 +106,8 @@
                                 </div>
                             @endif
                         </flux:field>
+                            </div>
+                        </details>
                     </div>
                 </div>
 
@@ -84,7 +120,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Page/Service') }}</flux:label>
-                            <flux:select wire:model="page_id">
+                            <flux:select wire:model.live="page_id">
                                 <option value="">{{ __('Not specific to a page') }}</option>
                                 @foreach ($pages as $page)
                                     <option value="{{ $page->id }}">
@@ -93,6 +129,11 @@
                                 @endforeach
                             </flux:select>
                             <flux:error name="page_id" />
+                            @if ($pages->firstWhere('id', $page_id)?->scope === 'out_of_scope')
+                                <flux:callout color="amber" class="mt-3">
+                                    <flux:callout.text>{{ __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.') }}</flux:callout.text>
+                                </flux:callout>
+                            @endif
                         </flux:field>
 
                         <flux:field>
@@ -126,20 +167,15 @@
                             <flux:error name="difficulty" />
                         </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('Status') }}</flux:label>
-                            <flux:select wire:model="status" required>
-                                <option value="open" selected>{{ __('Open') }}</option>
-                                <option value="resolved">{{ __('Resolved') }}</option>
-                                <option value="wont_fix">{{ __('Won\'t Fix') }}</option>
-                            </flux:select>
-                            <flux:error name="status" />
-                        </flux:field>
                     </div>
+                    <flux:text size="sm" class="mt-4 text-zinc-600 dark:text-zinc-400">{{ __('New issues start open. Change status with a resolution note after saving.') }}</flux:text>
                 </div>
 
                 <flux:separator />
 
+                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
+                    <summary class="cursor-pointer font-medium">{{ __('WCAG criteria and examples') }}</summary>
+                    <div class="mt-5 space-y-6">
                 <!-- WCAG Criteria -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('WCAG Success Criteria') }}</flux:heading>
@@ -152,7 +188,7 @@
                         <div class="space-y-2 max-h-96 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
                             @forelse ($wcagCriteria as $criterion)
                                 <flux:checkbox
-                                    wire:model="wcag_criteria"
+                                    wire:model.live="wcag_criteria"
                                     value="{{ $criterion->id }}"
                                     :label="$criterion->code.' — '.Str::limit($criterion->name, 80)"
                                 />
@@ -224,9 +260,12 @@
                     @endif
                 </div>
 
+                    </div>
+                </details>
+
                 <!-- Actions -->
                 <div class="flex gap-4 pt-4">
-                    <flux:button type="submit" variant="primary">{{ __('Report Issue') }}</flux:button>
+                    <flux:button type="submit" x-bind:disabled="rendering" variant="primary">{{ __('Report Issue') }}</flux:button>
                     <a href="{{ route('accessibility-projects.show', $project) }}">
                         <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
                     </a>

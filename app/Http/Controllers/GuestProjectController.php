@@ -7,24 +7,30 @@ use App\Models\ProjectShareLink;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Response;
 
 class GuestProjectController extends Controller
 {
     use AuthorizesRequests;
 
-    public function show(string $token): View
+    public function show(string $token): Response
     {
         $link = ProjectShareLink::where('token', $token)
-            ->with('project')
+            ->with('report')
             ->firstOrFail();
 
-        if ($link->isExpired()) {
-            abort(410, 'This share link has expired.');
+        if ($link->report_id === null || $link->report === null || $link->report->project_id !== $link->project_id || blank($link->report->html_content)) {
+            abort(410, __('This customer link is unavailable. Create a new link from a saved report.'));
         }
 
-        $project = $link->project;
+        if ($link->isExpired()) {
+            abort(410, __('This customer link has expired.'));
+        }
 
-        return view('shared-project.show', $this->previewData($project) + compact('link'));
+        return response($link->report->html_content)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('Cache-Control', 'private, no-store')
+            ->header('Content-Security-Policy', "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
     }
 
     public function preview(AccessibilityProject $project): View
@@ -107,9 +113,17 @@ class GuestProjectController extends Controller
         $project->load([
             'pages.issues.attachments',
             'pages.issues.wcagCriteria',
+            'pages.issues.examples' => fn ($query) => $query->visibleToTeam((string) $project->team_id),
+            'pages.issues.examples.criterion',
+            'pages.issues.examples.attachments',
+            'pages.issues.examples.referenceLinks',
             'issues.attachments',
             'issues.page',
             'issues.wcagCriteria',
+            'issues.examples' => fn ($query) => $query->visibleToTeam((string) $project->team_id),
+            'issues.examples.criterion',
+            'issues.examples.attachments',
+            'issues.examples.referenceLinks',
         ]);
 
         return [

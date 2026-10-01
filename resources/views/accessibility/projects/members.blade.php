@@ -82,11 +82,9 @@
                                     </flux:select>
                                     <flux:button type="submit" variant="ghost" size="sm" icon="check" aria-label="{{ __('Save role') }}" />
                                 </form>
-                                <form action="{{ route('project-members.destroy', [$project, $member]) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <flux:button type="submit" variant="ghost" size="sm" icon="trash" class="text-red-600" aria-label="{{ __('Remove member') }}" onclick="return confirm('{{ __('Remove :name from this project?', ['name' => $member->user->name]) }}')" />
-                                </form>
+                                <flux:modal.trigger name="remove-member-{{ $member->id }}">
+                                    <flux:button type="button" variant="ghost" size="sm" icon="trash" class="text-red-600" aria-label="{{ __('Remove member') }}" />
+                                </flux:modal.trigger>
                             </div>
                         @else
                             <flux:badge :color="$member->role === 'owner' ? 'amber' : 'zinc'">
@@ -94,6 +92,27 @@
                             </flux:badge>
                         @endif
                     </div>
+
+                    @if ($currentMember?->role === 'owner')
+                        <flux:modal name="remove-member-{{ $member->id }}" class="md:w-[28rem]">
+                            <form action="{{ route('project-members.destroy', [$project, $member]) }}" method="POST" class="space-y-6">
+                                @csrf
+                                @method('DELETE')
+
+                                <div>
+                                    <flux:heading level="2">{{ __('Remove :name from this project?', ['name' => $member->user->name]) }}</flux:heading>
+                                    <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This member will lose access to this project.') }}</flux:text>
+                                </div>
+
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button type="submit" variant="danger">{{ __('Remove member') }}</flux:button>
+                                </div>
+                            </form>
+                        </flux:modal>
+                    @endif
                 @endforeach
             </div>
         </flux:card>

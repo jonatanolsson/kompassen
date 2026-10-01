@@ -19,7 +19,6 @@ class Dashboard extends Component
             })
             ->withCount([
                 'pages',
-                'issues',
                 'reports',
                 'issues as open_issues_count' => function (Builder $query): void {
                     $query->where('status', 'open');
@@ -32,7 +31,6 @@ class Dashboard extends Component
             'projects' => $projects->take(6),
             'summary' => [
                 'projects' => $projects->count(),
-                'issues' => $projects->sum('issues_count'),
                 'open_issues' => $projects->sum('open_issues_count'),
                 'reports' => $projects->sum('reports_count'),
             ],

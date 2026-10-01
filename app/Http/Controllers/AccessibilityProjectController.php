@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessibilityProject;
 use App\Models\ProjectMember;
+use App\Services\ReportSiteIcon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class AccessibilityProjectController extends Controller
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('report_site_url', 'like', "%{$search}%")
                         ->orWhereHas('pages', function (Builder $query) use ($search): void {
                             $query->where('url', 'like', "%{$search}%");
                         });
@@ -47,6 +49,7 @@ class AccessibilityProjectController extends Controller
             'description' => 'nullable|string',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'audit_date' => 'nullable|date',
+            'report_site_url' => ReportSiteIcon::primarySiteRules(),
             'client_logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -56,6 +59,7 @@ class AccessibilityProjectController extends Controller
             unset($validated['client_logo']);
         }
 
+        $validated['report_site_url'] = ReportSiteIcon::origin($validated['report_site_url'] ?? null);
         $project = auth()->user()->team->accessibilityProjects()->create($validated);
 
         // Add creator as owner
@@ -102,6 +106,7 @@ class AccessibilityProjectController extends Controller
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'audit_date' => 'nullable|date',
             'status' => 'required|in:planning,in_progress,completed',
+            'report_site_url' => ReportSiteIcon::primarySiteRules(),
             'client_logo' => ['nullable', 'image', 'max:2048'],
             'remove_client_logo' => ['nullable', 'boolean'],
         ]);
@@ -121,6 +126,9 @@ class AccessibilityProjectController extends Controller
         }
 
         unset($validated['remove_client_logo']);
+        if (array_key_exists('report_site_url', $validated)) {
+            $validated['report_site_url'] = ReportSiteIcon::origin($validated['report_site_url']);
+        }
         $project->update($validated);
 
         return redirect()->route('accessibility-projects.show', $project)

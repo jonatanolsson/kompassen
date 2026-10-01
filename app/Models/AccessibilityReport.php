@@ -22,7 +22,30 @@ class AccessibilityReport extends Model
         'minor_count',
         'html_content',
         'created_by',
+        'series_id',
+        'version',
+        'previous_version_id',
+        'generated_at',
+        'audit_date_snapshot',
+        'client_logo_snapshot',
+        'report_options',
+        'document_metadata',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'report_options' => 'array',
+            'document_metadata' => 'array',
+            'generated_at' => 'datetime',
+            'audit_date_snapshot' => 'datetime',
+        ];
+    }
+
+    public function previousVersion(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'previous_version_id');
+    }
 
     public function project(): BelongsTo
     {

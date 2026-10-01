@@ -15,6 +15,8 @@ class WcagSuccessCriterion extends Model
 {
     use HasFactory;
 
+    public const WCAG_STANDARDS = ['WCAG 2.1', 'WCAG 2.2'];
+
     protected $attributes = [
         'standard' => 'WCAG 2.1',
         'level' => 'A',
@@ -48,7 +50,7 @@ class WcagSuccessCriterion extends Model
 
     public function scopeWcag(Builder $query): Builder
     {
-        return $query->where('standard', 'WCAG 2.1');
+        return $query->whereIn('standard', self::WCAG_STANDARDS);
     }
 
     public function examples(): HasMany

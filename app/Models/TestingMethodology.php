@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
@@ -14,6 +16,7 @@ class TestingMethodology extends Model
 
     protected $fillable = [
         'name',
+        'team_id',
         'category',
         'description',
         'is_custom',
@@ -39,6 +42,20 @@ class TestingMethodology extends Model
         return $this->belongsToMany(AccessibilityProject::class, 'accessibility_project_methodologies', 'methodology_id', 'project_id')
             ->withPivot('notes')
             ->withTimestamps();
+    }
+
+    public function scopeAvailableToTeam(Builder $query, string $teamId): Builder
+    {
+        $column = $query->qualifyColumn('team_id');
+
+        return $query->where(fn (Builder $query): Builder => $query
+            ->whereNull($column)
+            ->orWhere($column, $teamId));
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function getCategoryLabelAttribute(): string

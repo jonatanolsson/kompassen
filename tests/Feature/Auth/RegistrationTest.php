@@ -24,4 +24,6 @@ test('new users can register', function () {
     $component->assertRedirect(route('dashboard', absolute: false));
 
     $this->assertAuthenticated();
+    expect(auth()->user()->isTeamOwner())->toBeTrue()
+        ->and(auth()->user()->is_knowledge_editor)->toBeFalse();
 });

@@ -6,6 +6,7 @@ use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
 use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
+use App\Services\IssueDiagramSvg;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -27,7 +28,13 @@ class CreateAccessibilityIssue extends Component
 
     public string $description = '';
 
+    public string $impact = '';
+
     public string $mermaid_diagram = '';
+
+    public ?string $mermaid_svg = null;
+
+    public ?string $mermaid_source_hash = null;
 
     public ?string $page_id = null;
 
@@ -36,8 +43,6 @@ class CreateAccessibilityIssue extends Component
     public string $difficulty = 'medium';
 
     public string $component_area = '';
-
-    public string $status = 'open';
 
     public array $wcag_criteria = [];
 
@@ -58,7 +63,10 @@ class CreateAccessibilityIssue extends Component
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'impact' => 'nullable|string',
             'mermaid_diagram' => 'nullable|string|max:20000',
+            'mermaid_svg' => 'nullable|string|max:'.IssueDiagramSvg::MAX_SVG_BYTES,
+            'mermaid_source_hash' => 'nullable|string|size:64',
             'page_id' => [
                 'nullable',
                 Rule::exists('accessibility_pages', 'id')
@@ -67,34 +75,39 @@ class CreateAccessibilityIssue extends Component
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',
-            'status' => 'required|in:open,resolved,wont_fix',
             'wcag_criteria' => 'nullable|array',
             'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
-                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
+                ->where(fn ($query) => $query->whereIn('standard', WcagSuccessCriterion::WCAG_STANDARDS)),
             'example_ids' => 'nullable|array',
             'example_ids.*' => Rule::exists('wcag_criterion_examples', 'id')
-                ->where(fn ($query) => $query->whereIn('wcag_success_criterion_id', $this->wcag_criteria)),
+                ->where(fn ($query) => $query->whereIn('wcag_success_criterion_id', $this->wcag_criteria))
+                ->where(fn ($query) => $query->whereNull('team_id')->orWhere('team_id', $this->currentTeamId())),
             'attachments' => 'nullable|array',
             'attachments.*' => 'image|mimes:jpeg,png,gif,webp|max:5120',
         ];
     }
 
-    public function submit()
+    public function submit(IssueDiagramSvg $diagramSvg)
     {
         $validated = $this->validate();
 
         $project = AccessibilityProject::findOrFail($this->projectId);
         $this->authorize('update', $project);
 
+        $diagram = $diagramSvg->validate($validated['mermaid_diagram'], $validated['mermaid_svg'], $validated['mermaid_source_hash']);
+
         $issue_data = [
             'title' => $validated['title'],
             'description' => $validated['description'],
+            'impact' => $this->normalizedImpact($validated['impact']),
             'mermaid_diagram' => $validated['mermaid_diagram'],
+            'mermaid_svg' => $diagram['mermaid_svg'],
+            'mermaid_source_hash' => $diagram['mermaid_source_hash'],
             'page_id' => $validated['page_id'],
             'severity' => $validated['severity'],
             'difficulty' => $validated['difficulty'],
             'component_area' => $validated['component_area'],
-            'status' => $validated['status'],
+            'status' => 'open',
         ];
 
         $issue = $project->issues()->create($issue_data);
@@ -116,6 +129,19 @@ class CreateAccessibilityIssue extends Component
     public function updatedWcagCriteria(): void
     {
         $this->example_ids = $this->validExampleIds();
+    }
+
+    public function updatedMermaidDiagram(): void
+    {
+        if (! IssueDiagramSvg::isCurrent($this->mermaid_diagram, $this->mermaid_svg, $this->mermaid_source_hash)) {
+            $this->mermaid_svg = null;
+            $this->mermaid_source_hash = null;
+        }
+    }
+
+    private function normalizedImpact(?string $impact): ?string
+    {
+        return trim(strip_tags((string) $impact)) === '' ? null : $impact;
     }
 
     private function storeAttachments(array $files, AccessibilityIssue $issue): void
@@ -140,6 +166,7 @@ class CreateAccessibilityIssue extends Component
         $pages = $project->pages;
         $wcagCriteria = WcagSuccessCriterion::wcag()->get();
         $availableExamples = WcagCriterionExample::query()
+            ->visibleToTeam($this->currentTeamId())
             ->with('criterion')
             ->whereIn('wcag_success_criterion_id', $this->wcag_criteria)
             ->when(trim($this->exampleSearch) !== '', function ($query): void {
@@ -177,6 +204,11 @@ class CreateAccessibilityIssue extends Component
             ->all();
     }
 
+    private function currentTeamId(): string
+    {
+        return (string) auth()->user()?->team_id;
+    }
+
     /**
      * @return array<int, string>
      */
@@ -187,6 +219,7 @@ class CreateAccessibilityIssue extends Component
         }
 
         $validIds = WcagCriterionExample::query()
+            ->visibleToTeam($this->currentTeamId())
             ->whereIn('wcag_success_criterion_id', $this->wcag_criteria)
             ->pluck('id')
             ->all();

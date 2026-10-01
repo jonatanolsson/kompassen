@@ -11,24 +11,82 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
 
 ## Huvudfunktioner
 
-- **Dashboard** – översikt över projekt, granskningsstatus och snabbåtgärder.
+- **Dashboard** – visar öppna problem och senaste projektaktivitet med direktväg
+  till granskningens nästa steg.
 - **Projekt** – skapa, redigera och följa upp tillgänglighetsprojekt med
-  målversion och målnivå för WCAG.
+  målversion och målnivå för WCAG. Projektets valfria huvudwebbplats kan
+  ändras utan att sidornas URL:er påverkas; den visas som domän och kan
+  användas för rapportens webbplatsikon.
 - **Sidor och tjänster** – registrera både publika och inloggade resurser,
   exempelvis Mina sidor, med URL, beskrivning, åtkomstkontext och
   granskningsomfattning.
 - **Problem** – dokumentera tillgänglighetsproblem med allvarlighetsgrad,
-  svårighetsgrad, status, tilldelad medlem, WCAG-kriterium, rich text och
-  bilagor/skärmbilder.
+  svårighetsgrad, status, tilldelad medlem, WCAG-kriterium, separat
+  användarkonsekvens i rich text och bilagor/skärmbilder. Mermaid-diagram
+  renderas med JavaScript vid sparande och lagras som sanerad SVG tillsammans
+  med källkoden; en omrendering krävs när källkoden ändras. Formuläret visar
+  grunduppgifter först och fördjupar med ytterligare underlag, påverkan samt
+  WCAG-kriterier och exempel. Nya problem börjar som öppna; status ändras
+  efter sparande via åtgärden för lösning, med anteckning. Problem på sidor
+  utanför granskningsomfattningen finns kvar i projektet och märks tydligt
+  där, men tas inte med i rapporter.
 - **Problemhantering** – tilldela, lösa, exportera och följa upp problem.
 - **WCAG-kunskapsbank** – sökbara framgångskriterier, exempel och relaterade
-  resurser från bland annat W3C och DIGG.
+  resurser från bland annat W3C och DIGG. Mermaid-exempel sparar även en
+  sanerad, ljus SVG för rapportens webb- och PDF-visning. Äldre exempel med
+  Mermaid-kod behöver öppnas och sparas om i en webbläsare med JavaScript
+  innan de kan tas med som diagram i en ny rapport; annars anger felet vilket
+  exempel som behöver uppdateras. Att välja bort diagram tillåter rapport
+  utan exempelbilden. I nya rapporter visas bara diagrammets bild, inte dess
+  Mermaid-källa; källan finns kvar för redigering i kunskapsbanken.
 - **Testmetodik** – administrera återanvändbara metoder och koppla dem till
-  projekt.
-- **Rapporter** – skapa rapporter från projektets data, visa förhandsvisning
-  och ladda ner PDF.
-- **Delning** – skapa delningslänkar till kundanpassad rapportförhandsvisning
-  utan inloggning.
+  projekt. Gemensamma, förinstallerade metoder är skrivskyddade. Teamägaren
+  kan via **Kunskapsredaktörer** utse befintliga användare i samma team till
+  redaktörer. Redaktörer får skapa och ändra teamets egna metoder; bara
+  gemensamma och teamets metoder får kopplas till projektet. Äldre anpassade
+  metoder utan teamtillhörighet bevaras som skrivskyddade gemensamma metoder.
+- **Kunskapsbank** – globala WCAG-kriterier och tillhörande resurser är
+  skrivskyddade. Gemensamma befintliga exempel förblir synliga men skrivskyddade;
+  redaktörer skapar och redigerar enbart teamets egna exempel. Andra teams
+  exempel och metoder visas inte. Nya registreringar skapar eget team och
+  registranten blir teamägare; för äldre team utses den först skapade medlemmen
+  till ägare vid migrering. Redaktörsutnämning förutsätter att användaren redan
+  tillhör teamet; det finns ännu inget självbetjäningsflöde för att bjuda in
+  användare till ett team.
+- **Rapporter** – skapa en ljus, utskriftsanpassad rapport med prioriterad
+  sammanfattning och tekniskt appendix. Avancerade innehållsval sparas som
+  projektstandard; varje rapportversion lagrar sina egna val och sin egen
+  HTML-ögonblicksbild för identiskt innehåll i webb- och PDF-visning.
+  Förhandsvisningen öppnar den sparade HTML:en i en isolerad, ljus ram så
+  appens mörka tema inte kan färga rapportens sidor. En uppdatering
+  skapar en ny version utan att ändra tidigare rapporter. Äldre rapportmallar
+  bevaras tills en ny version uttryckligen skapas. Företagets logotyp i
+  appinställningarna visas överst, tillsammans med rapportens skapare och
+  datum; projektets kundlogotyp visas vid projektnamnet. Välj en publik
+  HTTPS-webbplats från projektets huvudwebbplats eller testade sidor när rapporten skapas
+  för att bädda in dess webbplatsikon. Om ingen ikon kan hämtas visas ett
+  åtgärdbart fel och du kan välja bort den. PNG, JPEG, GIF och WebP stöds,
+  liksom ICO med inbäddad PNG. Inställningen sparas för nästa rapport.
+  Befintliga versioner påverkas inte. Valda bilder bäddas in vid
+  generering; saknade bilder eller diagram som inte matchar källkoden stoppar
+  genereringen med ett åtgärdsförslag. Rapporter behåller namn på skaparen
+  även om användarkontot tas bort. Vid PDF-export normaliseras
+  diagrammens SVG-streckförskjutning för mPDF utan att den sparade
+  rapportversionen ändras.
+  Rapportdokumentet använder Verdana i webben och inbäddad DejaVu Sans
+  för text och diagram i PDF, med luftigare layout och enkelt språk; tidigare
+  versioner nås via
+  historikmenyn på rapportens sida. Befintliga sparade versioner behåller sitt
+  ursprungliga utseende tills en ny version skapas. Radering kräver bekräftelse.
+- **Delning** – skapa tidsbegränsade kundlänkar från en specifik sparad
+  rapportversion. Länken visar exakt den versionens isolerade, ljusa HTML-dokument
+  utan inloggning, även om projektet eller senare rapportversioner ändras.
+  Giltighetstid i framtiden krävs; länkar kan återkallas från rapportversionens
+  sida. Projektsidans förhandsvisning visar däremot aktuellt arbete och kräver
+  medlemskap. Äldre projektlänkar bevaras i databasen för återkallning men
+  returnerar 410 och visar aldrig levande projektdata. Om en delad rapportversion
+  raderas blir dess länk otillgänglig (410). Skapa då en ny länk från en sparad
+  version.
 - **Projektmedlemmar** – hantera medlemmar och roller i en separat vy.
 - **Rich text och säker rendering** – användarinnehåll saneras före visning.
 - **Svenska översättningar** – UI-strängar går via Laravels
@@ -46,7 +104,7 @@ vidare till dashboarden. Det finns därför en gemensam inloggningssida på
 - Flux UI 2 / Flux Pro
 - Tailwind CSS 4
 - Vite
-- Pest 4 och Laravel Pint
+- Pest 4, Pest Browser, Playwright och Laravel Pint
 - MariaDB/MySQL i drift
 - SQLite i tester
 - mPDF för PDF-rapporter
@@ -165,6 +223,14 @@ Kör ett specifikt test:
 ./vendor/bin/sail artisan test --compact --filter="can generate report"
 ```
 
+Browser-testerna körs i Chromium. Installera browsern en gång i Sail-containern
+och kör sedan browser-sviten separat:
+
+```bash
+./vendor/bin/sail exec laravel.test npx playwright install chromium
+./vendor/bin/sail artisan test --compact tests/Browser
+```
+
 Formatera ändrade PHP-filer:
 
 ```bash
@@ -243,6 +309,7 @@ routes/
   web.php                  Webb- och autentiserade projektflöden
   auth.php                 Autentiseringsroutes
 tests/
+  Browser/                 Kritiska användarresor i Chromium
   Feature/                 Beteende- och åtkomsttester
   Unit/                    Enhetstester
 ```

@@ -22,7 +22,9 @@ test('team users can view testing methodology administration', function () {
 
     $response->assertSuccessful()
         ->assertSee(__('Testing Methodologies'))
-        ->assertSee('testing-methodology-form-modal', false)
+        ->assertDontSee('testing-methodology-form-modal', false)
+        ->assertDontSee('delete-testing-methodology-'.$methodology->id, false)
+        ->assertDontSee('wire:confirm', false)
         ->assertSee($methodology->name);
 });
 
@@ -36,6 +38,7 @@ test('users without a team cannot administer testing methodologies', function ()
 
 test('users can create update and delete an unused custom methodology', function () {
     $user = User::factory()->create();
+    $user->team->update(['owner_id' => $user->id]);
 
     $component = Livewire::actingAs($user)
         ->test(TestingMethodologies::class)
@@ -52,7 +55,8 @@ test('users can create update and delete an unused custom methodology', function
         ->where('name', 'Keyboard testing')
         ->firstOrFail();
 
-    expect($methodology->is_custom)->toBeTrue();
+    expect($methodology->is_custom)->toBeTrue()
+        ->and($methodology->team_id)->toBe((string) $user->team_id);
 
     $component
         ->call('edit', $methodology->id)
@@ -79,7 +83,9 @@ test('methodologies used by projects cannot be deleted', function () {
         'name' => 'Keyboard testing',
         'category' => 'testing_tool',
         'is_custom' => true,
+        'team_id' => (string) $team->id,
     ]);
+    $team->update(['owner_id' => $user->id]);
 
     ProjectMember::create([
         'project_id' => $project->id,

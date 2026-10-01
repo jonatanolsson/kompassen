@@ -27,7 +27,7 @@ class AppSettings extends Component
     public function save(): void
     {
         $this->validate([
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
         ]);
 
         if ($this->logo) {

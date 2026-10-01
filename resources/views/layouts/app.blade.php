@@ -132,6 +132,7 @@
             </div>
         </div>
             @livewireScripts
+    <flux:toast />
     @fluxScripts
     </body>
 </html>

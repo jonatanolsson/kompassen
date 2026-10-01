@@ -16,8 +16,28 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+    --color-accent: var(--color-emerald-600);
+    --color-accent-content: var(--color-emerald-600);
+    --color-accent-foreground: var(--color-white);
+}
+
+@layer theme {
+    .dark {
+        --color-accent: var(--color-emerald-600);
+        --color-accent-content: var(--color-emerald-400);
+        --color-accent-foreground: var(--color-white);
+    }
+}
+
 [x-cloak] {
     display: none !important;
+}
+
+@media print {
+    details[data-print-expand] > [data-print-details] {
+        display: block !important;
+    }
 }
 
 /* ── user-content ──────────────────────────────────────────────

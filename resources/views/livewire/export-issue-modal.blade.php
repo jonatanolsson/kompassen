@@ -94,18 +94,19 @@
     @script
     <script>
         document.addEventListener('livewire:init', () => {
-            Livewire.on('copy-to-clipboard', (event) => {
-                const content = event.content;
-                navigator.clipboard.writeText(content).then(() => {
-                    // Success - notification will be handled by the notify event
-                }).catch(() => {
-                    alert('{{ __("Failed to copy to clipboard") }}');
-                });
+            Livewire.on('copy-to-clipboard', async ({ content }) => {
+                try {
+                    await navigator.clipboard.writeText(content);
+                } catch {
+                    window.Flux.toast({
+                        text: @js(__('Failed to copy to clipboard. Select the preview and copy it manually.')),
+                        variant: 'danger',
+                    });
+                }
             });
 
-            Livewire.on('notify', (event) => {
-                // Show notification - you can use a toast/notification system here
-                console.log(event.message);
+            Livewire.on('notify', ({ message }) => {
+                window.Flux.toast({ text: message, variant: 'success' });
             });
         });
     </script>

@@ -46,6 +46,15 @@
 
                         <div class="md:col-span-2">
                             <flux:field>
+                                <flux:label>{{ __('Primary website') }}</flux:label>
+                                <flux:input type="url" wire:model="report_site_url" placeholder="https://example.com" />
+                                <flux:description>{{ __('Optional. Used for the project domain and offered as the report icon website. Page URLs stay unchanged.') }}</flux:description>
+                                <flux:error name="report_site_url" />
+                            </flux:field>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <flux:field>
                                 <flux:label>{{ __('Description') }}</flux:label>
                                 <flux:editor
                                     wire:model="description"

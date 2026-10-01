@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\AccessibilityProject;
+use App\Services\ReportSiteIcon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -30,6 +31,8 @@ class EditAccessibilityProject extends Component
 
     public string $target_wcag_version = '2.1';
 
+    public ?string $report_site_url = null;
+
     #[Validate('required|in:planning,in_progress,completed')]
     public string $status = 'planning';
 
@@ -45,12 +48,20 @@ class EditAccessibilityProject extends Component
         $this->description = $project->description;
         $this->target_wcag_level = $project->target_wcag_level;
         $this->target_wcag_version = $project->target_wcag_version ?? '2.1';
+        $this->report_site_url = $project->report_site_url;
         $this->status = $project->status;
     }
 
     public function update(): void
     {
-        $this->validate();
+        $this->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'target_wcag_level' => 'required|in:A,AA,AAA',
+            'status' => 'required|in:planning,in_progress,completed',
+            'client_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'report_site_url' => ReportSiteIcon::primarySiteRules(),
+        ]);
 
         $project = AccessibilityProject::findOrFail($this->projectId);
 
@@ -61,6 +72,7 @@ class EditAccessibilityProject extends Component
             'description' => $this->description,
             'target_wcag_level' => $this->target_wcag_level,
             'status' => $this->status,
+            'report_site_url' => ReportSiteIcon::origin($this->report_site_url),
         ]);
 
         if ($this->client_logo) {

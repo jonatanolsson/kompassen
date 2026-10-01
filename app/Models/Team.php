@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-#[Fillable(['name'])]
+#[Fillable(['name', 'owner_id'])]
 class Team extends Model
 {
     use HasFactory;
@@ -21,7 +23,7 @@ class Team extends Model
         parent::boot();
         static::creating(function (Model $model) {
             if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = \Illuminate\Support\Str::ulid();
+                $model->{$model->getKeyName()} = Str::ulid();
             }
         });
     }
@@ -29,5 +31,15 @@ class Team extends Model
     public function accessibilityProjects(): HasMany
     {
         return $this->hasMany(AccessibilityProject::class);
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 }

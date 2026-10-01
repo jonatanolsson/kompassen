@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Models\AccessibilityProject;
 use App\Models\TestingMethodology;
+use App\Models\WcagCriterionExample;
 use App\Models\WcagSuccessCriterion;
 use App\Policies\AccessibilityProjectPolicy;
 use App\Policies\TestingMethodologyPolicy;
+use App\Policies\WcagCriterionExamplePolicy;
 use App\Policies\WcagSuccessCriterionPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -20,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         AccessibilityProject::class => AccessibilityProjectPolicy::class,
         TestingMethodology::class => TestingMethodologyPolicy::class,
+        WcagCriterionExample::class => WcagCriterionExamplePolicy::class,
         WcagSuccessCriterion::class => WcagSuccessCriterionPolicy::class,
     ];
 

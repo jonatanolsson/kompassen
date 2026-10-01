@@ -73,17 +73,31 @@
                                                 />
                                             </button>
                                         </flux:modal.trigger>
-                                        <form
-                                            action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('{{ __('Delete this image?') }}')"
-                                            class="mt-3"
-                                        >
+                                        <flux:modal.trigger name="delete-attachment-{{ $attachment->id }}">
+                                            <flux:button type="button" variant="danger" size="xs" icon="trash" class="mt-3 w-full">
+                                                {{ __('Delete') }}
+                                            </flux:button>
+                                        </flux:modal.trigger>
+                                    </div>
+
+                                    <flux:modal name="delete-attachment-{{ $attachment->id }}" class="md:w-[28rem]">
+                                        <form action="{{ route('accessibility-issue-attachments.destroy', [$project, $issue, $attachment]) }}" method="POST" class="space-y-6">
                                             @csrf
                                             @method('DELETE')
-                                            <flux:button type="submit" variant="danger" size="xs" icon="trash" class="w-full">{{ __('Delete') }}</flux:button>
+
+                                            <div>
+                                                <flux:heading level="2">{{ __('Delete this image?') }}</flux:heading>
+                                                <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                            </div>
+
+                                            <div class="flex justify-end gap-2">
+                                                <flux:modal.close>
+                                                    <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                                </flux:modal.close>
+                                                <flux:button type="submit" variant="danger">{{ __('Delete') }}</flux:button>
+                                            </div>
                                         </form>
-                                    </div>
+                                    </flux:modal>
 
                                     <!-- Image Lightbox Modal for each attachment -->
                                     <flux:modal name="attachment-lightbox-{{ $loop->index }}" class="w-auto max-w-4xl">

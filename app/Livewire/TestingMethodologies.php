@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\TestingMethodology;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,8 @@ class TestingMethodologies extends Component
     public function methodologies(): Collection
     {
         return TestingMethodology::query()
-            ->withCount('projects')
+            ->availableToTeam((string) auth()->user()->team_id)
+            ->withCount(['projects' => fn (Builder $query) => $query->where('accessibility_projects.team_id', (string) auth()->user()->team_id)])
             ->orderBy('category')
             ->orderBy('name')
             ->get()
@@ -52,12 +54,13 @@ class TestingMethodologies extends Component
 
     public function openCreateForm(): void
     {
+        $this->authorize('create', TestingMethodology::class);
         $this->resetForm();
     }
 
     public function edit(string $id): void
     {
-        $methodology = TestingMethodology::findOrFail($id);
+        $methodology = TestingMethodology::availableToTeam((string) auth()->user()->team_id)->findOrFail($id);
         $this->authorize('update', $methodology);
 
         $this->editingMethodologyId = $methodology->id;
@@ -69,7 +72,7 @@ class TestingMethodologies extends Component
     public function save(): void
     {
         $methodology = $this->editingMethodologyId
-            ? TestingMethodology::findOrFail($this->editingMethodologyId)
+            ? TestingMethodology::availableToTeam((string) auth()->user()->team_id)->findOrFail($this->editingMethodologyId)
             : null;
 
         $this->authorize($methodology ? 'update' : 'create', $methodology ?? TestingMethodology::class);
@@ -79,7 +82,9 @@ class TestingMethodologies extends Component
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('testing_methodologies', 'name')->ignore($methodology?->id),
+                Rule::unique('testing_methodologies', 'name')
+                    ->where(fn ($query) => $query->where('team_id', (string) auth()->user()->team_id))
+                    ->ignore($methodology?->id),
             ],
             'category' => ['required', Rule::in(array_keys($this->categoryOptions()))],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -97,6 +102,7 @@ class TestingMethodologies extends Component
                 'category' => $validated['category'],
                 'description' => $validated['description'] ?: null,
                 'is_custom' => true,
+                'team_id' => (string) auth()->user()->team_id,
             ]);
         }
 
@@ -108,7 +114,7 @@ class TestingMethodologies extends Component
 
     public function delete(string $id): void
     {
-        $methodology = TestingMethodology::findOrFail($id);
+        $methodology = TestingMethodology::availableToTeam((string) auth()->user()->team_id)->findOrFail($id);
         $this->authorize('delete', $methodology);
 
         if ($methodology->projects()->exists()) {

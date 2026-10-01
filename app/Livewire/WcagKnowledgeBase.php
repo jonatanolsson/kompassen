@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\WcagCriterionExample;
 use App\Models\WcagCriterionExampleAttachment;
 use App\Models\WcagSuccessCriterion;
+use App\Services\IssueDiagramSvg;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -74,6 +75,10 @@ class WcagKnowledgeBase extends Component
 
     public string $exampleCodeLanguage = 'html';
 
+    public ?string $exampleSvg = null;
+
+    public ?string $exampleSourceHash = null;
+
     /**
      * @var array<int, TemporaryUploadedFile>
      */
@@ -118,7 +123,7 @@ class WcagKnowledgeBase extends Component
             })
             ->orderBy('standard')
             ->orderBy('number')
-            ->withCount('examples')
+            ->withCount(['examples' => fn ($query) => $query->visibleToTeam((string) auth()->user()->team_id)])
             ->get()
             ->groupBy('standard');
     }
@@ -141,7 +146,12 @@ class WcagKnowledgeBase extends Component
             return null;
         }
 
-        return WcagSuccessCriterion::with(['examples.referenceLinks', 'examples.attachments', 'relatedResources'])
+        return WcagSuccessCriterion::with([
+            'examples' => fn ($query) => $query->visibleToTeam((string) auth()->user()->team_id),
+            'examples.referenceLinks',
+            'examples.attachments',
+            'relatedResources',
+        ])
             ->find($this->selectedCriterionId);
     }
 
@@ -344,15 +354,19 @@ class WcagKnowledgeBase extends Component
 
     public function startCreatingExample(): void
     {
-        $this->authorize('update', $this->selectedCriterionModel());
+        $this->selectedCriterionModel();
+        $this->authorize('create', WcagCriterionExample::class);
         $this->resetExampleForm();
         $this->resetValidation();
     }
 
-    public function saveExample(): void
+    public function saveExample(IssueDiagramSvg $diagramSvg): void
     {
         $criterion = $this->selectedCriterionModel();
-        $this->authorize('update', $criterion);
+        $example = $this->editingExampleId
+            ? $criterion->examples()->visibleToTeam((string) auth()->user()->team_id)->findOrFail($this->editingExampleId)
+            : null;
+        $this->authorize($example ? 'update' : 'create', $example ?? WcagCriterionExample::class);
 
         $this->validate([
             'selectedCriterionId' => ['required', 'exists:wcag_success_criteria,id'],
@@ -360,6 +374,8 @@ class WcagKnowledgeBase extends Component
             'exampleDescription' => ['nullable', 'string'],
             'exampleCode' => ['nullable', 'string'],
             'exampleCodeLanguage' => ['nullable', 'string', 'max:50'],
+            'exampleSvg' => ['nullable', 'string', 'max:'.IssueDiagramSvg::MAX_SVG_BYTES],
+            'exampleSourceHash' => ['nullable', 'string', 'size:64'],
             'exampleAttachments' => ['array', 'max:10'],
             'exampleAttachments.*' => ['image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
             'exampleAttachmentAltTexts' => ['array'],
@@ -369,6 +385,9 @@ class WcagKnowledgeBase extends Component
             'exampleLinks.*.url' => ['nullable', 'url', 'max:500'],
             'exampleLinks.*.label' => ['nullable', 'string', 'max:255'],
         ]);
+        $diagram = $this->exampleCodeLanguage === 'mermaid'
+            ? $diagramSvg->validate($this->exampleCode, $this->exampleSvg, $this->exampleSourceHash, 'exampleCode')
+            : ['mermaid_svg' => null, 'mermaid_source_hash' => null];
 
         $links = collect($this->exampleLinks)
             ->map(fn (array $link): array => [
@@ -383,21 +402,22 @@ class WcagKnowledgeBase extends Component
             'description' => $this->exampleDescription ?: null,
             'code_snippet' => $this->exampleCode ?: null,
             'code_language' => $this->exampleCodeLanguage ?: 'html',
+            ...$diagram,
             'url' => $links->first()['url'] ?? null,
             'url_label' => ($links->first()['label'] ?? null) ?: null,
         ];
 
         DB::transaction(function () use ($criterion, $data, $links): void {
             if ($this->editingExampleId) {
-                $example = WcagCriterionExample::query()
-                    ->whereKey($this->editingExampleId)
-                    ->whereBelongsTo($criterion, 'criterion')
-                    ->firstOrFail();
+                $example = $criterion->examples()->visibleToTeam((string) auth()->user()->team_id)
+                    ->findOrFail($this->editingExampleId);
+                $this->authorize('update', $example);
                 $example->update($data);
             } else {
                 $example = WcagCriterionExample::create([
                     ...$data,
                     'wcag_success_criterion_id' => $criterion->id,
+                    'team_id' => (string) auth()->user()->team_id,
                 ]);
             }
 
@@ -434,19 +454,19 @@ class WcagKnowledgeBase extends Component
     public function editExample(string $id): void
     {
         $criterion = $this->selectedCriterionModel();
-        $this->authorize('update', $criterion);
-
-        $example = WcagCriterionExample::query()
-            ->whereKey($id)
-            ->whereBelongsTo($criterion, 'criterion')
+        $example = $criterion->examples()
+            ->visibleToTeam((string) auth()->user()->team_id)
             ->with('attachments')
-            ->firstOrFail();
+            ->findOrFail($id);
+        $this->authorize('update', $example);
 
         $this->editingExampleId = $id;
         $this->exampleTitle = $example->title;
         $this->exampleDescription = $example->description ?? '';
         $this->exampleCode = $example->code_snippet ?? '';
         $this->exampleCodeLanguage = $example->code_language ?? 'html';
+        $this->exampleSvg = $example->mermaid_svg;
+        $this->exampleSourceHash = $example->mermaid_source_hash;
         $this->exampleLinks = $example->referenceLinks
             ->map(fn ($link): array => [
                 'url' => $link->url,
@@ -495,13 +515,11 @@ class WcagKnowledgeBase extends Component
     public function deleteExample(string $id): void
     {
         $criterion = $this->selectedCriterionModel();
-        $this->authorize('update', $criterion);
-
-        $example = WcagCriterionExample::query()
-            ->whereKey($id)
-            ->whereBelongsTo($criterion, 'criterion')
+        $example = $criterion->examples()
+            ->visibleToTeam((string) auth()->user()->team_id)
             ->with('attachments')
-            ->firstOrFail();
+            ->findOrFail($id);
+        $this->authorize('delete', $example);
 
         foreach ($example->attachments as $attachment) {
             Storage::disk('public')->delete($attachment->path);
@@ -515,12 +533,9 @@ class WcagKnowledgeBase extends Component
     public function deleteExampleAttachment(string $id): void
     {
         $criterion = $this->selectedCriterionModel();
-        $this->authorize('update', $criterion);
-
-        $example = WcagCriterionExample::query()
-            ->whereKey($this->editingExampleId)
-            ->whereBelongsTo($criterion, 'criterion')
-            ->firstOrFail();
+        $example = $criterion->examples()->visibleToTeam((string) auth()->user()->team_id)
+            ->findOrFail($this->editingExampleId);
+        $this->authorize('update', $example);
         $attachment = $example->attachments()->whereKey($id)->firstOrFail();
 
         Storage::disk('public')->delete($attachment->path);
@@ -577,6 +592,8 @@ class WcagKnowledgeBase extends Component
         $this->exampleDescription = '';
         $this->exampleCode = '';
         $this->exampleCodeLanguage = 'html';
+        $this->exampleSvg = null;
+        $this->exampleSourceHash = null;
         $this->exampleAttachments = [];
         $this->exampleAttachmentAltTexts = [];
         $this->existingExampleAttachments = [];

@@ -1,9 +1,10 @@
 <?php
 
 use App\Models\AccessibilityProject;
-use App\Models\Team;
+use App\Models\AccessibilityReport;
 use App\Models\ProjectMember;
 use App\Models\ProjectShareLink;
+use App\Models\Team;
 use App\Models\User;
 
 // ==================== Project Member Tests ====================
@@ -214,10 +215,14 @@ test('owner can create share link', function () {
         'user_id' => $owner->id,
         'role' => 'owner',
     ]);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id, 'title' => 'Saved report', 'target_wcag_level' => 'AA',
+        'total_issues' => 0, 'html_content' => '<h1>Saved report</h1>', 'created_by' => $owner->id,
+    ]);
 
     $response = $this->actingAs($owner)->post(
-        route('project-share-links.store', $project),
-        ['expires_at' => now()->addDays(7)->format('Y-m-d')]
+        route('project-share-links.store', [$project, $report]),
+        ['expires_at' => now()->addDays(7)->toDateTimeString()]
     );
 
     $response->assertRedirect();
@@ -237,10 +242,14 @@ test('editor can create share link', function () {
         'user_id' => $editor->id,
         'role' => 'editor',
     ]);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id, 'title' => 'Saved report', 'target_wcag_level' => 'AA',
+        'total_issues' => 0, 'html_content' => '<h1>Saved report</h1>', 'created_by' => $editor->id,
+    ]);
 
     $response = $this->actingAs($editor)->post(
-        route('project-share-links.store', $project),
-        ['expires_at' => null]
+        route('project-share-links.store', [$project, $report]),
+        ['expires_at' => now()->addDay()->toDateTimeString()]
     );
 
     $response->assertRedirect();
@@ -256,10 +265,14 @@ test('viewer cannot create share link', function () {
         'user_id' => $viewer->id,
         'role' => 'viewer',
     ]);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id, 'title' => 'Saved report', 'target_wcag_level' => 'AA',
+        'total_issues' => 0, 'html_content' => '<h1>Saved report</h1>', 'created_by' => $viewer->id,
+    ]);
 
     $response = $this->actingAs($viewer)->post(
-        route('project-share-links.store', $project),
-        ['expires_at' => null]
+        route('project-share-links.store', [$project, $report]),
+        ['expires_at' => now()->addDay()->toDateTimeString()]
     );
 
     $response->assertStatus(403);
@@ -291,7 +304,7 @@ test('owner can delete share link', function () {
 
 // ==================== Guest Access Tests ====================
 
-test('guest can view project via valid share link', function () {
+test('guest can view saved report via valid share link', function () {
     $household = Team::factory()->create();
     $owner = User::factory()->create(['team_id' => $household->id]);
     $project = AccessibilityProject::factory()->create(['team_id' => $household->id]);
@@ -301,16 +314,22 @@ test('guest can view project via valid share link', function () {
         'user_id' => $owner->id,
         'role' => 'owner',
     ]);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id, 'title' => 'Saved report', 'target_wcag_level' => 'AA',
+        'total_issues' => 0, 'html_content' => '<h1>Saved report</h1>', 'created_by' => $owner->id,
+    ]);
 
     $link = ProjectShareLink::create([
         'project_id' => $project->id,
+        'report_id' => $report->id,
         'created_by' => $owner->id,
+        'expires_at' => now()->addDay(),
     ]);
 
     $response = $this->get(route('projects.shared', $link->token));
 
     $response->assertStatus(200);
-    $response->assertSee($project->name);
+    $response->assertSee('Saved report');
 });
 
 test('guest cannot view project with invalid share link', function () {
@@ -351,10 +370,16 @@ test('guest view does not show edit/delete buttons', function () {
         'user_id' => $owner->id,
         'role' => 'owner',
     ]);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id, 'title' => 'Saved report', 'target_wcag_level' => 'AA',
+        'total_issues' => 0, 'html_content' => '<h1>Saved report</h1>', 'created_by' => $owner->id,
+    ]);
 
     $link = ProjectShareLink::create([
         'project_id' => $project->id,
+        'report_id' => $report->id,
         'created_by' => $owner->id,
+        'expires_at' => now()->addDay(),
     ]);
 
     $response = $this->get(route('projects.shared', $link->token));

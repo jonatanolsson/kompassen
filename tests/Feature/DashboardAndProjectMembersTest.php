@@ -5,7 +5,7 @@ use App\Models\ProjectMember;
 use App\Models\Team;
 use App\Models\User;
 
-test('dashboard shows scoped project summaries and quick actions', function () {
+test('dashboard shows scoped audit activity without repeated quick action panels', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
     $visibleProject = AccessibilityProject::factory()->create([
@@ -45,9 +45,30 @@ test('dashboard shows scoped project summaries and quick actions', function () {
         ->assertSee('Visible audit')
         ->assertDontSee('Hidden audit')
         ->assertSee(__('Open Issues'))
-        ->assertSee(__('Quick Actions'))
+        ->assertSee(__('Recent Projects'))
         ->assertSee(__('Report Issue'))
-        ->assertSee(__('Generate Report'));
+        ->assertSee(__('Generate Report'))
+        ->assertDontSee(__('Quick Actions'));
+});
+
+test('dashboard suggests adding a first page but hides project mutations from viewers', function () {
+    $team = Team::factory()->create();
+    $owner = User::factory()->create(['team_id' => $team->id]);
+    $viewer = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $owner->id, 'role' => 'owner']);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $viewer->id, 'role' => 'viewer']);
+
+    $this->actingAs($owner)->get(route('dashboard'))
+        ->assertSuccessful()
+        ->assertSee(route('accessibility-pages.create', $project));
+
+    $this->actingAs($viewer)->get(route('dashboard'))
+        ->assertSuccessful()
+        ->assertSee(route('accessibility-projects.show', $project))
+        ->assertDontSee(route('accessibility-pages.create', $project))
+        ->assertDontSee(route('accessibility-issues.create', $project))
+        ->assertDontSee(route('accessibility-reports.create', $project));
 });
 
 test('project members are visible and management controls are owner-only', function () {
@@ -67,7 +88,7 @@ test('project members are visible and management controls are owner-only', funct
         'user_id' => $owner->id,
         'role' => 'owner',
     ]);
-    ProjectMember::create([
+    $editorMember = ProjectMember::create([
         'project_id' => $project->id,
         'user_id' => $editor->id,
         'role' => 'editor',
@@ -88,7 +109,10 @@ test('project members are visible and management controls are owner-only', funct
         ->assertSuccessful()
         ->assertSee(__('Add Member'))
         ->assertSee(__('Only users from your team can be added.'))
-        ->assertSee('Project Editor');
+        ->assertSee('Project Editor')
+        ->assertSee('remove-member-'.$editorMember->id, false)
+        ->assertSee(__('This member will lose access to this project.'))
+        ->assertDontSee('confirm(', false);
 
     $this->actingAs($editor)
         ->get(route('project-members.index', $project))

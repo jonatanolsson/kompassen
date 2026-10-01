@@ -14,21 +14,21 @@ class TestingMethodologyPolicy
 
     public function view(User $user, TestingMethodology $testingMethodology): bool
     {
-        return $this->viewAny($user);
+        return $this->viewAny($user) && ($testingMethodology->team_id === null || (string) $testingMethodology->team_id === (string) $user->team_id);
     }
 
     public function create(User $user): bool
     {
-        return $this->viewAny($user);
+        return $user->canEditTeamKnowledge();
     }
 
     public function update(User $user, TestingMethodology $testingMethodology): bool
     {
-        return $this->viewAny($user);
+        return $user->canEditTeamKnowledge() && $testingMethodology->team_id !== null && (string) $testingMethodology->team_id === (string) $user->team_id;
     }
 
     public function delete(User $user, TestingMethodology $testingMethodology): bool
     {
-        return $this->viewAny($user);
+        return $this->update($user, $testingMethodology);
     }
 }

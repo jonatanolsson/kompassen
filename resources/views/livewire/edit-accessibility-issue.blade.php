@@ -8,7 +8,14 @@
                 </flux:text>
             </div>
 
-            <form wire:submit="update" enctype="multipart/form-data" class="space-y-8" wire:key="issue-edit-{{ $this->issueId }}">
+            <form
+                x-data="issueDiagramForm('update', @js([
+                    'renderFailed' => __('The Mermaid diagram could not be rendered. Check the diagram syntax and try again.'),
+                    'unsupported' => __('This Mermaid diagram uses features that cannot be saved safely for reports, such as HTML labels, images or links. Simplify the diagram and try again.'),
+                    'cryptoUnavailable' => __('Your browser cannot verify the rendered diagram. Open the application over HTTPS and try again.'),
+                    'sourceChanged' => __('The Mermaid diagram changed while it was being rendered. Save again.'),
+                ]))"
+                x-on:submit.prevent="save"  enctype="multipart/form-data" class="space-y-8" wire:key="issue-edit-{{ $this->issueId }}">
                 <!-- Title Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Issue Details') }}</flux:heading>
@@ -34,6 +41,21 @@
                             <flux:error name="description" />
                         </flux:field>
 
+                        <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($impact !== '' || $mermaid_diagram !== '' || count($databaseAttachments) > 0 || $errors->any()) open @endif>
+                            <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
+                            <div class="mt-6 space-y-6">
+                        <flux:field>
+                            <flux:label>{{ __('Impact') }}</flux:label>
+                            <flux:editor
+                                wire:model="impact"
+                                placeholder="{{ __('Describe how the issue affects users...') }}"
+                            />
+                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                {{ __('Optional. Explain the consequences for users; shown in reports.') }}
+                            </flux:text>
+                            <flux:error name="impact" />
+                        </flux:field>
+
                         <flux:field>
                             <flux:label>{{ __('Mermaid diagram') }}</flux:label>
                             <flux:textarea
@@ -43,18 +65,33 @@
                                 class="font-mono text-sm"
                             />
                             <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
-                                {{ __('Optional Mermaid source. It will be rendered on the issue detail page.') }}
+                                {{ __('Optional Mermaid source. It is rendered in your browser when you save and stored as a sanitized SVG for reports.') }}
                             </flux:text>
                             <flux:error name="mermaid_diagram" />
+                            <div
+                                x-ref="diagramError"
+                                x-show="diagramError"
+                                x-cloak
+                                tabindex="-1"
+                                role="alert"
+                                class="text-sm font-medium text-red-600 dark:text-red-400"
+                                x-text="diagramError"
+                            ></div>
+                            <flux:text size="sm" x-show="rendering" x-cloak class="text-zinc-500 dark:text-zinc-400" aria-live="polite">
+                                {{ __('Rendering diagram…') }}
+                            </flux:text>
                         </flux:field>
+                            </div>
+                        </details>
                     </div>
                 </div>
 
                 <flux:separator />
 
                 <!-- Images Section -->
+                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if (count($databaseAttachments) > 0 || count($this->attachments) > 0 || $errors->any()) open @endif>
+                    <summary class="cursor-pointer font-medium">{{ __('Images') }}</summary>
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Images') }}</flux:heading>
 
                     <flux:field class="mb-4">
                         <flux:label>{{ __('Upload new images') }}</flux:label>
@@ -81,17 +118,29 @@
                                                 />
                                             </button>
                                         </flux:modal.trigger>
-                                        <flux:button
-                                            type="button"
-                                            variant="danger"
-                                            size="xs"
-                                            icon="trash"
-                                            class="w-full"
-                                            wire:click="deleteAttachment('{{ $attachment['id'] }}')"
-                                            wire:confirm="{{ __('Delete this image?') }}"
-                                        >
-                                            {{ __('Delete') }}
-                                        </flux:button>
+                                        <flux:modal.trigger name="delete-issue-attachment-{{ $attachment['id'] }}">
+                                            <flux:button type="button" variant="danger" size="xs" icon="trash" class="w-full">
+                                                {{ __('Delete') }}
+                                            </flux:button>
+                                        </flux:modal.trigger>
+
+                                        <flux:modal name="delete-issue-attachment-{{ $attachment['id'] }}" class="md:w-[28rem]">
+                                            <div class="space-y-6">
+                                                <div>
+                                                    <flux:heading level="2">{{ __('Delete this image?') }}</flux:heading>
+                                                    <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                                                </div>
+
+                                                <div class="flex justify-end gap-2">
+                                                    <flux:modal.close>
+                                                        <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                                    </flux:modal.close>
+                                                    <flux:button type="button" variant="danger" wire:click="deleteAttachment('{{ $attachment['id'] }}')">
+                                                        {{ __('Delete') }}
+                                                    </flux:button>
+                                                </div>
+                                            </div>
+                                        </flux:modal>
 
                                         <!-- Image Lightbox Modal for each attachment -->
                                         <flux:modal name="issue-attachment-lightbox-{{ $loop->index }}" class="w-auto max-w-4xl">
@@ -100,7 +149,6 @@
                                                     <flux:heading level="2">{{ $attachment['original_filename'] }}</flux:heading>
                                                     <flux:modal.close />
                                                 </div>
-
                                                 <flux:separator />
 
                                                 <div class="flex justify-center bg-zinc-900 rounded-lg p-4">
@@ -134,6 +182,7 @@
                         </div>
                     @endif
                 </div>
+                </details>
 
                 <flux:separator />
 
@@ -143,7 +192,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Page/Service') }}</flux:label>
-                            <flux:select wire:model.defer="page_id">
+                            <flux:select wire:model.live="page_id">
                                 <option value="">{{ __('Not specific to a page') }}</option>
                                 @foreach ($pages as $page)
                                     <option value="{{ $page['id'] }}">
@@ -152,6 +201,11 @@
                                 @endforeach
                             </flux:select>
                             <flux:error name="page_id" />
+                            @if ((collect($pages)->firstWhere('id', $page_id)['scope'] ?? null) === 'out_of_scope')
+                                <flux:callout color="amber" class="mt-3">
+                                    <flux:callout.text>{{ __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.') }}</flux:callout.text>
+                                </flux:callout>
+                            @endif
                         </flux:field>
 
                         <flux:field>
@@ -171,7 +225,7 @@
                 <!-- Classification Section -->
                 <div class="py-4">
                     <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Classification') }}</flux:heading>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <flux:field>
                             <flux:label>{{ __('Severity') }}</flux:label>
                             <flux:select wire:model.defer="severity" required>
@@ -193,20 +247,15 @@
                             <flux:error name="difficulty" />
                         </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('Status') }}</flux:label>
-                            <flux:select wire:model.defer="status" required>
-                                <option value="open">{{ __('Open') }}</option>
-                                <option value="resolved">{{ __('Resolved') }}</option>
-                                <option value="wont_fix">{{ __("Won't Fix") }}</option>
-                            </flux:select>
-                            <flux:error name="status" />
-                        </flux:field>
                     </div>
+                    <flux:text size="sm" class="mt-4 text-zinc-600 dark:text-zinc-400">{{ __('Change issue status using the resolution action on the issue page.') }}</flux:text>
                 </div>
 
                 <flux:separator />
 
+                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if (count($wcag_criteria) > 0 || count($example_ids) > 0 || $errors->any()) open @endif>
+                    <summary class="cursor-pointer font-medium">{{ __('WCAG criteria and examples') }}</summary>
+                    <div class="mt-5 space-y-6">
                 <!-- WCAG Criteria -->
                 <div class="py-4">
                     <div class="flex items-start justify-between gap-4">
@@ -225,7 +274,7 @@
                         @forelse ($availableCriteria as $criterion)
                             <div wire:key="edit-issue-criterion-{{ $criterion['id'] }}" class="rounded-lg px-3 py-2 transition hover:bg-zinc-50 dark:hover:bg-zinc-800">
                                 <flux:checkbox
-                                    wire:model="wcag_criteria"
+                                    wire:model.live="wcag_criteria"
                                     value="{{ $criterion['id'] }}"
                                     :label="$criterion['number'].' — '.($criterion['name_sv'] ?? $criterion['name_en'])"
                                 />
@@ -302,9 +351,12 @@
 
                 <flux:separator />
 
+                    </div>
+                </details>
+
                 <!-- Actions -->
                 <div class="flex gap-3 pt-6">
-                    <flux:button type="submit" variant="primary">{{ __('Update Issue') }}</flux:button>
+                    <flux:button type="submit" x-bind:disabled="rendering" variant="primary">{{ __('Update Issue') }}</flux:button>
                     <flux:button type="button" variant="ghost" wire:click="cancel">{{ __('Cancel') }}</flux:button>
                 </div>
             </form>

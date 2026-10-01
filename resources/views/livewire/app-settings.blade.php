@@ -10,7 +10,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
             <flux:heading level="2" size="sm">{{ __('Brand Logo') }}</flux:heading>
-            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Displayed in the sidebar. PNG or SVG recommended.') }}</flux:text>
+            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Shown in the sidebar and at the top of new reports. Upload PNG or JPEG.') }}</flux:text>
             </div>
 
             <div class="sm:col-span-2 space-y-4">
@@ -19,15 +19,17 @@
                         <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 p-3 flex items-center justify-center w-32 h-16">
                             <img src="{{ Storage::url($currentLogo) }}" alt="{{ __('Current logo') }}" class="max-h-10 max-w-full object-contain" />
                         </div>
-                        <flux:button type="button" variant="subtle" size="sm" icon="trash" wire:click="removeLogo" wire:confirm="{{ __('Remove the current logo?') }}">
-                            {{ __('Remove') }}
-                        </flux:button>
+                        <flux:modal.trigger name="remove-logo-modal">
+                            <flux:button type="button" variant="subtle" size="sm" icon="trash">
+                                {{ __('Remove') }}
+                            </flux:button>
+                        </flux:modal.trigger>
                     </div>
                 @endif
 
                 <flux:field>
                 <flux:label>{{ $currentLogo ? __('Replace logo') : __('Upload logo') }}</flux:label>
-                    <flux:input type="file" wire:model="logo" accept="image/*" />
+                    <flux:input type="file" wire:model="logo" accept="image/png,image/jpeg,image/gif,image/webp" />
                     <flux:error name="logo" />
                     @if ($logo)
                         <div class="mt-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 p-3 inline-flex">
@@ -44,4 +46,21 @@
             <flux:button type="submit" variant="primary">{{ __('Save Settings') }}</flux:button>
         </div>
     </form>
+
+    <flux:modal name="remove-logo-modal" class="md:w-[28rem]">
+        <div class="space-y-6">
+            <div>
+                <flux:heading level="2">{{ __('Remove the current logo?') }}</flux:heading>
+                <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+            </div>
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                </flux:modal.close>
+                <flux:button type="button" variant="danger" wire:click="removeLogo">
+                    {{ __('Remove') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

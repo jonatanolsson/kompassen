@@ -36,8 +36,9 @@ class AccessibilityIssueController extends Controller
             'examples.attachments',
         ]);
         $wcagCriteria = $issue->wcagCriteria()->get();
+        $projectMembers = $project->members()->with('user')->get();
 
-        return view('accessibility.issues.show', compact('project', 'issue', 'wcagCriteria'));
+        return view('accessibility.issues.show', compact('project', 'issue', 'wcagCriteria', 'projectMembers'));
     }
 
     public function store(Request $request, AccessibilityProject $project)
@@ -56,15 +57,15 @@ class AccessibilityIssueController extends Controller
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',
-            'status' => 'required|in:open,resolved,wont_fix',
+            'status' => 'sometimes|in:open',
             'wcag_criteria' => 'nullable|array',
             'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
-                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
+                ->where(fn ($query) => $query->whereIn('standard', WcagSuccessCriterion::WCAG_STANDARDS)),
             'attachments' => 'nullable|array',
             'attachments.*' => 'image|mimes:jpeg,png,gif,webp|max:5120',
         ]);
 
-        $issue = $project->issues()->create($validated);
+        $issue = $project->issues()->create([...$validated, 'status' => 'open']);
 
         if (! empty($validated['wcag_criteria'])) {
             $issue->wcagCriteria()->sync($validated['wcag_criteria']);
@@ -113,10 +114,10 @@ class AccessibilityIssueController extends Controller
             'severity' => 'required|in:critical,major,moderate,minor',
             'difficulty' => 'required|in:easy,medium,hard',
             'component_area' => 'nullable|string|max:255',
-            'status' => 'required|in:open,resolved,wont_fix',
+            'status' => 'prohibited',
             'wcag_criteria' => 'nullable|array',
             'wcag_criteria.*' => Rule::exists('wcag_success_criteria', 'id')
-                ->where(fn ($query) => $query->where('standard', 'WCAG 2.1')),
+                ->where(fn ($query) => $query->whereIn('standard', WcagSuccessCriterion::WCAG_STANDARDS)),
             'wcag_failure_types' => 'nullable|array',
             'wcag_comments' => 'nullable|array',
             'wcag_code_snippets' => 'nullable|array',
@@ -162,7 +163,7 @@ class AccessibilityIssueController extends Controller
 
         $validated = request()->validate([
             'resolution_status' => 'required|in:open,fixed,wontfix',
-            'resolution_notes' => 'nullable|string|max:5000',
+            'resolution_notes' => ['nullable', 'required_unless:resolution_status,open', 'string', 'max:5000'],
         ]);
 
         (new ResolveAccessibilityIssue)($issue, $validated['resolution_status'], $validated['resolution_notes'] ?? null);

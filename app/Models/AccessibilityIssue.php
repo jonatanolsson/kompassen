@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\IssueDiagramSvg;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'mermaid_diagram', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'impact', 'mermaid_diagram', 'mermaid_svg', 'mermaid_source_hash', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;
@@ -28,6 +29,12 @@ class AccessibilityIssue extends Model
             }
         });
         static::saving(function (self $issue): void {
+            if ($issue->isDirty(['mermaid_diagram', 'mermaid_svg', 'mermaid_source_hash'])
+                && ! IssueDiagramSvg::isCurrent($issue->mermaid_diagram, $issue->mermaid_svg, $issue->mermaid_source_hash)) {
+                $issue->mermaid_svg = null;
+                $issue->mermaid_source_hash = null;
+            }
+
             if ($issue->isDirty('status')) {
                 $issue->resolution_status = match ($issue->status) {
                     'resolved' => 'fixed',

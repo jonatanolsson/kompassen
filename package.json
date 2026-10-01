@@ -12,6 +12,7 @@
         "autoprefixer": "^10.4.2",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.0.0",
+        "playwright": "^1.63.0",
         "postcss": "^8.4.31",
         "tailwindcss": "^4.2.4",
         "vite": "^8.0.0"

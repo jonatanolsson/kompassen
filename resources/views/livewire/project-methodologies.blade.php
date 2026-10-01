@@ -71,15 +71,33 @@
                                         size="xs"
                                         variant="subtle"
                                     />
-                                    <flux:button
-                                        wire:click="removeMethodology('{{ $method->id }}')"
-                                        wire:confirm='{{ __("Remove :name from this project?", ["name" => $method->name]) }}'
-                                        icon="trash"
-                                        size="xs"
-                                        variant="subtle"
-                                    />
+                                    <flux:modal.trigger name="remove-project-methodology-{{ $method->id }}">
+                                        <flux:button
+                                            type="button"
+                                            icon="trash"
+                                            size="xs"
+                                            variant="subtle"
+                                            aria-label="{{ __('Remove :name from this project?', ['name' => $method->name]) }}"
+                                        />
+                                    </flux:modal.trigger>
                                 </div>
                             </div>
+                            <flux:modal name="remove-project-methodology-{{ $method->id }}" class="md:w-[28rem]">
+                                <div class="space-y-6">
+                                    <div>
+                                        <flux:heading level="2">{{ __('Remove :name from this project?', ['name' => $method->name]) }}</flux:heading>
+                                        <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This only removes the method from this project.') }}</flux:text>
+                                    </div>
+                                    <div class="flex justify-end gap-2">
+                                        <flux:modal.close>
+                                            <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                        </flux:modal.close>
+                                        <flux:button type="button" variant="danger" wire:click="removeMethodology('{{ $method->id }}')">
+                                            {{ __('Remove') }}
+                                        </flux:button>
+                                    </div>
+                                </div>
+                            </flux:modal>
                         @endforeach
                     </div>
                 </div>

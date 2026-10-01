@@ -2,41 +2,23 @@
     <div class="product-page-header">
         <div>
             <flux:heading level="1">{{ __('Dashboard') }}</flux:heading>
-            <flux:subheading class="mt-1">{{ __('Welcome back, :name!', ['name' => auth()->user()->name]) }}</flux:subheading>
+            <flux:subheading class="mt-1">{{ __('Your latest project activity') }}</flux:subheading>
         </div>
         <flux:button href="{{ route('accessibility-projects.create') }}" variant="primary" icon="plus">
             {{ __('Create Project') }}
         </flux:button>
     </div>
 
-    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <a href="{{ route('accessibility-projects.index') }}" class="product-stat">
-            <flux:text>{{ __('Projects') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $summary['projects'] }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">{{ __('Projects you can access') }}</flux:text>
-        </a>
-        <a href="{{ route('accessibility-projects.index') }}" class="product-stat">
-            <flux:text>{{ __('Open Issues') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $summary['open_issues'] }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">{{ __('Issues needing attention') }}</flux:text>
-        </a>
-        <div class="product-stat">
-            <flux:text>{{ __('Total Issues') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $summary['issues'] }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">{{ __('Across your projects') }}</flux:text>
-        </div>
-        <div class="product-stat">
-            <flux:text>{{ __('Reports') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $summary['reports'] }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-500">{{ __('Generated reports') }}</flux:text>
-        </div>
+    <div class="flex flex-wrap gap-x-6 gap-y-2 py-3 text-sm">
+        <span><strong class="font-semibold text-zinc-950 dark:text-white">{{ $summary['open_issues'] }}</strong> {{ __('Open Issues') }}</span>
+        <span><strong class="font-semibold text-zinc-950 dark:text-white">{{ $summary['projects'] }}</strong> {{ __('Projects') }}</span>
+        <span><strong class="font-semibold text-zinc-950 dark:text-white">{{ $summary['reports'] }}</strong> {{ __('Reports') }}</span>
     </div>
 
     <section class="product-section">
         <div class="product-section-heading">
             <div>
                 <flux:heading level="2">{{ __('Recent Projects') }}</flux:heading>
-                <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Your latest project activity') }}</flux:text>
             </div>
             <flux:button href="{{ route('accessibility-projects.index') }}" variant="ghost" icon="arrow-right">
                 {{ __('View All Projects') }}
@@ -50,48 +32,44 @@
                 <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">
                     {{ __('Create a project to start your accessibility audit.') }}
                 </flux:text>
-                <flux:button href="{{ route('accessibility-projects.create') }}" variant="primary" class="mt-6" icon="plus">
-                    {{ __('Create Project') }}
-                </flux:button>
             </div>
         @else
-            <div class="mt-6 grid gap-3 lg:grid-cols-2">
+            <ul class="mt-4 space-y-1">
                 @foreach ($projects as $project)
-                    <div wire:key="dashboard-project-{{ $project->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="min-w-0">
-                                <flux:heading level="3" class="truncate">{{ $project->name }}</flux:heading>
-                                <flux:text class="mt-1 text-sm text-zinc-500">
+                    <li wire:key="dashboard-project-{{ $project->id }}" class="grid gap-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center">
+                        <div class="min-w-0">
+                            <flux:link href="{{ route('accessibility-projects.show', $project) }}" class="font-medium text-zinc-950 dark:text-white">
+                                {{ $project->name }}
+                            </flux:link>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <flux:text class="text-sm text-zinc-500">
                                     {{ __('Updated') }} {{ $project->updated_at->translatedFormat('j M Y') }}
                                 </flux:text>
-                            </div>
-                            <flux:badge :color="$project->status === 'completed' ? 'green' : ($project->status === 'in_progress' ? 'amber' : 'zinc')">
-                                {{ __(Str::title(str_replace('_', ' ', $project->status))) }}
-                            </flux:badge>
-                        </div>
-
-                        <div class="mt-5 grid grid-cols-3 gap-3">
-                            <div>
-                                <flux:text class="text-xs text-zinc-500">{{ __('Pages & Services') }}</flux:text>
-                                <flux:text class="mt-1 font-medium">{{ $project->pages_count }}</flux:text>
-                            </div>
-                            <div>
-                                <flux:text class="text-xs text-zinc-500">{{ __('Open Issues') }}</flux:text>
-                                <flux:text class="mt-1 font-medium">{{ $project->open_issues_count }}</flux:text>
-                            </div>
-                            <div>
-                                <flux:text class="text-xs text-zinc-500">{{ __('Reports') }}</flux:text>
-                                <flux:text class="mt-1 font-medium">{{ $project->reports_count }}</flux:text>
+                                <flux:badge size="sm" :color="$project->status === 'completed' ? 'green' : ($project->status === 'in_progress' ? 'amber' : 'zinc')">
+                                    {{ __(Str::title(str_replace('_', ' ', $project->status))) }}
+                                </flux:badge>
                             </div>
                         </div>
 
-                        <div class="mt-5 flex flex-wrap gap-2">
-                            <flux:button href="{{ route('accessibility-projects.show', $project) }}" variant="primary" size="sm" icon="eye">
-                                {{ __('View Project') }}
-                            </flux:button>
+                        <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+                            <span>{{ $project->pages_count }} {{ __('Pages & Services') }}</span>
+                            <span>{{ $project->open_issues_count }} {{ __('Open Issues') }}</span>
+                            <span>{{ $project->reports_count }} {{ __('Reports') }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            @can('update', $project)
+                                @if ($project->pages_count === 0)
+                                    <flux:button href="{{ route('accessibility-pages.create', $project) }}" variant="subtle" size="sm">
+                                        {{ __('Add Page or Service') }}
+                                    </flux:button>
+                                @elseif ($project->open_issues_count === 0)
+                                    <flux:button href="{{ route('accessibility-issues.create', $project) }}" variant="subtle" size="sm">
+                                        {{ __('Report Issue') }}
+                                    </flux:button>
+                                @endif
                             <flux:dropdown>
-                                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
-                                    {{ __('Actions') }}
+                                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" aria-label="{{ __('Actions') }}">
                                 </flux:button>
                                 <flux:menu>
                                     <flux:menu.item href="{{ route('accessibility-issues.create', $project) }}" icon="plus">
@@ -102,28 +80,12 @@
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
+                            @endcan
+                            <flux:button href="{{ route('accessibility-projects.show', $project) }}" variant="ghost" size="sm" icon="arrow-right" aria-label="{{ __('View Project') }}" />
                         </div>
-                    </div>
+                    </li>
                 @endforeach
-            </div>
+            </ul>
         @endif
-    </section>
-
-    <section>
-        <div>
-            <flux:heading level="2">{{ __('Quick Actions') }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Start a new audit or find existing project material.') }}</flux:text>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-            <flux:button href="{{ route('accessibility-projects.create') }}" variant="outline" icon="plus">
-                {{ __('Create Project') }}
-            </flux:button>
-            <flux:button href="{{ route('accessibility-projects.index') }}" variant="outline" icon="document-text">
-                {{ __('Browse Projects') }}
-            </flux:button>
-            <flux:button href="{{ route('wcag.knowledge-base') }}" variant="outline" icon="book-open">
-                {{ __('Knowledge Base') }}
-            </flux:button>
-        </div>
     </section>
 </div>

@@ -8,7 +8,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="primary">
-                    {{ __('Preview') }}
+                    {{ __('Current project preview') }}
                 </flux:button>
 
                 <flux:dropdown align="end">
@@ -23,24 +23,57 @@
                         <flux:menu.item href="{{ route('project-members.index', $project) }}" icon="users" wire:navigate>
                             {{ __('Manage Members') }}
                         </flux:menu.item>
-                        <flux:modal.trigger name="share-modal">
-                            <flux:menu.item icon="link">{{ __('Share') }}</flux:menu.item>
-                        </flux:modal.trigger>
+                        <flux:menu.item href="{{ route('accessibility-reports.index', $project) }}" icon="link">
+                            {{ __('Customer reports and links') }}
+                        </flux:menu.item>
+                        @if ($project->shareLinks->whereNull('report_id')->isNotEmpty())
+                            <flux:modal.trigger name="share-modal">
+                                <flux:menu.item icon="exclamation-triangle">{{ __('Legacy links') }}</flux:menu.item>
+                            </flux:modal.trigger>
+                        @endif
                         <flux:menu.item href="{{ route('accessibility-projects.edit', $project) }}" icon="pencil" wire:navigate>
                             {{ __('Edit') }}
                         </flux:menu.item>
                         <flux:menu.separator />
-                        <form action="{{ route('accessibility-projects.destroy', $project) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <flux:menu.item as="button" type="submit" variant="danger" icon="trash">
+                        <flux:modal.trigger name="delete-project-modal">
+                            <flux:menu.item as="button" type="button" variant="danger" icon="trash">
                                 {{ __('Delete') }}
                             </flux:menu.item>
-                        </form>
+                        </flux:modal.trigger>
                     </flux:menu>
                 </flux:dropdown>
             </div>
         </div>
+
+        @if ($errors->has('resolution_notes') || $errors->has('resolution_status'))
+            <flux:callout color="red" class="mb-6">
+                <flux:callout.text>{{ __('Could not change status. Open the resolution action and correct the highlighted fields.') }}</flux:callout.text>
+                @if ($project->issues->contains(fn ($issue) => (string) $issue->id === old('resolution_issue_id')))
+                    <flux:modal.trigger name="resolve-project-issue-{{ old('resolution_issue_id') }}">
+                        <flux:button type="button" size="sm" variant="outline">{{ __('Change resolution') }}</flux:button>
+                    </flux:modal.trigger>
+                @endif
+            </flux:callout>
+        @endif
+
+        <flux:modal name="delete-project-modal" class="md:w-[28rem]">
+            <form action="{{ route('accessibility-projects.destroy', $project) }}" method="POST" class="space-y-6">
+                @csrf
+                @method('DELETE')
+
+                <div>
+                    <flux:heading level="2">{{ __('Delete this project?') }}</flux:heading>
+                    <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="danger">{{ __('Delete') }}</flux:button>
+                </div>
+            </form>
+        </flux:modal>
 
         @if ($project->description)
             <section class="product-section mb-8">
@@ -93,16 +126,35 @@
                                 <a href="{{ route('accessibility-pages.edit', [$project, $page]) }}">
                                 <flux:button variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
                                 </a>
-                                <form action="{{ route('accessibility-pages.destroy', [$project, $page]) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                <flux:button type="submit" variant="ghost" size="sm" icon="trash" onclick="return confirm('{{ __('Are you sure?') }}')">{{ __('Delete') }}</flux:button>
-                                </form>
+                                <flux:modal.trigger name="delete-page-{{ $page->id }}">
+                                    <flux:button type="button" variant="ghost" size="sm" icon="trash" aria-label="{{ __('Delete') }}" />
+                                </flux:modal.trigger>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
+
+            @foreach ($project->pages as $page)
+                <flux:modal name="delete-page-{{ $page->id }}" class="md:w-[28rem]">
+                    <form action="{{ route('accessibility-pages.destroy', [$project, $page]) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('DELETE')
+
+                        <div>
+                            <flux:heading level="2">{{ __('Delete this page or service?') }}</flux:heading>
+                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close>
+                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            </flux:modal.close>
+                            <flux:button type="submit" variant="danger">{{ __('Delete') }}</flux:button>
+                        </div>
+                    </form>
+                </flux:modal>
+            @endforeach
         </div>
 
         <flux:separator class="my-8" />
@@ -165,6 +217,11 @@
                             <flux:table.cell>
                                 <div class="font-medium">{{ $issue->title }}</div>
                                 <div class="text-xs text-zinc-500 mt-1">{{ Str::limit(strip_tags($issue->description), 100) }}</div>
+                                @if ($issue->page?->scope === 'out_of_scope')
+                                    <flux:text class="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                                        {{ __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.') }}
+                                    </flux:text>
+                                @endif
                             </flux:table.cell>
 
                             <flux:table.cell>
@@ -208,11 +265,11 @@
                                             <flux:menu.item icon="check-circle">{{ __('Change resolution') }}</flux:menu.item>
                                         </flux:modal.trigger>
                                         <flux:menu.separator />
-                                        <flux:menu.item as="button" icon="trash" variant="danger" onclick="if(confirm('{{ __('Are you sure?') }}')){ document.getElementById('destroy-{{ $issue->id }}').submit(); }">{{ __('Delete') }}</flux:menu.item>
+                                        <flux:modal.trigger name="delete-issue-{{ $issue->id }}">
+                                            <flux:menu.item as="button" type="button" icon="trash" variant="danger">{{ __('Delete') }}</flux:menu.item>
+                                        </flux:modal.trigger>
                                     </flux:menu>
                                 </flux:dropdown>
-
-                                <form id="destroy-{{ $issue->id }}" action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
                             </flux:table.cell>
                         </flux:table.row>
 
@@ -259,6 +316,7 @@
                     <form action="{{ route('accessibility-issues.resolve', [$project, $issue]) }}" method="POST" class="space-y-6">
                         @csrf
                         @method('PATCH')
+                        <input type="hidden" name="resolution_issue_id" value="{{ $issue->id }}">
 
                         <div>
                             <flux:heading level="2">{{ __('Change resolution') }}</flux:heading>
@@ -268,15 +326,22 @@
                         <flux:field>
                             <flux:label>{{ __('Status') }}</flux:label>
                             <flux:select name="resolution_status">
-                                <option value="open">{{ __('Open') }}</option>
-                                <option value="fixed" @selected($issue->resolution_status === 'fixed')>{{ __('Mark as fixed') }}</option>
-                                <option value="wontfix" @selected($issue->resolution_status === 'wontfix')>{{ __('Mark as wontfix') }}</option>
+                                <option value="open" @selected((old('resolution_issue_id') === $issue->id ? old('resolution_status') : $issue->resolution_status) === 'open')>{{ __('Open') }}</option>
+                                <option value="fixed" @selected((old('resolution_issue_id') === $issue->id ? old('resolution_status') : $issue->resolution_status) === 'fixed')>{{ __('Mark as fixed') }}</option>
+                                <option value="wontfix" @selected((old('resolution_issue_id') === $issue->id ? old('resolution_status') : $issue->resolution_status) === 'wontfix')>{{ __('Mark as wontfix') }}</option>
                             </flux:select>
+                            @if (old('resolution_issue_id') === $issue->id)
+                                <flux:error name="resolution_status" />
+                            @endif
                         </flux:field>
 
                         <flux:field>
                             <flux:label>{{ __('Resolution Notes') }}</flux:label>
-                            <flux:textarea name="resolution_notes" rows="4">{{ $issue->resolution_notes }}</flux:textarea>
+                            <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('A resolution note is required when marking an issue fixed or not planned for fixing.') }}</flux:text>
+                            <flux:textarea name="resolution_notes" rows="4">{{ old('resolution_issue_id') === $issue->id ? old('resolution_notes', $issue->resolution_notes) : $issue->resolution_notes }}</flux:textarea>
+                            @if (old('resolution_issue_id') === $issue->id)
+                                <flux:error name="resolution_notes" />
+                            @endif
                         </flux:field>
 
                         <div class="flex justify-end gap-2">
@@ -284,6 +349,27 @@
                                 <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
                             </flux:modal.close>
                             <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
+                        </div>
+                    </form>
+                </flux:modal>
+            @endforeach
+
+            @foreach ($project->issues as $issue)
+                <flux:modal name="delete-issue-{{ $issue->id }}" class="md:w-[28rem]">
+                    <form action="{{ route('accessibility-issues.destroy', [$project, $issue]) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('DELETE')
+
+                        <div>
+                            <flux:heading level="2">{{ __('Delete this issue?') }}</flux:heading>
+                            <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This action cannot be undone.') }}</flux:text>
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close>
+                                <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            </flux:modal.close>
+                            <flux:button type="submit" variant="danger">{{ __('Delete') }}</flux:button>
                         </div>
                     </form>
                 </flux:modal>
@@ -298,83 +384,44 @@
     </div>
 </div>
 
-<!-- Share Modal -->
+<!-- Legacy links remain revocable; they never expose the changing project view. -->
+@if ($project->shareLinks->whereNull('report_id')->isNotEmpty())
 <flux:modal name="share-modal" class="md:w-96">
     <div class="space-y-6">
-        <flux:heading level="2">{{ __('Share Project') }}</flux:heading>
-
-        <flux:separator />
-
-        <!-- Create Share Link Form -->
-        <form action="{{ route('project-share-links.store', $project) }}" method="POST">
-            @csrf
-            <div class="space-y-4">
-                <flux:field>
-                    <flux:label>{{ __('Expiration Date (Optional)') }}</flux:label>
-                    <flux:input 
-                        type="date" 
-                        name="expires_at"
-                        :min="today()"
-                    />
-                    <flux:error name="expires_at" />
-                </flux:field>
-
-                <flux:button type="submit" variant="primary" class="w-full">{{ __('Create Share Link') }}</flux:button>
+        <flux:heading level="2">{{ __('Legacy links') }}</flux:heading>
+        <flux:callout variant="warning">{{ __('Old project links no longer show live data. Create a new customer link from a saved report version.') }}</flux:callout>
+        @foreach ($project->shareLinks->whereNull('report_id') as $link)
+            <div class="flex items-center justify-between gap-2">
+                <flux:text class="break-all">{{ route('projects.shared', $link->token) }}</flux:text>
+                <flux:modal.trigger name="delete-share-link-{{ $link->id }}">
+                    <flux:button type="button" icon="trash" size="sm" variant="subtle" aria-label="{{ __('Revoke share link') }}" />
+                </flux:modal.trigger>
             </div>
-        </form>
-
-        <flux:separator />
-
-        <!-- Existing Share Links -->
-        <div>
-            <flux:heading level="3" class="mb-4">{{ __('Active Share Links') }}</flux:heading>
-            @if ($project->shareLinks->count() > 0)
-                <div class="space-y-3 max-h-64 overflow-y-auto">
-                    @foreach ($project->shareLinks as $link)
-                        @if (!$link->isExpired())
-                            <div class="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg flex items-center justify-between">
-                                <div class="flex-1">
-                                    <div class="text-sm font-medium text-zinc-900 dark:text-white break-all">
-                                        {{ route('projects.shared', $link->token) }}
-                                    </div>
-                                    @if ($link->expires_at)
-                                        <div class="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-                                        {{ __('Expires') }}: {{ $link->expires_at->translatedFormat('j M Y H:i') }}
-                                        </div>
-                                    @endif
-                                </div>
-            <div class="flex gap-2 ml-2">
-                                    <flux:button 
-                                        href="{{ route('projects.shared', $link->token) }}"
-                                        target="_blank"
-                                        icon="eye" 
-                                        size="sm"
-                                        variant="subtle"
-                                    />
-                                    <flux:button 
-                                        x-on:click="navigator.clipboard.writeText('{{ route('projects.shared', $link->token) }}').then(() => $flux.toast({ text: '{{ __('Copied!') }}', variant: 'success' }))" 
-                                        icon="document-duplicate" 
-                                        size="sm"
-                                        variant="subtle"
-                                    />
-                                    <form action="{{ route('project-share-links.destroy', [$project, $link]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <flux:button type="submit" icon="trash" size="sm" variant="subtle" />
-                                    </form>
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-            @else
-                <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">
-                    {{ __('No active share links yet. Create one above.') }}
-                </flux:text>
-            @endif
-        </div>
+        @endforeach
     </div>
 </flux:modal>
+@endif
+
+@foreach ($project->shareLinks->whereNull('report_id') as $link)
+        <flux:modal name="delete-share-link-{{ $link->id }}" class="md:w-[28rem]">
+            <form action="{{ route('project-share-links.destroy', [$project, $link]) }}" method="POST" class="space-y-6">
+                @csrf
+                @method('DELETE')
+
+                <div>
+                    <flux:heading level="2">{{ __('Revoke this share link?') }}</flux:heading>
+                    <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('Anyone using this link will lose access.') }}</flux:text>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="danger">{{ __('Revoke link') }}</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+@endforeach
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

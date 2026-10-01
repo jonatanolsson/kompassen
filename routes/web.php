@@ -8,6 +8,7 @@ use App\Http\Controllers\AccessibilityReportController;
 use App\Http\Controllers\GuestProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectShareLinkController;
+use App\Http\Controllers\TeamKnowledgeEditorController;
 use App\Livewire\AppSettings;
 use App\Livewire\CreateAccessibilityIssue;
 use App\Livewire\CreateAccessibilityPage;
@@ -45,6 +46,11 @@ Route::get('testing-methodologies', TestingMethodologies::class)
     ->middleware(['auth'])
     ->name('testing-methodologies');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('team/knowledge-editors', [TeamKnowledgeEditorController::class, 'index'])->name('team.knowledge-editors.index');
+    Route::put('team/knowledge-editors/{user}', [TeamKnowledgeEditorController::class, 'update'])->name('team.knowledge-editors.update');
+});
+
 // Guest project sharing (no auth required)
 Route::get('projects/shared/{token}', [GuestProjectController::class, 'show'])
     ->name('projects.shared');
@@ -81,7 +87,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('project-members.destroy');
 
     // Project share links
-    Route::post('accessibility-projects/{project}/share-links', [ProjectShareLinkController::class, 'store'])
+    Route::post('accessibility-projects/{project}/reports/{report}/share-links', [ProjectShareLinkController::class, 'store'])
+        ->scopeBindings()
         ->name('project-share-links.store');
     Route::delete('accessibility-projects/{project}/share-links/{shareLink}', [ProjectShareLinkController::class, 'destroy'])
         ->scopeBindings()
@@ -99,10 +106,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('accessibility-projects/{project}/reports', [AccessibilityReportController::class, 'store'])
         ->name('accessibility-reports.store');
     Route::get('accessibility-projects/{project}/reports/{report}', [AccessibilityReportController::class, 'show'])
+        ->scopeBindings()
         ->name('accessibility-reports.show');
     Route::get('accessibility-projects/{project}/reports/{report}/download', [AccessibilityReportController::class, 'download'])
+        ->scopeBindings()
         ->name('accessibility-reports.download');
+    Route::post('accessibility-projects/{project}/reports/{report}/regenerate', [AccessibilityReportController::class, 'regenerate'])
+        ->scopeBindings()
+        ->name('accessibility-reports.regenerate');
     Route::delete('accessibility-projects/{project}/reports/{report}', [AccessibilityReportController::class, 'destroy'])
+        ->scopeBindings()
         ->name('accessibility-reports.destroy');
 
     // Pages within projects
