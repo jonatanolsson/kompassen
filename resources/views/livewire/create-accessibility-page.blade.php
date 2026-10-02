@@ -64,15 +64,15 @@
                             <flux:error name="description" />
                         </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('Scope') }}</flux:label>
-                            <flux:select wire:model="scope">
-                                <option value="in_scope">{{ __('In Scope') }}</option>
-                                <option value="out_of_scope">{{ __('Out of Scope') }}</option>
-                            </flux:select>
-                            <flux:description>{{ __('Choose whether this page is included in the audit.') }}</flux:description>
-                            <flux:error name="scope" />
-                        </flux:field>
+                        <flux:radio.group
+                            wire:model="scope"
+                            label="{{ __('Scope') }}"
+                            description="{{ __('Choose whether this page or service is included in the audit.') }}"
+                        >
+                            <flux:radio value="in_scope" label="{{ __('Yes') }}" />
+                            <flux:radio value="out_of_scope" label="{{ __('No') }}" />
+                        </flux:radio.group>
+                        <flux:error name="scope" />
                     </div>
                 </div>
 

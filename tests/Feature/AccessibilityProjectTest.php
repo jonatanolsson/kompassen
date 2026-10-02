@@ -38,6 +38,44 @@ test('can create accessibility project', function () {
     ]);
 });
 
+test('page scope uses yes and no radio options on create and edit forms', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityPage::class, ['project' => $project])
+        ->assertSee(__('Yes'))
+        ->assertSee(__('No'))
+        ->assertSeeHtml('data-flux-radio-group')
+        ->assertSeeHtml('value="in_scope"')
+        ->assertSeeHtml('value="out_of_scope"')
+        ->assertDontSeeHtml('<select wire:model="scope"');
+
+    $page = $project->pages()->create([
+        'name' => 'Out of scope service',
+        'resource_type' => 'service',
+        'scope' => 'out_of_scope',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('accessibility-pages.edit', [$project, $page]))
+        ->assertSuccessful()
+        ->assertSee(__('Yes'))
+        ->assertSee(__('No'))
+        ->assertSeeHtml('data-flux-radio-group')
+        ->assertSeeHtml('name="scope"')
+        ->assertSeeHtml('value="in_scope"')
+        ->assertSeeHtml('value="out_of_scope"')
+        ->assertSeeHtml('checked')
+        ->assertDontSeeHtml('<select name="scope"');
+});
+
 test('project form explains validation errors and keeps entered content', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
@@ -225,27 +263,21 @@ test('project issue list warns only for pages outside the audit scope', function
 
     $content = $response->getContent();
     preg_match_all('/<tr[^>]*data-issue-row[^>]*>(.*?)<\/tr>/s', $content, $rows);
-    preg_match_all('/<div data-page-metadata[^>]*>(.*?)<\/div>/s', $content, $pageMetadata);
     $warning = __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.');
     expect($rows[0])->toHaveCount(2)
-        ->and(substr_count($content, '<tbody'))->toBe(substr_count($content, '</tbody>'))
-        ->and($pageMetadata[1])->toHaveCount(2)
-        ->and($pageMetadata[1][0])->toContain(__('Page'))
-        ->and($pageMetadata[1][0])->toContain('·')
-        ->and($pageMetadata[1][0])->toContain(__('In Scope'))
-        ->and($pageMetadata[1][1])->toContain(__('Page'))
-        ->and($pageMetadata[1][1])->toContain('·')
-        ->and($pageMetadata[1][1])->toContain(__('Out of Scope'));
+        ->and(substr_count($content, '<tbody'))->toBe(substr_count($content, '</tbody>'));
 
-    $response->assertSee($description);
+    $response->assertSee($description)
+        ->assertSee('Included page')
+        ->assertSee('Excluded page')
+        ->assertSee(__('Page'))
+        ->assertSee(__('In Scope'))
+        ->assertSee(__('Out of Scope'))
+        ->assertSee(route('accessibility-pages.show', [$project, $inScopePage]));
 
     foreach ($rows[1] as $row) {
         preg_match_all('/<td\b[^>]*>(.*?)<\/td>/s', $row, $cells);
         expect(strip_tags($cells[1][2]))->not->toContain($description);
-    }
-
-    foreach ($pageMetadata[1] as $metadata) {
-        expect($metadata)->not->toContain('data-flux-badge');
     }
 
     $included = collect($rows[0])->first(fn (string $row): bool => str_contains($row, 'Included page issue'));
@@ -474,11 +506,11 @@ test('can add an authenticated service from the livewire form', function () {
     ]);
 });
 
-test('project details show service type and access context', function () {
+test('project overview links services to access context details', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
     $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
-    $project->pages()->create([
+    $page = $project->pages()->create([
         'name' => 'Mina sidor',
         'resource_type' => 'service',
         'access_context' => 'authenticated',
@@ -494,6 +526,11 @@ test('project details show service type and access context', function () {
         ->get(route('accessibility-projects.show', $project))
         ->assertSuccessful()
         ->assertSee(__('Service'))
+        ->assertSee(route('accessibility-pages.show', [$project, $page]))
+        ->assertDontSee(__('Authenticated'));
+
+    $this->get(route('accessibility-pages.show', [$project, $page]))
+        ->assertSuccessful()
         ->assertSee(__('Authenticated'));
 });
 

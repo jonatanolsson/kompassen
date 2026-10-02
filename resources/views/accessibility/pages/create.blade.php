@@ -63,15 +63,15 @@
                     <flux:error name="description" />
                 </flux:field>
 
-                <flux:field>
-                    <flux:label>{{ __('Scope') }}</flux:label>
-                    <flux:select name="scope">
-                        <option value="in_scope" @selected(old('scope', 'in_scope') === 'in_scope')>{{ __('In Scope') }}</option>
-                        <option value="out_of_scope" @selected(old('scope') === 'out_of_scope')>{{ __('Out of Scope') }}</option>
-                    </flux:select>
-                    <flux:description>{{ __('Choose whether this page is included in the audit.') }}</flux:description>
-                    <flux:error name="scope" />
-                </flux:field>
+                <flux:radio.group
+                    name="scope"
+                    label="{{ __('Scope') }}"
+                    description="{{ __('Choose whether this page or service is included in the audit.') }}"
+                >
+                    <flux:radio value="in_scope" label="{{ __('Yes') }}" @checked(old('scope', 'in_scope') === 'in_scope') />
+                    <flux:radio value="out_of_scope" label="{{ __('No') }}" @checked(old('scope') === 'out_of_scope') />
+                </flux:radio.group>
+                <flux:error name="scope" />
 
                 <div class="flex gap-4 pt-4">
                     <flux:button type="submit" variant="primary">{{ __('Add Page or Service') }}</flux:button>
