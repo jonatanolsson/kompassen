@@ -93,6 +93,29 @@ enbart byter namn på eller duplicerar en Flux-komponent.
 - Färg får förstärka status, men status ska alltid ha en läsbar textetikett.
   Kontroller ska ha synlig tangentbordsfokus och tillgängliga namn.
 
+## Så arbetar vi med designsystemet
+
+Livewire-komponenters format, state, auktorisering och testflöde beskrivs också
+i [Kompassen Livewire-skillen](../.github/skills/livewire-development/SKILL.md).
+
+1. Kontrollera först befintliga Kompassen-mönster och den installerade Flux-
+   versionens dokumentation. Verifiera props och beteende; gissa inte utifrån
+   komponentnamn eller exempel för en annan version.
+2. Använd Flux direkt för kontroller och interaktioner. Skapa `x-ui`-komponent
+   endast för ett återkommande produktmönster eller en tydlig gemensam regel.
+3. Beskriv varje `x-ui`-komponent här med syfte, props, slots och ett exempel.
+   Lägg till en levande katalogdemo för nya eller ändrade mönster; visa också
+   relevanta tillstånd, inte bara ett statiskt standardläge.
+4. Lägg nya UI-texter i `resources/lang/sv.json`. Lägg till riktade Pest-tester
+   när rendering, Livewire-state eller åtkomst ändras.
+5. Kontrollera mörkt läge, mobilbredd, tangentbordsfokus, tillgängliga namn,
+   semantiska rubriknivåer och att avdelare inte dubblerar befintliga kanter.
+6. Håll demotillstånd lokalt och utan beständig lagring om inte funktionen
+   uttryckligen är avsedd att spara data.
+7. Fråga innan kodning om beteende, lagring, behörighet eller projektscope är
+   oklart. Kopiera inte ofullständiga säkerhets- eller felhanteringsexempel
+   från externa referenser.
+
 ## Komponent- och beteendegränser
 
 1. Använd en befintlig Flux- eller `x-ui`-komponent innan du skriver egen

@@ -31,7 +31,7 @@ These things changed in Livewire 3, but may not have been updated in this applic
 - Use `wire:model.live` for real-time updates, `wire:model` is now deferred by default.
 - Components now use the `App\Livewire` namespace (not `App\Http\Livewire`).
 - Use `$this->dispatch()` to dispatch events (not `emit` or `dispatchBrowserEvent`).
-- Use the `components.layouts.app` view as the typical layout path (not `layouts.app`).
+- Layout paths are application-specific. Follow the established layout for the project you are working in.
 
 ### New Directives
 
@@ -113,3 +113,51 @@ $this->get('/posts/create')
 - Using `wire:model` expecting real-time updates (use `wire:model.live` instead in v3)
 - Not validating/authorizing in Livewire actions (treat them like HTTP requests)
 - Including Alpine.js separately when it's already bundled with Livewire 3
+
+## Kompassen-specific rules
+
+These rules take precedence over generic examples above when working in
+Kompassen.
+
+### Component format and layout
+
+- Default to class-based components in `app/Livewire` with views under `resources/views/livewire`.
+- Full-page class-based components use `#[Layout('layouts.app')]`. The active
+  Flux application shell is `resources/views/layouts/app.blade.php`;
+  `components.layouts.app` is a legacy Breeze layout.
+- Use Volt only where an existing feature or an explicit requirement calls for
+  a single-file component. Follow sibling components rather than converting
+  formats incidentally.
+
+### State, queries, and actions
+
+- Treat every public property as client-controlled input. Use `#[Locked]` only for immutable values; it does not replace authorization.
+- Use `wire:model` for ordinary form state. Use `wire:model.live` only when immediate feedback is required, such as search and filters.
+- Submit forms with `wire:submit`. Validate inside the action, authorize
+  before reading or mutating project data, and scope every project query to
+  the current project.
+- Keep rich-text editor state as a string and validate it in the action that saves it. Never persist showcase or preview state.
+- Keep queries out of Blade. Use computed properties for derived data, and use `#[Url]` only for filters or sorting that should be shareable or survive reloads.
+- For repeatable rows and nested Livewire components, provide stable `wire:key` or `:key` values.
+
+### Events, feedback, and testing
+
+- Use Livewire 3 events with `$this->dispatch()`. Close a modal and reset successful form state only after the action succeeds; keep validation errors visible.
+- Use Flux for controls and interactive UI. Follow the component API and
+  visual rules in
+  [`docs/design-system.md`](../../../docs/design-system.md).
+- Add focused Pest coverage for authorization, validation, project scoping,
+  state changes, and dispatched events. Use browser tests when correctness
+  depends on JavaScript interaction, keyboard behavior, or responsive layout.
+
+### Resolve uncertainty before coding
+
+- Check existing Kompassen usage first, then verify unfamiliar Livewire or Flux APIs against documentation for the installed version. Do not infer component props or behavior from names alone.
+- External examples are references, not authority. Do not copy omitted authorization, persistence, or error handling.
+- The [Podium Livewire views](https://github.com/livewire/podium/tree/main/resources/views/livewire)
+  demonstrate URL-backed filters, computed lists, validation, reset-after-save,
+  and dispatched events. Adapt them to Kompassen's component format and
+  project authorization.
+- Ask the user when behavior, persistence, project scope, permissions, or
+  destructive-action handling is ambiguous. Do not silently choose a product
+  behavior.
