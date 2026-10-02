@@ -146,26 +146,30 @@
                             <flux:error name="component_area" />
                         </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('Severity') }}</flux:label>
-                            <flux:select wire:model="severity" required>
-                                <option value="critical">{{ __('Critical') }}</option>
-                                <option value="major" selected>{{ __('Major') }}</option>
-                                <option value="moderate">{{ __('Moderate') }}</option>
-                                <option value="minor">{{ __('Minor') }}</option>
-                            </flux:select>
-                            <flux:error name="severity" />
-                        </flux:field>
+                        <flux:radio.group
+                            variant="buttons"
+                            wire:model="severity"
+                            label="{{ __('Severity') }}"
+                            required
+                        >
+                            <flux:radio value="critical" label="{{ __('Critical issue severity') }}" />
+                            <flux:radio value="major" label="{{ __('Major issue severity') }}" />
+                            <flux:radio value="moderate" label="{{ __('Moderate issue severity') }}" />
+                            <flux:radio value="minor" label="{{ __('Minor issue severity') }}" />
+                        </flux:radio.group>
+                        <flux:error name="severity" />
 
-                        <flux:field>
-                            <flux:label>{{ __('Difficulty to Fix') }}</flux:label>
-                            <flux:select wire:model="difficulty" required>
-                                <option value="easy">{{ __('Easy') }}</option>
-                                <option value="medium" selected>{{ __('Medium') }}</option>
-                                <option value="hard">{{ __('Hard') }}</option>
-                            </flux:select>
-                            <flux:error name="difficulty" />
-                        </flux:field>
+                        <flux:radio.group
+                            variant="buttons"
+                            wire:model="difficulty"
+                            label="{{ __('Difficulty to Fix') }}"
+                            required
+                        >
+                            <flux:radio value="easy" label="{{ __('Easy') }}" />
+                            <flux:radio value="medium" label="{{ __('Medium') }}" />
+                            <flux:radio value="hard" label="{{ __('Hard') }}" />
+                        </flux:radio.group>
+                        <flux:error name="difficulty" />
 
                     </div>
                     <flux:text size="sm" class="mt-4 text-zinc-600 dark:text-zinc-400">{{ __('New issues start open. Change status with a resolution note after saving.') }}</flux:text>

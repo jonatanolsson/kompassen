@@ -125,6 +125,53 @@ test('issue creation starts open and rejects direct status changes', function ()
     expect($issue->refresh()->status)->toBe('open');
 });
 
+test('issue create and edit forms use radio groups for severity and difficulty', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSet('severity', 'major')
+        ->assertSet('difficulty', 'medium')
+        ->assertSeeHtml('data-flux-radio-group-buttons')
+        ->assertSeeHtml('wire:model="severity"')
+        ->assertSeeHtml('wire:model="difficulty"')
+        ->assertSeeHtml('value="critical"')
+        ->assertSeeHtml('value="major"')
+        ->assertSeeHtml('value="moderate"')
+        ->assertSeeHtml('value="minor"')
+        ->assertSeeHtml('value="easy"')
+        ->assertSeeHtml('value="medium"')
+        ->assertSeeHtml('value="hard"')
+        ->assertSee(__('Critical issue severity'))
+        ->set('title', 'Keyboard trap')
+        ->set('severity', 'critical')
+        ->set('difficulty', 'hard')
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $issue = $project->issues()->firstOrFail();
+    expect($issue->severity)->toBe('critical')
+        ->and($issue->difficulty)->toBe('hard');
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSet('severity', 'critical')
+        ->assertSet('difficulty', 'hard')
+        ->assertSeeHtml('data-flux-radio-group-buttons')
+        ->assertSeeHtml('wire:model="severity"')
+        ->assertSeeHtml('wire:model="difficulty"')
+        ->set('severity', 'minor')
+        ->set('difficulty', 'easy')
+        ->call('update')
+        ->assertRedirect(route('accessibility-issues.edit', [$project, $issue]));
+
+    expect($issue->refresh()->severity)->toBe('minor')
+        ->and($issue->difficulty)->toBe('easy');
+});
+
 test('closing an issue requires a resolution note', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
