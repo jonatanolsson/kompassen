@@ -46,6 +46,11 @@
                     <flux:sidebar.item href="{{ route('testing-methodologies') }}" :active="request()->routeIs('testing-methodologies')" icon="beaker" wire:navigate>
                         {{ __('Testing Methodology') }}
                     </flux:sidebar.item>
+                    @if (app()->environment(['local', 'testing']))
+                        <flux:sidebar.item href="{{ route('design-system') }}" :active="request()->routeIs('design-system')" wire:navigate>
+                            {{ __('Design System') }}
+                        </flux:sidebar.item>
+                    @endif
                     <flux:sidebar.item href="{{ route('accessibility-projects.index') }}" :active="request()->routeIs('accessibility-projects.*')" icon="document-text" wire:navigate>
                         {{ __('Accessibility') }}
                     </flux:sidebar.item>

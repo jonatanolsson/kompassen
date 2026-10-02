@@ -14,6 +14,7 @@ use App\Livewire\CreateAccessibilityIssue;
 use App\Livewire\CreateAccessibilityPage;
 use App\Livewire\CreateAccessibilityProject;
 use App\Livewire\Dashboard;
+use App\Livewire\DesignSystem;
 use App\Livewire\EditAccessibilityIssue;
 use App\Livewire\EditAccessibilityProject;
 use App\Livewire\TestingMethodologies;
@@ -29,6 +30,12 @@ Route::get('/', function () {
 Route::get('dashboard', Dashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+if (app()->environment(['local', 'testing'])) {
+    Route::get('design-system', DesignSystem::class)
+        ->middleware(['auth'])
+        ->name('design-system');
+}
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

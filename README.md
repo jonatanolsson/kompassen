@@ -325,6 +325,13 @@ till rätt projekt.
 Delade rapporter nås via tokenroute utan inloggning. Behandla delningslänkar
 som åtkomstuppgifter och återkalla dem när de inte längre ska vara giltiga.
 
+## Designsystem
+
+Gemensamma UI-regler, komponent-API:er och Flux-/Tailwind-mönster finns i
+[`docs/design-system.md`](docs/design-system.md). Den interaktiva
+komponentkatalogen finns på `/design-system` i local- och testmiljö efter
+inloggning; routen registreras inte i produktion.
+
 ## Testning och kvalitet
 
 Ändringar ska ha relevant Pest-test och följa Laravel Pint. Minimikontroller
