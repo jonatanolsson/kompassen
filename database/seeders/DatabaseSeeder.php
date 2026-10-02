@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             WcagRelatedResourcesSeeder::class,
             TestingMethodologySeeder::class,
             ExampleProjectSeeder::class,
+            ExampleProjectMediaSeeder::class,
         ]);
     }
 }
