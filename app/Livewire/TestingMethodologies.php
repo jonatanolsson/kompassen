@@ -130,6 +130,7 @@ class TestingMethodologies extends Component
             $this->resetForm();
         }
 
+        $this->dispatch('close-modal', name: 'delete-testing-methodology-'.$id);
         $this->dispatch('toast', message: __('Testing methodology deleted.'), variant: 'success');
     }
 

@@ -1,11 +1,8 @@
-<div class="space-y-4">
-    <div class="flex items-center justify-between">
-        <div>
-            <flux:heading level="2">{{ __('Testing Methodology') }}</flux:heading>
-            <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">{{ __('Tools and methods used to test this project') }}</flux:text>
-        </div>
+<div class="product-section mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <flux:heading level="2">{{ __('Testing Methodology') }}</flux:heading>
         <flux:modal.trigger name="add-methodology-modal">
-            <flux:button variant="primary" icon="plus" size="sm">
+            <flux:button type="button" variant="primary" icon="plus" size="sm">
                 {{ __('Add Method') }}
             </flux:button>
         </flux:modal.trigger>
@@ -13,96 +10,111 @@
 
     @if ($projectMethodologies->isEmpty())
         <div class="py-4">
-            <flux:text class="text-zinc-500 dark:text-zinc-400">{{ __('No testing methods added yet.') }}</flux:text>
+            <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No testing methods added yet.') }}</flux:text>
         </div>
     @else
-        @php
-            $grouped = $projectMethodologies->groupBy(fn($m) => $m->category);
-        @endphp
+        <div class="max-w-full overflow-x-auto">
+            <flux:table class="w-full table-auto! text-sm">
+                <flux:table.columns>
+                    <flux:table.column class="py-2">{{ __('Method / Tool') }}</flux:table.column>
+                    <flux:table.column class="py-2">{{ __('Version / Device / Notes') }}</flux:table.column>
+                    <flux:table.column class="whitespace-nowrap py-2 text-right">{{ __('Actions') }}</flux:table.column>
+                </flux:table.columns>
 
-        <div class="space-y-4">
-            @foreach ($grouped as $category => $methods)
-                <div>
-                    <flux:text class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">
-                        {{ match($category) {
+                @foreach ($projectMethodologies as $method)
+                    @php
+                        $categoryLabel = match($method->category) {
                             'screen_reader' => __('Screen Readers'),
                             'browser' => __('Browsers'),
                             'browser_extension' => __('Browser Extensions'),
                             'device' => __('Devices'),
                             'testing_tool' => __('Testing Tools'),
-                            default => __(ucfirst(str_replace('_', ' ', $category))),
-                        } }}
-                    </flux:text>
-                    <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                        @foreach ($methods as $method)
-                            <div class="flex items-start gap-3 py-3 first:pt-0 last:pb-0 group"
-                                 x-data="{ editing: false, notes: @js($method->pivot->notes ?? '') }">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-sm text-zinc-900 dark:text-white">{{ $method->name }}</div>
-                                    <div x-show="!editing">
-                                        @if ($method->pivot->notes)
-                                            <div class="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">{{ $method->pivot->notes }}</div>
-                                        @else
-                                        <div class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{{ __('No version/notes specified') }}</div>
-                                        @endif
-                                    </div>
-                                    <div x-show="editing" class="mt-1">
-                                        <flux:input
-                                            x-model="notes"
-                                            placeholder="{{ __('e.g. version 2024, Windows 11...') }}"
-                                        />
-                                        <div class="flex gap-2 mt-1">
-                                            <flux:button
-                                                type="button"
-                                                size="xs"
-                                                variant="subtle"
-                                                @click="$wire.updateNotes('{{ $method->id }}', notes); editing = false"
-                                            >{{ __('Save') }}</flux:button>
-                                            <flux:button type="button" size="xs" variant="ghost" @click="editing = false">
-                                                {{ __('Cancel') }}
-                                            </flux:button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            default => __(ucfirst(str_replace('_', ' ', $method->category))),
+                        };
+                    @endphp
+                    <flux:table.row
+                        wire:key="project-methodology-{{ $method->id }}"
+                        x-data="{ editing: false, notes: @js($method->pivot->notes ?? '') }"
+                    >
+                        <flux:table.cell class="whitespace-normal break-words py-2 font-medium">
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span>{{ $method->name }}</span>
+                                <span class="text-xs font-normal text-zinc-500 dark:text-zinc-400">{{ $categoryLabel }}</span>
+                            </div>
+                        </flux:table.cell>
+
+                        <flux:table.cell class="max-w-md whitespace-normal break-words py-2 text-sm text-zinc-600 dark:text-zinc-400">
+                            <div x-show="!editing">
+                                @if ($method->pivot->notes)
+                                    <span>{{ $method->pivot->notes }}</span>
+                                @else
+                                    <span class="text-xs italic text-zinc-400 dark:text-zinc-500">{{ __('No version/notes specified') }}</span>
+                                @endif
+                            </div>
+                            <div x-show="editing" class="max-w-xs space-y-2">
+                                <flux:input
+                                    x-model="notes"
+                                    placeholder="{{ __('e.g. version 2024, Windows 11...') }}"
+                                />
+                                <flux:error name="notes" />
+                                <div class="flex gap-2">
                                     <flux:button
-                                        x-on:click="editing = true"
-                                        icon="pencil"
+                                        type="button"
                                         size="xs"
                                         variant="subtle"
-                                    />
-                                    <flux:modal.trigger name="remove-project-methodology-{{ $method->id }}">
-                                        <flux:button
-                                            type="button"
-                                            icon="trash"
-                                            size="xs"
-                                            variant="subtle"
-                                            aria-label="{{ __('Remove :name from this project?', ['name' => $method->name]) }}"
-                                        />
-                                    </flux:modal.trigger>
+                                        @click="$wire.updateNotes('{{ $method->id }}', notes).then((updated) => { if (updated) editing = false })"
+                                    >{{ __('Save') }}</flux:button>
+                                    <flux:button type="button" size="xs" variant="ghost" @click="$wire.cancelNotesEdit(); editing = false">
+                                        {{ __('Cancel') }}
+                                    </flux:button>
                                 </div>
                             </div>
-                            <flux:modal name="remove-project-methodology-{{ $method->id }}" class="md:w-[28rem]">
-                                <div class="space-y-6">
-                                    <div>
-                                        <flux:heading level="2">{{ __('Remove :name from this project?', ['name' => $method->name]) }}</flux:heading>
-                                        <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This only removes the method from this project.') }}</flux:text>
-                                    </div>
-                                    <div class="flex justify-end gap-2">
-                                        <flux:modal.close>
-                                            <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
-                                        </flux:modal.close>
-                                        <flux:button type="button" variant="danger" wire:click="removeMethodology('{{ $method->id }}')">
-                                            {{ __('Remove') }}
-                                        </flux:button>
-                                    </div>
-                                </div>
-                            </flux:modal>
-                        @endforeach
+                        </flux:table.cell>
+
+                        <flux:table.cell class="whitespace-nowrap py-2 text-right">
+                            <div class="inline-flex items-center justify-end gap-1">
+                                <flux:button
+                                    type="button"
+                                    x-on:click="editing = true"
+                                    icon="pencil"
+                                    size="sm"
+                                    variant="subtle"
+                                    aria-label="{{ __('Edit notes for :name', ['name' => $method->name]) }}"
+                                />
+                                <flux:modal.trigger name="remove-project-methodology-{{ $method->id }}">
+                                    <flux:button
+                                        type="button"
+                                        icon="trash"
+                                        size="sm"
+                                        variant="subtle"
+                                        aria-label="{{ __('Remove :name from this project?', ['name' => $method->name]) }}"
+                                    />
+                                </flux:modal.trigger>
+                            </div>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table>
+        </div>
+
+        @foreach ($projectMethodologies as $method)
+            <flux:modal name="remove-project-methodology-{{ $method->id }}" class="md:w-[28rem]" wire:key="remove-methodology-modal-{{ $method->id }}">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading level="2">{{ __('Remove :name from this project?', ['name' => $method->name]) }}</flux:heading>
+                        <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">{{ __('This only removes the method from this project.') }}</flux:text>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <flux:modal.close>
+                            <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
+                        </flux:modal.close>
+                        <flux:button type="button" variant="danger" wire:click="removeMethodology('{{ $method->id }}')">
+                            {{ __('Remove') }}
+                        </flux:button>
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </flux:modal>
+        @endforeach
     @endif
 
     <!-- Add Methodology Modal -->
@@ -151,8 +163,10 @@
         <flux:separator />
 
         <div class="flex gap-2 justify-end">
-            <flux:button variant="ghost" wire:click="$dispatch('close-modal', { name: 'add-methodology-modal' })">{{ __('Cancel') }}</flux:button>
-            <flux:button wire:click="addMethodology" variant="primary">{{ __('Add Method') }}</flux:button>
+            <flux:modal.close>
+                <flux:button type="button" variant="ghost" wire:click="cancelAddMethodology">{{ __('Cancel') }}</flux:button>
+            </flux:modal.close>
+            <flux:button type="button" wire:click="addMethodology" variant="primary">{{ __('Add Method') }}</flux:button>
         </div>
     </div>
 </flux:modal>

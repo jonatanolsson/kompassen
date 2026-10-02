@@ -25,6 +25,7 @@ test('team users can view testing methodology administration', function () {
         ->assertDontSee('testing-methodology-form-modal', false)
         ->assertDontSee('delete-testing-methodology-'.$methodology->id, false)
         ->assertDontSee('wire:confirm', false)
+        ->assertSee(__('Read-only'))
         ->assertSee($methodology->name);
 });
 
@@ -44,6 +45,12 @@ test('users can create update and delete an unused custom methodology', function
         ->test(TestingMethodologies::class)
         ->call('openCreateForm')
         ->assertSet('editingMethodologyId', null)
+        ->set('name', 'Discarded method')
+        ->set('description', 'Discarded description')
+        ->call('cancel')
+        ->assertSet('name', '')
+        ->assertSet('description', '')
+        ->call('openCreateForm')
         ->set('name', 'Keyboard testing')
         ->set('category', 'testing_tool')
         ->set('description', 'Manual keyboard-only checks.')
@@ -70,7 +77,10 @@ test('users can create update and delete an unused custom methodology', function
 
     expect($methodology->refresh()->name)->toBe('Keyboard and focus testing');
 
-    $component->call('delete', $methodology->id);
+    $component
+        ->call('delete', $methodology->id)
+        ->assertDispatched('close-modal', name: 'delete-testing-methodology-'.$methodology->id)
+        ->assertDispatched('toast', message: __('Testing methodology deleted.'), variant: 'success');
 
     $this->assertModelMissing($methodology);
 });
@@ -103,7 +113,10 @@ test('methodologies used by projects cannot be deleted', function () {
 
     Livewire::actingAs($user)
         ->test(TestingMethodologies::class)
-        ->call('delete', $methodology->id);
+        ->assertSee(__('Cannot delete a methodology used by projects.'))
+        ->assertSeeHtml('disabled')
+        ->call('delete', $methodology->id)
+        ->assertDispatched('toast', message: __('Cannot delete a methodology used by projects.'), variant: 'error');
 
     $this->assertModelExists($methodology);
 });

@@ -17,8 +17,6 @@ class ProjectMethodologies extends Component
 
     public AccessibilityProject $project;
 
-    public bool $showAddForm = false;
-
     public string $selectedMethodologyId = '';
 
     #[Validate('nullable|string|max:1000')]
@@ -50,6 +48,19 @@ class ProjectMethodologies extends Component
         ]);
 
         $this->reset(['selectedMethodologyId', 'notes']);
+        $this->dispatch('close-modal', name: 'add-methodology-modal');
+        $this->dispatch('toast', message: __('Testing method added to project.'), variant: 'success');
+    }
+
+    public function cancelAddMethodology(): void
+    {
+        $this->reset(['selectedMethodologyId', 'notes']);
+        $this->resetValidation();
+    }
+
+    public function cancelNotesEdit(): void
+    {
+        $this->resetValidation('notes');
     }
 
     public function removeMethodology(string $methodologyId): void
@@ -58,21 +69,34 @@ class ProjectMethodologies extends Component
         $this->project->methodologies()->availableToTeam((string) $this->project->team_id)
             ->wherePivot('methodology_id', $methodologyId)->firstOrFail();
         $this->project->methodologies()->detach($methodologyId);
+        $this->dispatch('close-modal', name: 'remove-project-methodology-'.$methodologyId);
+        $this->dispatch('toast', message: __('Testing method removed from project.'), variant: 'success');
     }
 
-    public function updateNotes(string $methodologyId, string $notes): void
+    public function updateNotes(string $methodologyId, string $notes): bool
     {
         $this->authorize('update', $this->project);
         $this->project->methodologies()->availableToTeam((string) $this->project->team_id)
             ->wherePivot('methodology_id', $methodologyId)->firstOrFail();
-        Validator::make(
+
+        $validator = Validator::make(
             ['notes' => $notes],
             ['notes' => ['nullable', 'string', 'max:1000']],
-        )->validate();
+        );
+
+        if ($validator->fails()) {
+            $this->setErrorBag($validator->errors());
+
+            return false;
+        }
+
+        $this->resetValidation('notes');
 
         $this->project->methodologies()->updateExistingPivot($methodologyId, [
             'notes' => $notes ?: null,
         ]);
+
+        return true;
     }
 
     public function render()
