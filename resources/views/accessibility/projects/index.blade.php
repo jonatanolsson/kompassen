@@ -1,6 +1,6 @@
 <x-app-layout>
-    <div class="product-page space-y-6">
-            <div class="product-page-header">
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-6">
+            <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
                 <div>
                     <flux:heading level="1">{{ __('Accessibility Projects') }}</flux:heading>
                     <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
@@ -10,7 +10,7 @@
                 <flux:button href="{{ route('accessibility-projects.create') }}" variant="primary" icon="plus">{{ __('New Project') }}</flux:button>
             </div>
 
-            <form method="GET" action="{{ route('accessibility-projects.index') }}" class="product-section flex flex-col gap-4 sm:flex-row sm:items-end">
+            <form method="GET" action="{{ route('accessibility-projects.index') }}" class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 flex flex-col gap-4 sm:flex-row sm:items-end">
                 <flux:field class="flex-1 sm:max-w-xl">
                     <flux:label>{{ __('Search projects') }}</flux:label>
                     <flux:input
@@ -31,7 +31,7 @@
             </form>
 
             @if ($projects->isEmpty())
-                <div class="product-section p-12 text-center">
+                <div class="rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 p-12 text-center">
                     <flux:icon name="folder-open" class="mx-auto mb-4 size-10 text-zinc-400" />
                     <flux:heading level="2" size="sm">
                         {{ $search !== '' ? __('No projects match your search.') : __('No projects yet. Create one to get started.') }}
@@ -91,7 +91,7 @@
                         </div>
                     </div>
 
-                    <div class="product-section w-full overflow-x-auto p-1 sm:p-2">
+                    <div class="rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 w-full overflow-x-auto p-1 sm:p-2">
                     <flux:table class="w-full table-auto!">
                             <flux:table.columns>
                                 <flux:table.column>{{ __('Project') }}</flux:table.column>

@@ -53,7 +53,7 @@ test('project testing methodologies are presented as a compact table', function 
 
     Livewire::actingAs($owner)
         ->test(ProjectMethodologies::class, ['project' => $project])
-        ->assertSeeHtml('class="product-section mb-8"')
+        ->assertSeeHtml('rounded-2xl border border-zinc-200/80')
         ->assertSeeHtml('class="flex items-center justify-between mb-4"')
         ->assertSeeHtml('<table')
         ->assertSeeHtml('wire:key="project-methodology-'.$methodology->id.'"')

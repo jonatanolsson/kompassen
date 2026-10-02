@@ -1,6 +1,6 @@
 @props(['title', 'description' => null])
 
-<header {{ $attributes->merge(['class' => 'product-page-header']) }}>
+<header {{ $attributes->merge(['class' => 'flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800']) }}>
     <div class="min-w-0">
         <flux:heading level="1">{{ $title }}</flux:heading>
         @if ($description)

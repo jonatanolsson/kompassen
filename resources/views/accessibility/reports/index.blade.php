@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot:title>{{ __('Reports for :name', ['name' => $project->name]) }}</x-slot:title>
 
-    <div class="product-page space-y-6">
-        <div class="product-page-header">
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-6">
+        <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
             <div>
                 <flux:heading level="1">{{ __('Reports for :name', ['name' => $project->name]) }}</flux:heading>
                 <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">{{ __('Generated reports') }}</flux:text>
@@ -17,7 +17,7 @@
 
         <div>
             @if ($reports->isEmpty())
-                <div class="product-section py-12 text-center">
+                <div class="rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 px-5 py-12 text-center sm:px-6">
                     <flux:icon name="document-text" class="mx-auto mb-4 size-12 text-zinc-400"/>
                     <p class="text-zinc-600 dark:text-zinc-400">{{ __('No reports generated yet.') }}</p>
                     <flux:button href="{{ route('accessibility-reports.create', $project) }}" variant="primary" class="mt-4">
@@ -25,7 +25,7 @@
                     </flux:button>
                 </div>
             @else
-                <div class="product-section overflow-x-auto p-1 sm:p-2">
+                <div class="rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 overflow-x-auto p-1 sm:p-2">
                     <flux:table class="w-full table-auto!">
                         <flux:table.columns>
                             <flux:table.column>{{ __('Title') }}</flux:table.column>

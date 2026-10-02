@@ -1,4 +1,4 @@
-<div id="testing-methodology" class="product-section mb-8">
+<div id="testing-methodology" class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
     <div class="flex items-center justify-between mb-4">
         <flux:heading level="2">{{ __('Testing Methodology') }}</flux:heading>
         <flux:modal.trigger name="add-methodology-modal">

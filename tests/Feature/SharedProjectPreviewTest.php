@@ -89,7 +89,7 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         ->assertSee(__('Out of Scope'))
         ->assertSee('Legacy portal')
         ->assertDontSee('Excluded issue')
-        ->assertSee('user-content', false)
+        ->assertSee('leading-[1.75]', false)
         ->assertSee('role="dialog"', false)
         ->assertSee('aria-modal="true"', false);
 });

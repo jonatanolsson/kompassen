@@ -1,7 +1,7 @@
 <x-app-layout>
-    <div class="product-page">
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <div class="w-full">
-        <div class="product-page-header">
+        <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
             <div>
                 <flux:heading level="1">{{ $project->name }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:text>
@@ -76,14 +76,14 @@
         </flux:modal>
 
         @if ($project->description)
-            <section class="product-section mb-8">
+            <section class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-3">{{ __('Description') }}</flux:heading>
                 <x-user-content :content="$project->description" />
             </section>
         @endif
 
         <!-- Pages Section -->
-        <div id="pages-services" class="product-section mb-8">
+        <div id="pages-services" class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
             <div class="flex items-center justify-between mb-4">
                 <flux:heading level="2">{{ __('Pages & Services') }}</flux:heading>
                 <flux:button href="{{ route('accessibility-pages.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Add Page or Service') }}</flux:button>
@@ -156,7 +156,7 @@
         </div>
 
         <!-- Issues Section -->
-        <div class="product-section mb-8">
+        <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
             <div class="flex items-center justify-between mb-4">
             <flux:heading level="2">{{ __('Issues') }}</flux:heading>
                 <flux:button href="{{ route('accessibility-issues.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Report Issue') }}</flux:button>

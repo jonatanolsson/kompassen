@@ -1,7 +1,7 @@
 <x-app-layout>
-    <div class="product-page">
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <div class="w-full">
-        <div class="product-page-header">
+        <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
             <div>
                 <flux:heading level="1" class="mb-2">{{ $issue->title }}</flux:heading>
                 <div class="flex gap-2">
@@ -66,14 +66,14 @@
 
         <!-- Description -->
         @if ($issue->description)
-            <div class="product-section mb-8">
+            <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>
                 <x-markdown :markdown="$issue->description" />
             </div>
         @endif
 
         @if ($issue->mermaid_diagram)
-            <div class="product-section mb-8">
+            <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <div class="mb-4 flex items-center justify-between gap-4">
                     <flux:heading level="2">{{ __('Issue diagram') }}</flux:heading>
                     <flux:badge color="zinc">Mermaid</flux:badge>
@@ -89,7 +89,7 @@
         @endif
 
         @if ($issue->resolution_notes)
-            <div class="product-section mb-8">
+            <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Resolution Notes') }}</flux:heading>
                 <flux:text class="whitespace-pre-line">{{ $issue->resolution_notes }}</flux:text>
             </div>
@@ -97,7 +97,7 @@
 
         <!-- Images -->
         @if ($issue->attachments->count() > 0)
-            <div class="product-section mb-8">
+            <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Images') }}</flux:heading>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     @foreach ($issue->attachments as $attachment)
@@ -117,7 +117,7 @@
         @endif
 
         <!-- Details -->
-        <div class="product-section mb-8 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+        <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
             @if ($issue->page)
                 <div>
                     <flux:heading level="3" class="text-sm mb-2">{{ __('Page/Service') }}</flux:heading>
@@ -171,7 +171,7 @@
 
         <!-- WCAG Criteria -->
         @if ($wcagCriteria->count() > 0)
-            <div class="product-section mb-8">
+            <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
                 <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($wcagCriteria as $criterion)
@@ -205,7 +205,7 @@
             </div>
         @endif
 
-        <div class="product-section mb-8">
+        <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
             @if ($issue->examples->isNotEmpty())
                 <div class="mb-4 flex items-center justify-between gap-4">
                     <div>
@@ -330,7 +330,7 @@
         </div>
 
         <!-- Metadata -->
-        <div class="product-section grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+        <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
             <div>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Created') }}</flux:text>
                 <flux:text>{{ $issue->created_at->translatedFormat('j M Y H:i') }}</flux:text>

@@ -1,5 +1,5 @@
-<div class="product-page space-y-6">
-    <div class="product-page-header">
+<div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-6">
+    <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
         <div>
             <flux:heading size="xl">{{ __('Knowledge Base') }}</flux:heading>
             <flux:subheading>{{ __('WCAG criteria and resources are read-only. Team editors may manage their own examples.') }}</flux:subheading>
@@ -9,7 +9,7 @@
         @endif
     </div>
 
-    <div class="product-section grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+    <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
         <flux:input
             id="knowledge-search"
             wire:model.live.debounce.300ms="search"

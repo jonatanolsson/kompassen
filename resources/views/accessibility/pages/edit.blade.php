@@ -1,6 +1,6 @@
 <x-app-layout>
-    <div class="product-page">
-    <div class="product-section w-full">
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 w-full">
         <flux:heading level="1" class="mb-2">{{ __('Update Page or Service') }}</flux:heading>
         <flux:text class="text-zinc-600 dark:text-zinc-400 mb-8">{{ __('Update page or service details.') }}</flux:text>
 

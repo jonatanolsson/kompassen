@@ -78,16 +78,19 @@ enbart byter namn på eller duplicerar en Flux-komponent.
 - Använd zinc för neutral text, kanter och ytor samt gemensamma accenttokens
   (`--color-accent`, `--color-accent-content` och
   `--color-accent-foreground`) för primära åtgärder och markerade lägen.
-- Använd befintliga layoutklasser: `.product-page`,
-  `.product-page-header`, `.product-section`, `.product-section-heading`,
-  `.product-stat` och `.user-content`.
+- Använd Tailwind-utilities direkt i Blade och Flux för interaktiva kontroller.
+  Återkommande produktmönster hör hemma i dokumenterade `x-ui.*`-komponenter.
+  `x-user-content` använder Tailwind child-variants för sanerad rich text.
+  Lägg inte till egna designselektorer eller `@apply`-regler i
+  `resources/css/app.css`; behåll där Tailwind/Flux-importer, designtokens och
+  nödvändiga beteenderegler som `[x-cloak]` och utskriftsregler.
 - Ge anpassade ytor och texter stöd för mörkt läge. Flux Appearance är redan
   aktiverat i den autentiserade layouten.
 - Föredra kompakta tabeller för tät, strukturerad data. Låt beskrivningskolumner
   växa och ge åtgärds-, datum- och antalskolumner innehållsbaserad bredd.
   Använd horisontell rullning endast när det behövs.
-- Använd mellanrumsklasser konsekvent (`gap`, befintlig sektionspadding och
-  gemensamma layoutklasser). Undvik engångsfärger, godtycklig rundning,
+- Använd mellanrumsklasser konsekvent (`gap` och befintlig
+  komponentpadding). Undvik engångsfärger, godtycklig rundning,
   dubbla kanter och `!important`. Använd `!important` endast för en bekräftad
   konflikt med Flux standardstilar.
 - Färg får förstärka status, men status ska alltid ha en läsbar textetikett.

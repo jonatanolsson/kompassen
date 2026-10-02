@@ -1,4 +1,4 @@
-<div class="product-page space-y-6">
+<div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-6">
     <x-ui.page-header
         :title="__('Component catalog')"
         :description="__('A live catalog of Kompassen UI patterns and reusable components.')"
@@ -15,7 +15,7 @@
             <x-ui.stat-card :label="__('Accent color')" value="Emerald">
                 {{ __('Use accent for primary actions and selected states.') }}
             </x-ui.stat-card>
-            <x-ui.stat-card :label="__('Shared surface')" value="product-section">
+            <x-ui.stat-card :label="__('Shared surface')" value="rounded-xl border">
                 {{ __('Consistent border, radius, background, and shadow.') }}
             </x-ui.stat-card>
         </div>

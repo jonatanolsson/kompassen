@@ -329,7 +329,7 @@ test('renders project description as formatted user content', function () {
     $response = $this->actingAs($user)->get("/accessibility-projects/{$project->id}");
 
     $response
-        ->assertSee('class="user-content"', false)
+        ->assertSee('leading-[1.75]', false)
         ->assertSee('<strong>Important</strong>', false)
         ->assertSee('<ol>', false)
         ->assertSee('First step');

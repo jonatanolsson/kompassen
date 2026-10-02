@@ -1,8 +1,8 @@
 @props(['title' => null, 'description' => null])
 
-<section {{ $attributes->merge(['class' => 'product-section']) }}>
+<section {{ $attributes->merge(['class' => 'rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10']) }}>
     @if ($title || $description || isset($actions))
-        <div class="product-section-heading mb-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <div>
                 @if ($title)
                     <flux:heading level="2">{{ $title }}</flux:heading>

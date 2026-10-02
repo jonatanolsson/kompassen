@@ -1,5 +1,5 @@
-<div class="product-page space-y-8">
-    <div class="product-page-header">
+<div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-8">
+    <div class="flex flex-col gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
         <div>
             <flux:heading level="1">{{ __('Dashboard') }}</flux:heading>
             <flux:subheading class="mt-1">{{ __('Your latest project activity') }}</flux:subheading>
@@ -15,8 +15,8 @@
         <span><strong class="font-semibold text-zinc-950 dark:text-white">{{ $summary['reports'] }}</strong> {{ __('Reports') }}</span>
     </div>
 
-    <section class="product-section">
-        <div class="product-section-heading">
+    <section class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <flux:heading level="2">{{ __('Recent Projects') }}</flux:heading>
             </div>
