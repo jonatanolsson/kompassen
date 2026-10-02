@@ -46,11 +46,6 @@
                     <flux:sidebar.item href="{{ route('testing-methodologies') }}" :active="request()->routeIs('testing-methodologies')" icon="beaker" wire:navigate>
                         {{ __('Testing Methodology') }}
                     </flux:sidebar.item>
-                    @if (app()->environment(['local', 'testing']))
-                        <flux:sidebar.item href="{{ route('design-system') }}" :active="request()->routeIs('design-system')" wire:navigate>
-                            {{ __('Design System') }}
-                        </flux:sidebar.item>
-                    @endif
                     <flux:sidebar.item href="{{ route('accessibility-projects.index') }}" :active="request()->routeIs('accessibility-projects.*')" icon="document-text" wire:navigate>
                         {{ __('Accessibility') }}
                     </flux:sidebar.item>
@@ -60,6 +55,14 @@
                     <flux:sidebar.item href="{{ route('settings') }}" :active="request()->routeIs('settings')" icon="cog-6-tooth" wire:navigate>
                         {{ __('Settings') }}
                     </flux:sidebar.item>
+                    @if (app()->environment(['local', 'testing']))
+                        <flux:separator />
+                        <flux:sidebar.group heading="{{ __('Debug') }}">
+                            <flux:sidebar.item href="{{ route('design-system') }}" :active="request()->routeIs('design-system')" wire:navigate>
+                                {{ __('Design System') }}
+                            </flux:sidebar.item>
+                        </flux:sidebar.group>
+                    @endif
                 </flux:sidebar.nav>
 
                 <flux:sidebar.spacer />
