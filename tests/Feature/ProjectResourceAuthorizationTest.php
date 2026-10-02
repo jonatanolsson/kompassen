@@ -157,6 +157,54 @@ test('issues can only be assigned to members of the current project', function (
     expect($issue->refresh()->assigned_to)->toBeNull();
 });
 
+test('owners can reassign issues using project members in the assignee selector', function () {
+    $team = Team::factory()->create();
+    $owner = User::factory()->create(['team_id' => $team->id]);
+    $currentAssignee = User::factory()->create(['team_id' => $team->id]);
+    $newAssignee = User::factory()->create(['team_id' => $team->id]);
+    $otherProjectUser = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    $otherProject = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+
+    foreach ([$owner, $currentAssignee, $newAssignee] as $member) {
+        ProjectMember::create([
+            'project_id' => $project->id,
+            'user_id' => $member->id,
+            'role' => $member->is($owner) ? 'owner' : 'editor',
+        ]);
+    }
+
+    ProjectMember::create([
+        'project_id' => $otherProject->id,
+        'user_id' => $otherProjectUser->id,
+        'role' => 'editor',
+    ]);
+
+    $issue = $project->issues()->create([
+        'title' => 'Assigned issue',
+        'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+        'assigned_to' => $currentAssignee->id,
+    ]);
+
+    $this->actingAs($owner)
+        ->get(route('accessibility-issues.show', [$project, $issue]))
+        ->assertSuccessful()
+        ->assertSee('name="assigned_to"', false)
+        ->assertSeeHtml('value="'.$currentAssignee->id.'" selected')
+        ->assertSeeHtml('value="'.$newAssignee->id.'"')
+        ->assertDontSee('value="'.$otherProjectUser->id.'"', false)
+        ->assertSee(__('Update assignment'))
+        ->assertSee(__('Unassign'));
+
+    $this->put(route('accessibility-issues.assign', [$project, $issue]), [
+        'assigned_to' => $newAssignee->id,
+    ])->assertRedirect();
+
+    expect($issue->refresh()->assigned_to)->toBe($newAssignee->id);
+});
+
 test('livewire issue forms reject pages from another project', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);

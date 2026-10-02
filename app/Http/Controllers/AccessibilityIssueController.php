@@ -31,6 +31,7 @@ class AccessibilityIssueController extends Controller
         $this->authorize('view', $project);
 
         $issue->load([
+            'assignedTo',
             'examples.criterion',
             'examples.referenceLinks',
             'examples.attachments',

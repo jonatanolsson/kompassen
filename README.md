@@ -31,7 +31,8 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   efter sparande via åtgärden för lösning, med anteckning. Problem på sidor
   utanför granskningsomfattningen finns kvar i projektet och märks tydligt
   där, men tas inte med i rapporter.
-- **Problemhantering** – tilldela, lösa, exportera och följa upp problem.
+- **Problemhantering** – tilldela eller ändra tilldelning till en medlem i
+  projektet, lösa, exportera och följa upp problem.
 - **WCAG-kunskapsbank** – sökbara framgångskriterier, exempel och relaterade
   resurser från bland annat W3C och DIGG. Mermaid-exempel sparar även en
   sanerad, ljus SVG för rapportens webb- och PDF-visning. Äldre exempel med

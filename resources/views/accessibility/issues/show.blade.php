@@ -135,10 +135,22 @@
             <!-- Assignee -->
             <div>
                 <flux:heading level="3" class="text-sm mb-2">{{ __('Assigned To') }}</flux:heading>
-                @if ($issue->assignedTo)
-                    <div class="flex items-center justify-between">
-                        <flux:text>{{ $issue->assignedTo->name }}</flux:text>
-                        @can('update', $project)
+                @can('update', $project)
+                    <div class="flex flex-wrap items-center gap-2">
+                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="flex flex-wrap items-center gap-2">
+                            @csrf
+                            @method('PUT')
+                            <flux:select name="assigned_to" aria-label="{{ __('Assign to a member') }}" required>
+                                <option value="">{{ __('Select a project member') }}</option>
+                                @foreach ($projectMembers as $member)
+                                    <option value="{{ $member->user_id }}" @selected((string) $issue->assigned_to === (string) $member->user_id)>{{ $member->user->name }}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:button type="submit" variant="outline" size="sm">
+                                {{ $issue->assignedTo ? __('Update assignment') : __('Assign') }}
+                            </flux:button>
+                        </form>
+                        @if ($issue->assignedTo)
                             <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="inline">
                                 @csrf
                                 @method('PUT')
@@ -147,25 +159,17 @@
                                     {{ __('Unassign') }}
                                 </flux:button>
                             </form>
-                        @endcan
+                        @endif
                     </div>
                 @else
-                    @can('update', $project)
-                        <form action="{{ route('accessibility-issues.assign', [$project, $issue]) }}" method="POST" class="flex flex-wrap items-center gap-2">
-                            @csrf
-                            @method('PUT')
-                            <flux:select name="assigned_to" aria-label="{{ __('Assign to a member') }}" required>
-                                <option value="">{{ __('Select a project member') }}</option>
-                                @foreach ($projectMembers as $member)
-                                    <option value="{{ $member->user_id }}">{{ $member->user->name }}</option>
-                                @endforeach
-                            </flux:select>
-                            <flux:button type="submit" variant="outline" size="sm">{{ __('Assign') }}</flux:button>
-                        </form>
-                    @else
-                        <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
-                    @endcan
-                @endif
+                    <div>
+                        @if ($issue->assignedTo)
+                            <flux:text>{{ $issue->assignedTo->name }}</flux:text>
+                        @else
+                            <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('Unassigned') }}</flux:text>
+                        @endif
+                    </div>
+                @endcan
             </div>
         </div>
 
