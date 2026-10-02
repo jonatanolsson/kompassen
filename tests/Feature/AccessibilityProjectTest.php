@@ -208,10 +208,12 @@ test('project issue list warns only for pages outside the audit scope', function
         'url' => 'https://example.com/excluded',
         'scope' => 'out_of_scope',
     ]);
+    $description = 'The full issue description stays in expanded details.';
     foreach ([$inScopePage, $outOfScopePage] as $page) {
         $project->issues()->create([
             'page_id' => $page->id,
             'title' => $page->name.' issue',
+            'description' => $description,
             'severity' => 'major',
             'difficulty' => 'easy',
             'status' => 'open',
@@ -221,9 +223,30 @@ test('project issue list warns only for pages outside the audit scope', function
     $response = $this->actingAs($user)->get(route('accessibility-projects.show', $project));
     $response->assertSuccessful();
 
-    preg_match_all('/<tr[^>]*data-issue-row[^>]*>.*?<\/tr>/s', $response->getContent(), $rows);
+    $content = $response->getContent();
+    preg_match_all('/<tr[^>]*data-issue-row[^>]*>(.*?)<\/tr>/s', $content, $rows);
+    preg_match_all('/<div data-page-metadata[^>]*>(.*?)<\/div>/s', $content, $pageMetadata);
     $warning = __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.');
-    expect($rows[0])->toHaveCount(2);
+    expect($rows[0])->toHaveCount(2)
+        ->and(substr_count($content, '<tbody'))->toBe(substr_count($content, '</tbody>'))
+        ->and($pageMetadata[1])->toHaveCount(2)
+        ->and($pageMetadata[1][0])->toContain(__('Page'))
+        ->and($pageMetadata[1][0])->toContain('·')
+        ->and($pageMetadata[1][0])->toContain(__('In Scope'))
+        ->and($pageMetadata[1][1])->toContain(__('Page'))
+        ->and($pageMetadata[1][1])->toContain('·')
+        ->and($pageMetadata[1][1])->toContain(__('Out of Scope'));
+
+    $response->assertSee($description);
+
+    foreach ($rows[1] as $row) {
+        preg_match_all('/<td\b[^>]*>(.*?)<\/td>/s', $row, $cells);
+        expect(strip_tags($cells[1][2]))->not->toContain($description);
+    }
+
+    foreach ($pageMetadata[1] as $metadata) {
+        expect($metadata)->not->toContain('data-flux-badge');
+    }
 
     $included = collect($rows[0])->first(fn (string $row): bool => str_contains($row, 'Included page issue'));
     $excluded = collect($rows[0])->first(fn (string $row): bool => str_contains($row, 'Excluded page issue'));

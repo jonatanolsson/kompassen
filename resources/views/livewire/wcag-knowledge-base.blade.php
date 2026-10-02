@@ -9,8 +9,6 @@
         @endif
     </div>
 
-    <flux:separator variant="subtle" class="my-6" />
-
     <div class="product-section grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
         <flux:input
             id="knowledge-search"

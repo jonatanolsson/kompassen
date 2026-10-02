@@ -13,9 +13,7 @@
                 </div>
             </div>
             <div class="flex gap-2 items-center">
-                <a href="{{ route('accessibility-projects.show', $project) }}">
-                    <flux:button variant="ghost" icon="arrow-left">{{ __('Back') }}</flux:button>
-                </a>
+                <flux:button href="{{ route('accessibility-projects.show', $project) }}" variant="ghost" icon="arrow-left">{{ __('Back') }}</flux:button>
 
                 <!-- Actions Dropdown -->
                 <flux:dropdown>
@@ -53,8 +51,6 @@
                 </flux:dropdown>
             </div>
         </div>
-
-        <flux:separator class="my-6" />
 
         @if ($issue->page?->scope === 'out_of_scope')
             <flux:callout color="amber" class="mb-6">
@@ -332,8 +328,6 @@
                 </div>
             @endif
         </div>
-
-        <flux:separator class="my-6" />
 
         <!-- Metadata -->
         <div class="product-section grid grid-cols-1 gap-4 text-sm md:grid-cols-3">

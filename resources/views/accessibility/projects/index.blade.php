@@ -7,9 +7,7 @@
                         {{ __('Manage your website accessibility audits') }}
                     </flux:text>
                 </div>
-                <a href="{{ route('accessibility-projects.create') }}">
-                    <flux:button variant="primary" icon="plus">{{ __('New Project') }}</flux:button>
-                </a>
+                <flux:button href="{{ route('accessibility-projects.create') }}" variant="primary" icon="plus">{{ __('New Project') }}</flux:button>
             </div>
 
             <form method="GET" action="{{ route('accessibility-projects.index') }}" class="product-section flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -94,22 +92,22 @@
                     </div>
 
                     <div class="product-section w-full overflow-x-auto p-1 sm:p-2">
-                    <flux:table class="w-full min-w-[760px]">
+                    <flux:table class="w-full table-auto!">
                             <flux:table.columns>
-                                <flux:table.cell class="min-w-56 whitespace-nowrap">{{ __('Project') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-48 whitespace-nowrap">{{ __('Domain') }}</flux:table.cell>
-                                <flux:table.cell x-cloak x-show="columns.pages" class="min-w-20 whitespace-nowrap">{{ __('Pages & Services') }}</flux:table.cell>
-                                <flux:table.cell x-cloak x-show="columns.issues" class="min-w-20 whitespace-nowrap">{{ __('Issues') }}</flux:table.cell>
-                                <flux:table.cell x-cloak x-show="columns.wcag" class="min-w-28 whitespace-nowrap">{{ __('WCAG Level') }}</flux:table.cell>
-                                <flux:table.cell x-cloak x-show="columns.status" class="min-w-36 whitespace-nowrap">{{ __('Status') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-32 whitespace-nowrap">{{ __('Updated') }}</flux:table.cell>
-                                <flux:table.cell class="min-w-32 whitespace-nowrap">{{ __('Actions') }}</flux:table.cell>
+                                <flux:table.column>{{ __('Project') }}</flux:table.column>
+                                <flux:table.column>{{ __('Domain') }}</flux:table.column>
+                                <flux:table.column x-cloak x-show="columns.pages" class="whitespace-nowrap">{{ __('Pages & Services') }}</flux:table.column>
+                                <flux:table.column x-cloak x-show="columns.issues" class="whitespace-nowrap">{{ __('Issues') }}</flux:table.column>
+                                <flux:table.column x-cloak x-show="columns.wcag" class="whitespace-nowrap">{{ __('WCAG Level') }}</flux:table.column>
+                                <flux:table.column x-cloak x-show="columns.status" class="whitespace-nowrap">{{ __('Status') }}</flux:table.column>
+                                <flux:table.column class="whitespace-nowrap">{{ __('Updated') }}</flux:table.column>
+                                <flux:table.column class="whitespace-nowrap">{{ __('Actions') }}</flux:table.column>
                             </flux:table.columns>
 
                             @foreach ($projects as $project)
                                 <flux:table.row class="align-middle">
-                                    <flux:table.cell class="min-w-56 py-4">
-                                        <div class="min-w-48">
+                                    <flux:table.cell class="py-4">
+                                        <div>
                                             <flux:link href="{{ route('accessibility-projects.show', $project) }}" class="font-medium">
                                                 {{ $project->name }}
                                             </flux:link>
@@ -120,9 +118,9 @@
                                             @endif
                                         </div>
                                     </flux:table.cell>
-                                    <flux:table.cell class="min-w-48 py-4">
+                                    <flux:table.cell class="whitespace-normal break-all py-4">
                                         @if ($project->domains !== [])
-                                            <span class="whitespace-nowrap text-sm text-zinc-700 dark:text-zinc-300">
+                                            <span class="text-sm text-zinc-700 dark:text-zinc-300">
                                                 {{ implode(', ', $project->domains) }}
                                             </span>
                                         @else
@@ -131,20 +129,20 @@
                                             </span>
                                         @endif
                                     </flux:table.cell>
-                                    <flux:table.cell x-cloak x-show="columns.pages" class="min-w-20 py-4">{{ $project->pages_count }}</flux:table.cell>
-                                    <flux:table.cell x-cloak x-show="columns.issues" class="min-w-20 py-4">{{ $project->issues_count }}</flux:table.cell>
-                                    <flux:table.cell x-cloak x-show="columns.wcag" class="min-w-28 py-4">
+                                    <flux:table.cell x-cloak x-show="columns.pages" class="whitespace-nowrap py-4">{{ $project->pages_count }}</flux:table.cell>
+                                    <flux:table.cell x-cloak x-show="columns.issues" class="whitespace-nowrap py-4">{{ $project->issues_count }}</flux:table.cell>
+                                    <flux:table.cell x-cloak x-show="columns.wcag" class="whitespace-nowrap py-4">
                                         <flux:badge color="zinc">{{ $project->target_wcag_level }}</flux:badge>
                                     </flux:table.cell>
-                                    <flux:table.cell x-cloak x-show="columns.status" class="min-w-36 py-4">
+                                    <flux:table.cell x-cloak x-show="columns.status" class="whitespace-nowrap py-4">
                                         <flux:badge :color="$project->status === 'completed' ? 'green' : ($project->status === 'in_progress' ? 'blue' : 'amber')">
                                             {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}
                                         </flux:badge>
                                     </flux:table.cell>
-                                    <flux:table.cell class="min-w-32 whitespace-nowrap py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                                    <flux:table.cell class="whitespace-nowrap py-4 text-sm text-zinc-500 dark:text-zinc-400">
                                         {{ $project->updated_at->translatedFormat('j M Y') }}
                                     </flux:table.cell>
-                                    <flux:table.cell class="min-w-32 py-4">
+                                    <flux:table.cell class="whitespace-nowrap py-4">
                                         <div class="flex items-center gap-1">
                                             <flux:button
                                                 href="{{ route('accessibility-projects.show', $project) }}"

@@ -221,9 +221,7 @@
                 <!-- Actions -->
                 <div class="flex gap-3 pt-6">
                     <flux:button type="submit" variant="primary">{{ __('Update Issue') }}</flux:button>
-                    <a href="{{ route('accessibility-projects.show', $project) }}">
-                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
-                    </a>
+                    <flux:button href="{{ route('accessibility-projects.show', $project) }}" variant="ghost">{{ __('Cancel') }}</flux:button>
                 </div>
             </form>
         </div>

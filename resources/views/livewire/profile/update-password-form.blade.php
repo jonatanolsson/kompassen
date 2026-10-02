@@ -63,7 +63,7 @@ new class extends Component
             <div class="flex items-center gap-3 pt-2">
                 <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
                 <span x-data="{ show: false }" x-show="show" x-on:password-updated.window="show = true; setTimeout(() => show = false, 2500)" class="text-sm text-green-600 dark:text-green-400">
-                    Saved.
+                    {{ __('Saved.') }}
                 </span>
             </div>
         </form>
