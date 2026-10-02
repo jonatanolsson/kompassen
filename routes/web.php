@@ -17,6 +17,7 @@ use App\Livewire\CreateAccessibilityProject;
 use App\Livewire\Dashboard;
 use App\Livewire\DesignSystem;
 use App\Livewire\EditAccessibilityIssue;
+use App\Livewire\EditAccessibilityPage;
 use App\Livewire\EditAccessibilityProject;
 use App\Livewire\TestingMethodologies;
 use App\Livewire\WcagKnowledgeBase;
@@ -135,7 +136,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('accessibility-projects/{project}/pages', [AccessibilityPageController::class, 'store'])
         ->scopeBindings()
         ->name('accessibility-pages.store');
-    Route::get('accessibility-projects/{project}/pages/{page}/edit', [AccessibilityPageController::class, 'edit'])
+    Route::get('accessibility-projects/{project}/pages/{page}/edit', EditAccessibilityPage::class)
         ->scopeBindings()
         ->name('accessibility-pages.edit');
     Route::put('accessibility-projects/{project}/pages/{page}', [AccessibilityPageController::class, 'update'])

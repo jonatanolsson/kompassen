@@ -2,6 +2,7 @@
 
 use App\Livewire\CreateAccessibilityPage;
 use App\Livewire\CreateAccessibilityProject;
+use App\Livewire\EditAccessibilityPage;
 use App\Livewire\EditAccessibilityProject;
 use App\Models\AccessibilityProject;
 use App\Models\ProjectMember;
@@ -66,14 +67,76 @@ test('page scope uses yes and no radio options on create and edit forms', functi
     $this->actingAs($user)
         ->get(route('accessibility-pages.edit', [$project, $page]))
         ->assertSuccessful()
+        ->assertSeeLivewire(EditAccessibilityPage::class)
+        ->assertSeeHtml('data-flux-editor')
+        ->assertSeeHtml('wire:model="description"')
         ->assertSee(__('Yes'))
         ->assertSee(__('No'))
         ->assertSeeHtml('data-flux-radio-group')
-        ->assertSeeHtml('name="scope"')
+        ->assertSeeHtml('wire:model="scope"')
         ->assertSeeHtml('value="in_scope"')
         ->assertSeeHtml('value="out_of_scope"')
         ->assertSeeHtml('checked')
-        ->assertDontSeeHtml('<select name="scope"');
+        ->assertDontSeeHtml('<select wire:model="scope"');
+});
+
+test('project editor can update page description with Flux rich text', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+    $page = $project->pages()->create([
+        'name' => 'Homepage',
+        'url' => 'https://example.com/',
+        'description' => '<p>Original description</p>',
+        'scope' => 'in_scope',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityPage::class, ['project' => $project, 'page' => $page])
+        ->assertSet('description', '<p>Original description</p>')
+        ->assertSeeHtml('data-flux-editor')
+        ->set('description', '<p>Updated <strong>description</strong></p>')
+        ->set('url', 'not-a-valid-url')
+        ->call('submit')
+        ->assertHasErrors(['url' => 'url'])
+        ->assertSet('description', '<p>Updated <strong>description</strong></p>');
+
+    expect($page->refresh()->description)->toBe('<p>Original description</p>');
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityPage::class, ['project' => $project, 'page' => $page])
+        ->set('description', '<p>Updated <strong>description</strong></p>')
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($page->refresh()->description)->toBe('<p>Updated <strong>description</strong></p>');
+
+    $this->actingAs($user)
+        ->get(route('accessibility-pages.show', [$project, $page]))
+        ->assertSuccessful()
+        ->assertSee('<strong>description</strong>', false)
+        ->assertDontSee('&lt;p&gt;Updated', false);
+});
+
+test('project viewers cannot access page editing form', function () {
+    $team = Team::factory()->create();
+    $viewer = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $viewer->id,
+        'role' => 'viewer',
+    ]);
+    $page = $project->pages()->create(['name' => 'Homepage']);
+
+    $this->actingAs($viewer)
+        ->get(route('accessibility-pages.edit', [$project, $page]))
+        ->assertForbidden();
 });
 
 test('project form explains validation errors and keeps entered content', function () {

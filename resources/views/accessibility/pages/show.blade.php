@@ -54,7 +54,7 @@
 
             <x-ui.section :title="__('Description')">
                 @if ($page->description)
-                    <flux:text class="whitespace-pre-line">{{ $page->description }}</flux:text>
+                    <x-user-content :content="$page->description" />
                 @else
                     <flux:text class="text-zinc-500 dark:text-zinc-400">{{ __('No description provided.') }}</flux:text>
                 @endif

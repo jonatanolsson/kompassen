@@ -61,6 +61,10 @@ test('nested project resources cannot be accessed through another project', func
         ->assertNotFound();
 
     $this->actingAs($user)
+        ->get(route('accessibility-pages.edit', [$project, $page]))
+        ->assertNotFound();
+
+    $this->actingAs($user)
         ->delete(route('accessibility-issues.destroy', [$project, $issue]))
         ->assertNotFound();
 

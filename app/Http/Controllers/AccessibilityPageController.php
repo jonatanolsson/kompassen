@@ -12,13 +12,6 @@ class AccessibilityPageController extends Controller
 {
     use AuthorizesRequests;
 
-    public function create(AccessibilityProject $project)
-    {
-        $this->authorize('update', $project);
-
-        return view('accessibility.pages.create', compact('project'));
-    }
-
     public function store(Request $request, AccessibilityProject $project)
     {
         $this->authorize('update', $project);
@@ -47,13 +40,6 @@ class AccessibilityPageController extends Controller
         $this->authorize('view', $project);
 
         return view('accessibility.pages.show', compact('project', 'page'));
-    }
-
-    public function edit(AccessibilityProject $project, AccessibilityPage $page)
-    {
-        $this->authorize('update', $project);
-
-        return view('accessibility.pages.edit', compact('project', 'page'));
     }
 
     public function update(Request $request, AccessibilityProject $project, AccessibilityPage $page)
