@@ -14,5 +14,12 @@ test('authenticated users can view the local design system catalog', function ()
         ->assertSee(__('Component catalog'))
         ->assertSee('x-ui.page-header')
         ->assertSee('x-ui.section')
+        ->assertSee(__('Typography and headings'))
+        ->assertSee(__('Rich text editor'))
+        ->assertSee(__('Audit progress'))
+        ->assertSee(__('Separators'))
+        ->assertSee(__('Tabs example'))
+        ->assertSee(__('Accordion example'))
+        ->assertSee(__('Activity panel example.'))
         ->assertSee('<table', false);
 });

@@ -11,6 +11,10 @@ class DesignSystem extends Component
 {
     public string $title = '';
 
+    public string $editorContent = '';
+
+    public string $activeExampleTab = 'overview';
+
     public function mount(): void
     {
         $this->title = __('Design System');

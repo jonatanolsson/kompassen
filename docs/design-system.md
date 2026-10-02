@@ -20,6 +20,16 @@ Flux-komponenter ska användas direkt från Blade. Officiella riktlinjer:
 - [Flux customization](https://fluxui.dev/docs/customization)
 - [Flux dark mode](https://fluxui.dev/docs/dark-mode)
 
+Komponentspecifika exempel och API:er:
+
+- [Editor](https://fluxui.dev/components/editor)
+- [Heading and text](https://fluxui.dev/components/heading)
+- [Progress](https://fluxui.dev/components/progress)
+- [Separator](https://fluxui.dev/components/separator)
+- [Tabs](https://fluxui.dev/components/tabs)
+- [Accordion](https://fluxui.dev/components/accordion)
+- [Skeleton](https://fluxui.dev/components/skeleton)
+
 ## Komponenter
 
 | Komponent | API | Användning |
@@ -28,6 +38,11 @@ Flux-komponenter ska användas direkt från Blade. Officiella riktlinjer:
 | `x-ui.section` | valfri `title`, `description`, `actions`-slot | Produktens gemensamma sektionsyta |
 | `x-ui.stat-card` | `label`, `value`, valfri standardslot | Kompakt nyckeltal eller sammanfattning |
 | `x-ui.empty-state` | `message`, valfri `description`, `actions`-slot | Tomma listor och nästa rekommenderade steg |
+
+Komponentkatalogen visar även Flux-exempel för rubrikhierarki, rich-text,
+status och laddning, avdelare, flikar, utfällbara avsnitt, formulärkontroller,
+tabeller, menyer och modaler. Redigerarens innehåll och aktiv flik är lokal
+Livewire-demo-state; ingenting sparas.
 
 Exempel:
 
@@ -90,7 +105,8 @@ enbart byter namn på eller duplicerar en Flux-komponent.
    kräver ett medvetet underhållsbeslut eftersom kopior behöver uppdateras
    manuellt.
 4. Lägg synliga UI-texter i `resources/lang/sv.json` och använd `__()` för att
-   visa dem.
+   visa dem. Flux-redigerarens verktygsfält har dessutom egna översättnings-
+   nycklar där.
 5. Validera och auktorisera Livewire-åtgärder på servern. Behåll
    projektscopen och stabila `wire:key`-värden för upprepade rader.
 6. Använd semantiska rubriker, etiketter, valideringsmeddelanden och namngivna
