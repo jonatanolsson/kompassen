@@ -83,7 +83,7 @@
         @endif
 
         <!-- Pages Section -->
-        <div class="product-section mb-8">
+        <div id="pages-services" class="product-section mb-8">
             <div class="flex items-center justify-between mb-4">
                 <flux:heading level="2">{{ __('Pages & Services') }}</flux:heading>
                 <flux:button href="{{ route('accessibility-pages.create', $project) }}" variant="primary" icon="plus" size="sm">{{ __('Add Page or Service') }}</flux:button>
@@ -94,38 +94,42 @@
                     <flux:text class="text-zinc-600 dark:text-zinc-400">{{ __('No pages or services added yet.') }}</flux:text>
                 </div>
             @else
-                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @foreach ($project->pages as $page)
-                        @php
-                            $resourceType = $page->resource_type ?? 'page';
-                            $accessContext = $page->access_context ?? 'not_applicable';
-                        @endphp
-                        <div class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                            <div class="space-y-2">
-                                <div>
-                                    <flux:heading level="4">{{ $page->name }}</flux:heading>
-                                    <div data-page-metadata class="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                        <span>{{ __($resourceType === 'service' ? 'Service' : 'Page') }}</span>
-                                        <span aria-hidden="true" class="text-zinc-400 dark:text-zinc-500">·</span>
-                                        <span>{{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}</span>
-                                        @if ($accessContext !== 'not_applicable')
-                                            <span aria-hidden="true" class="text-zinc-400 dark:text-zinc-500">·</span>
-                                            <span>{{ __($accessContext === 'authenticated' ? 'Authenticated' : ($accessContext === 'mixed' ? 'Public and authenticated' : 'Public')) }}</span>
-                                        @endif
+                <div class="max-w-full overflow-x-auto">
+                    <flux:table class="w-full table-auto! text-sm">
+                        <flux:table.columns>
+                            <flux:table.column class="py-2">{{ __('Name') }}</flux:table.column>
+                            <flux:table.column class="whitespace-nowrap py-2">{{ __('Scope') }}</flux:table.column>
+                            <flux:table.column class="whitespace-nowrap py-2 text-right">{{ __('Actions') }}</flux:table.column>
+                        </flux:table.columns>
+
+                        @foreach ($project->pages as $page)
+                            @php
+                                $resourceType = $page->resource_type ?? 'page';
+                            @endphp
+                            <flux:table.row>
+                                <flux:table.cell class="min-w-0 py-2">
+                                    <div class="flex min-w-0 flex-col gap-1">
+                                        <span class="truncate font-medium">{{ $page->name }}</span>
+                                        <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ __($resourceType === 'service' ? 'Service' : 'Page') }}</span>
                                     </div>
-                                </div>
-                                @if ($page->url)
-                                    <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">{{ $page->url }}</flux:text>
-                                @endif
-                            </div>
-                            <div class="flex gap-2">
-                                <flux:button href="{{ route('accessibility-pages.edit', [$project, $page]) }}" variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
-                                <flux:modal.trigger name="delete-page-{{ $page->id }}">
-                                    <flux:button type="button" variant="ghost" size="sm" icon="trash" aria-label="{{ __('Delete') }}" />
-                                </flux:modal.trigger>
-                            </div>
-                        </div>
-                    @endforeach
+                                </flux:table.cell>
+                                <flux:table.cell class="whitespace-nowrap py-2 text-sm">
+                                    {{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}
+                                </flux:table.cell>
+                                <flux:table.cell class="whitespace-nowrap py-2 text-right">
+                                    <div class="inline-flex items-center justify-end gap-1">
+                                        <flux:button href="{{ route('accessibility-pages.show', [$project, $page]) }}" variant="ghost" size="sm">
+                                            {{ __('View details') }}
+                                        </flux:button>
+                                        <flux:button href="{{ route('accessibility-pages.edit', [$project, $page]) }}" variant="ghost" size="sm" icon="pencil">{{ __('Edit') }}</flux:button>
+                                        <flux:modal.trigger name="delete-page-{{ $page->id }}">
+                                            <flux:button type="button" variant="ghost" size="sm" icon="trash" aria-label="{{ __('Delete') }}" />
+                                        </flux:modal.trigger>
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                    </flux:table>
                 </div>
             @endif
 

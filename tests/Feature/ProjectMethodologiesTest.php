@@ -3,6 +3,7 @@
 use App\Livewire\ProjectMethodologies;
 use App\Models\AccessibilityProject;
 use App\Models\ProjectMember;
+use App\Models\Team;
 use App\Models\TestingMethodology;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -43,6 +44,7 @@ test('project testing methodologies are presented as a compact table', function 
     $methodology = TestingMethodology::create([
         'name' => 'Keyboard testing',
         'category' => 'testing_tool',
+        'description' => 'Full testing method description shown on its own page.',
     ]);
     $project->methodologies()->attach($methodology->id, [
         'id' => (string) Str::ulid(),
@@ -60,7 +62,9 @@ test('project testing methodologies are presented as a compact table', function 
         ->assertSee(__('Actions'))
         ->assertSee('Keyboard testing')
         ->assertSee(__('Testing Tools'))
-        ->assertSee('NVDA 2025');
+        ->assertSee('NVDA 2025')
+        ->assertSee(route('project-methodologies.show', [$project, $methodology]))
+        ->assertDontSee('Full testing method description shown on its own page.');
 });
 
 test('project owner can save testing methodology notes and keep edit open on validation errors', function () {
@@ -156,5 +160,75 @@ test('non-members cannot view project testing methodologies', function () {
 
     Livewire::actingAs($user)
         ->test(ProjectMethodologies::class, ['project' => $project])
+        ->assertForbidden();
+});
+
+test('project members can view details for assigned testing methods', function () {
+    $viewer = User::factory()->create();
+    $project = AccessibilityProject::factory()->create(['team_id' => $viewer->team_id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $viewer->id,
+        'role' => 'viewer',
+    ]);
+    $methodology = TestingMethodology::create([
+        'name' => 'Keyboard testing',
+        'category' => 'testing_tool',
+        'description' => 'Detailed testing instructions.',
+    ]);
+    $project->methodologies()->attach($methodology->id, [
+        'id' => (string) Str::ulid(),
+        'notes' => 'NVDA 2025',
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('project-methodologies.show', [$project, $methodology]))
+        ->assertSuccessful()
+        ->assertSee('Keyboard testing')
+        ->assertSee(__('Testing Tool'))
+        ->assertSee('Detailed testing instructions.')
+        ->assertSee('NVDA 2025')
+        ->assertSee(route('accessibility-projects.show', $project).'#testing-methodology', false);
+});
+
+test('project methodology details are limited to assigned team methods and project members', function () {
+    $viewer = User::factory()->create();
+    $project = AccessibilityProject::factory()->create(['team_id' => $viewer->team_id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $viewer->id,
+        'role' => 'viewer',
+    ]);
+    $assignedMethodology = TestingMethodology::create([
+        'name' => 'Assigned method',
+        'category' => 'testing_tool',
+    ]);
+    $unassignedMethodology = TestingMethodology::create([
+        'name' => 'Unassigned method',
+        'category' => 'testing_tool',
+    ]);
+    $otherTeam = Team::factory()->create();
+    $otherTeamMethodology = TestingMethodology::create([
+        'name' => 'Other team method',
+        'team_id' => $otherTeam->id,
+        'category' => 'testing_tool',
+    ]);
+    $project->methodologies()->attach($assignedMethodology->id, [
+        'id' => (string) Str::ulid(),
+    ]);
+    $project->methodologies()->attach($otherTeamMethodology->id, [
+        'id' => (string) Str::ulid(),
+    ]);
+    $nonMember = User::factory()->create();
+
+    $this->actingAs($viewer)
+        ->get(route('project-methodologies.show', [$project, $unassignedMethodology]))
+        ->assertNotFound();
+
+    $this->get(route('project-methodologies.show', [$project, $otherTeamMethodology]))
+        ->assertNotFound();
+
+    $this->actingAs($nonMember)
+        ->get(route('project-methodologies.show', [$project, $assignedMethodology]))
         ->assertForbidden();
 });

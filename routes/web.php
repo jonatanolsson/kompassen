@@ -7,6 +7,7 @@ use App\Http\Controllers\AccessibilityProjectController;
 use App\Http\Controllers\AccessibilityReportController;
 use App\Http\Controllers\GuestProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\ProjectMethodologyController;
 use App\Http\Controllers\ProjectShareLinkController;
 use App\Http\Controllers\TeamKnowledgeEditorController;
 use App\Livewire\AppSettings;
@@ -128,6 +129,9 @@ Route::middleware(['auth'])->group(function () {
     // Pages within projects
     Route::get('accessibility-projects/{project}/pages/create', CreateAccessibilityPage::class)
         ->name('accessibility-pages.create');
+    Route::get('accessibility-projects/{project}/pages/{page}', [AccessibilityPageController::class, 'show'])
+        ->scopeBindings()
+        ->name('accessibility-pages.show');
     Route::post('accessibility-projects/{project}/pages', [AccessibilityPageController::class, 'store'])
         ->scopeBindings()
         ->name('accessibility-pages.store');
@@ -140,6 +144,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('accessibility-projects/{project}/pages/{page}', [AccessibilityPageController::class, 'destroy'])
         ->scopeBindings()
         ->name('accessibility-pages.destroy');
+
+    // Project methodologies
+    Route::get('accessibility-projects/{project}/methodologies/{methodology}', [ProjectMethodologyController::class, 'show'])
+        ->scopeBindings()
+        ->name('project-methodologies.show');
 
     // Issues within projects
     Route::get('accessibility-projects/{project}/issues/create', CreateAccessibilityIssue::class)

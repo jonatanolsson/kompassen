@@ -19,7 +19,8 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   användas för rapportens webbplatsikon.
 - **Sidor och tjänster** – registrera både publika och inloggade resurser,
   exempelvis Mina sidor, med URL, beskrivning, åtkomstkontext och
-  granskningsomfattning.
+  granskningsomfattning. Projektöversikten visar en kompakt sammanfattning;
+  varje resurs har en separat detaljvy.
 - **Problem** – dokumentera tillgänglighetsproblem med allvarlighetsgrad,
   svårighetsgrad, status, tilldelad medlem, WCAG-kriterium, separat
   användarkonsekvens i rich text och bilagor/skärmbilder. Mermaid-diagram
@@ -45,6 +46,8 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   redaktörer. Redaktörer får skapa och ändra teamets egna metoder; bara
   gemensamma och teamets metoder får kopplas till projektet. Äldre anpassade
   metoder utan teamtillhörighet bevaras som skrivskyddade gemensamma metoder.
+  Projektöversikten visar kopplade metoder kompakt med separata detaljsidor
+  för metodbeskrivning och projektspecifika anteckningar.
 - **Kunskapsbank** – globala WCAG-kriterier och tillhörande resurser är
   skrivskyddade. Gemensamma befintliga exempel förblir synliga men skrivskyddade;
   redaktörer skapar och redigerar enbart teamets egna exempel. Andra teams

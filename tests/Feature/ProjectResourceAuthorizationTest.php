@@ -57,6 +57,10 @@ test('nested project resources cannot be accessed through another project', func
         ->assertNotFound();
 
     $this->actingAs($user)
+        ->get(route('accessibility-pages.show', [$project, $page]))
+        ->assertNotFound();
+
+    $this->actingAs($user)
         ->delete(route('accessibility-issues.destroy', [$project, $issue]))
         ->assertNotFound();
 
@@ -239,4 +243,40 @@ test('viewers can view issues but cannot manage project members', function () {
     $this->actingAs($viewer)
         ->delete(route('project-members.destroy', [$project, $member]))
         ->assertForbidden();
+});
+
+test('project members can open page and service details from the compact overview', function () {
+    $team = Team::factory()->create();
+    $viewer = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $viewer->id,
+        'role' => 'viewer',
+    ]);
+    $page = $project->pages()->create([
+        'name' => 'Account service',
+        'resource_type' => 'service',
+        'url' => 'https://example.test/account',
+        'access_context' => 'mixed',
+        'description' => 'Page details shown only on the detail view.',
+        'scope' => 'out_of_scope',
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('accessibility-projects.show', $project))
+        ->assertSuccessful()
+        ->assertSee('<table', false)
+        ->assertSee(route('accessibility-pages.show', [$project, $page]), false)
+        ->assertDontSee('Page details shown only on the detail view.');
+
+    $this->get(route('accessibility-pages.show', [$project, $page]))
+        ->assertSuccessful()
+        ->assertSee('Account service')
+        ->assertSee('https://example.test/account')
+        ->assertSee(__('Service'))
+        ->assertSee(__('Out of Scope'))
+        ->assertSee(__('Public and authenticated'))
+        ->assertSee('Page details shown only on the detail view.')
+        ->assertSee(route('accessibility-projects.show', $project).'#pages-services', false);
 });

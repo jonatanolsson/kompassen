@@ -1,4 +1,4 @@
-<div class="product-section mb-8">
+<div id="testing-methodology" class="product-section mb-8">
     <div class="flex items-center justify-between mb-4">
         <flux:heading level="2">{{ __('Testing Methodology') }}</flux:heading>
         <flux:modal.trigger name="add-methodology-modal">
@@ -43,10 +43,10 @@
                             </div>
                         </flux:table.cell>
 
-                        <flux:table.cell class="max-w-md whitespace-normal break-words py-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        <flux:table.cell class="max-w-[16rem] whitespace-nowrap py-2 text-sm text-zinc-600 dark:text-zinc-400">
                             <div x-show="!editing">
                                 @if ($method->pivot->notes)
-                                    <span>{{ $method->pivot->notes }}</span>
+                                    <span class="block max-w-[16rem] truncate">{{ $method->pivot->notes }}</span>
                                 @else
                                     <span class="text-xs italic text-zinc-400 dark:text-zinc-500">{{ __('No version/notes specified') }}</span>
                                 @endif
@@ -73,6 +73,13 @@
 
                         <flux:table.cell class="whitespace-nowrap py-2 text-right">
                             <div class="inline-flex items-center justify-end gap-1">
+                                <flux:button
+                                    href="{{ route('project-methodologies.show', [$project, $method]) }}"
+                                    size="sm"
+                                    variant="ghost"
+                                >
+                                    {{ __('View details') }}
+                                </flux:button>
                                 <flux:button
                                     type="button"
                                     x-on:click="editing = true"

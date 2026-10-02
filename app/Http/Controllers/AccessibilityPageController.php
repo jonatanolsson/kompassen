@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessibilityPage;
 use App\Models\AccessibilityProject;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -39,6 +40,13 @@ class AccessibilityPageController extends Controller
 
         return redirect()->route('accessibility-projects.show', $project)
             ->with('success', __('Page or service created successfully.'));
+    }
+
+    public function show(AccessibilityProject $project, AccessibilityPage $page): View
+    {
+        $this->authorize('view', $project);
+
+        return view('accessibility.pages.show', compact('project', 'page'));
     }
 
     public function edit(AccessibilityProject $project, AccessibilityPage $page)
