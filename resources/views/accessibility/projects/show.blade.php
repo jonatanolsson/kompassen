@@ -405,6 +405,11 @@
         <!-- Testing Methodology -->
         @livewire('project-methodologies', ['project' => $project])
 
+        <div class="mt-8">
+            <flux:button href="{{ route('accessibility-projects.index') }}" variant="ghost" icon="arrow-left">
+                {{ __('Back') }}
+            </flux:button>
+        </div>
     </div>
 </div>
 

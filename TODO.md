@@ -6,7 +6,7 @@ De som är åtgärdade kommer vara överstrukna och de som ännu inte är påbö
 1.
 
 ## Logik
-1. Saknar tillbaka knapp eller brödsmulor på vissa vyer för att kunna gå upp en nivå
+1. ~~Saknar tillbaka knapp eller brödsmulor på vissa vyer för att kunna gå upp en nivå~~
 2.
 
 ## Funktionalitet

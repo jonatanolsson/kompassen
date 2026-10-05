@@ -22,6 +22,30 @@ test('can view accessibility projects index', function () {
     $response->assertStatus(200);
 });
 
+test('nested project pages link to their logical parent pages', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+    $page = $project->pages()->create(['name' => 'Homepage']);
+
+    $this->actingAs($user)
+        ->get(route('accessibility-projects.show', $project))
+        ->assertSuccessful()
+        ->assertSee('href="'.route('accessibility-projects.index').'"', false)
+        ->assertSee(__('Back'));
+
+    $this->actingAs($user)
+        ->get(route('accessibility-pages.edit', [$project, $page]))
+        ->assertSuccessful()
+        ->assertSee('href="'.route('accessibility-pages.show', [$project, $page]).'"', false)
+        ->assertSee(__('Cancel'));
+});
+
 test('can create accessibility project', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
