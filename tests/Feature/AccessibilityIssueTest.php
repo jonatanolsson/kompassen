@@ -172,6 +172,37 @@ test('issue create and edit forms use radio groups for severity and difficulty',
         ->and($issue->difficulty)->toBe('easy');
 });
 
+test('issue edit uses Flux accordions and expands them when validation fails', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $issue = $project->issues()->create([
+        'title' => 'Keyboard trap',
+        'description' => 'The keyboard focus cannot escape.',
+        'impact' => 'Keyboard users cannot continue.',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSee(__('Additional evidence and user impact'))
+        ->assertSee(__('Images'))
+        ->assertSee(__('WCAG criteria and examples'))
+        ->assertDontSee('<details', false);
+
+    expect(substr_count($component->html(), 'data-flux-accordion-item'))->toBe(3)
+        ->and(substr_count($component->html(), 'open: true'))->toBe(1);
+
+    $component->set('title', '')
+        ->call('update')
+        ->assertHasErrors('title');
+
+    expect(substr_count($component->html(), 'open: true'))->toBe(3);
+});
+
 test('closing an issue requires a resolution note', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);

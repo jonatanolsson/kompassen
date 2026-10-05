@@ -41,8 +41,11 @@
                             <flux:error name="description" />
                         </flux:field>
 
-                        <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($impact !== '' || $mermaid_diagram !== '' || count($databaseAttachments) > 0 || $errors->any()) open @endif>
-                            <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
+                        <flux:accordion transition>
+                            <flux:accordion.item
+                                :heading="__('Additional evidence and user impact')"
+                                :expanded="$impact !== '' || $mermaid_diagram !== '' || count($databaseAttachments) > 0 || $errors->any()"
+                            >
                             <div class="mt-6 space-y-6">
                         <flux:field>
                             <flux:label>{{ __('Impact') }}</flux:label>
@@ -82,15 +85,19 @@
                             </flux:text>
                         </flux:field>
                             </div>
-                        </details>
+                        </flux:accordion.item>
+                    </flux:accordion>
                     </div>
                 </div>
 
                 <flux:separator />
 
                 <!-- Images Section -->
-                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if (count($databaseAttachments) > 0 || count($this->attachments) > 0 || $errors->any()) open @endif>
-                    <summary class="cursor-pointer font-medium">{{ __('Images') }}</summary>
+                <flux:accordion transition>
+                    <flux:accordion.item
+                        :heading="__('Images')"
+                        :expanded="count($databaseAttachments) > 0 || count($this->attachments) > 0 || $errors->any()"
+                    >
                 <div class="py-4">
 
                     <flux:field class="mb-4">
@@ -182,7 +189,8 @@
                         </div>
                     @endif
                 </div>
-                </details>
+                    </flux:accordion.item>
+                </flux:accordion>
 
                 <flux:separator />
 
@@ -257,8 +265,11 @@
 
                 <flux:separator />
 
-                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if (count($wcag_criteria) > 0 || count($example_ids) > 0 || $errors->any()) open @endif>
-                    <summary class="cursor-pointer font-medium">{{ __('WCAG criteria and examples') }}</summary>
+                <flux:accordion transition>
+                    <flux:accordion.item
+                        :heading="__('WCAG criteria and examples')"
+                        :expanded="count($wcag_criteria) > 0 || count($example_ids) > 0 || $errors->any()"
+                    >
                     <div class="mt-5 space-y-6">
                 <!-- WCAG Criteria -->
                 <div class="py-4">
@@ -356,7 +367,8 @@
                 <flux:separator />
 
                     </div>
-                </details>
+                    </flux:accordion.item>
+                </flux:accordion>
 
                 <!-- Actions -->
                 <div class="flex gap-3 pt-6">
