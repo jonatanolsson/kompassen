@@ -148,7 +148,7 @@ test('issue example selection is limited to selected WCAG criteria', function ()
     expect($project->issues()->count())->toBe(0);
 });
 
-test('issue detail shows linked knowledge base examples', function () {
+test('issue detail shows an overview of attached criteria and knowledge base examples', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
     $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
@@ -182,10 +182,20 @@ test('issue detail shows linked knowledge base examples', function () {
         'status' => 'open',
     ]);
     $issue->examples()->attach($example);
+    $issue->wcagCriteria()->attach($criterion);
 
     $this->actingAs($user)
         ->get(route('accessibility-issues.show', [$project, $issue]))
         ->assertSuccessful()
+        ->assertSee(__('WCAG Success Criteria'))
+        ->assertSee('<table', false)
+        ->assertSee('<th', false)
+        ->assertSee(__('Criterion'))
+        ->assertSee(__('Level'))
+        ->assertSee('1.1.1')
+        ->assertSee('Icke-textinnehåll')
+        ->assertSee('Textalternativ tillhandahålls.')
+        ->assertSee('href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content"', false)
         ->assertSee(__('Knowledge Base Examples'))
         ->assertSee(__('Issue diagram'))
         ->assertSee('data-mermaid-diagram')

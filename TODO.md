@@ -12,7 +12,7 @@ De som är åtgärdade kommer vara överstrukna och de som ännu inte är påbö
 ## Funktionalitet
 1. "Tillgänglighetsfel / issues" inne i projektet
    1. ~~Tilldelad till på fel är är inte riktigt korrekt. Det borde vara en select där man väljer användare i projektet~~
-   2. WCAG-Framgångskriterier presenteras inte i en lista / tabell. Det är svårt att för en översikt
+   2. ~~WCAG-Framgångskriterier presenteras inte i en lista / tabell. Det är svårt att för en översikt~~
    3. När jag tittar inne på redigering så använder den inte flux accordion när jag ska redigera
    4. När jag väljer att lägga in ett framgångskriterie i ett issue så får jag inte upp en lista med framgångskriterier så bör jag få även upp exemplen vilket jag inte upplever att jag får.
    5. ~~Svårighet bör vara radio buttons där jag borde kunna välja svårighet.~~

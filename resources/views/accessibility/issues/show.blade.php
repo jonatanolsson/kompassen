@@ -177,35 +177,41 @@
         @if ($wcagCriteria->count() > 0)
             <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('WCAG Success Criteria') }}</flux:heading>
-                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @foreach ($wcagCriteria as $criterion)
-                        <div class="py-4 first:pt-0 last:pb-0">
-                            <div class="space-y-2">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3 flex-1">
-                                        <span class="font-bold text-blue-600 dark:text-blue-400 min-w-fit">{{ $criterion->number }}</span>
-                                        <div class="flex-1 min-w-0">
-                                            <flux:heading level="4" class="text-sm">{{ $criterion->name_sv ?? $criterion->name_en }}</flux:heading>
-                                            <div class="flex items-center gap-2 mt-1">
-                                                <flux:badge color="blue" class="text-xs">{{ Str::upper($criterion->level) }}</flux:badge>
-                                            </div>
-                                        </div>
+                <flux:table class="w-full table-auto! text-sm">
+                    <flux:table.columns>
+                        <flux:table.column>{{ __('Criterion') }}</flux:table.column>
+                        <flux:table.column class="whitespace-nowrap">{{ __('Level') }}</flux:table.column>
+                        <flux:table.column class="whitespace-nowrap">{{ __('W3C') }}</flux:table.column>
+                    </flux:table.columns>
+
+                    <flux:table.rows>
+                        @foreach ($wcagCriteria as $criterion)
+                            <flux:table.row>
+                                <flux:table.cell class="min-w-0 py-2">
+                                    <div>
+                                        <span class="mr-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">{{ $criterion->number }}</span>
+                                        <span class="font-medium">{{ $criterion->name_sv ?? $criterion->name_en }}</span>
                                     </div>
+                                    @if ($criterion->description_sv || $criterion->description_en)
+                                        <flux:text size="sm" class="mt-1 whitespace-normal text-zinc-600 dark:text-zinc-400">
+                                            {{ $criterion->description_sv ?? $criterion->description_en }}
+                                        </flux:text>
+                                    @endif
+                                </flux:table.cell>
+                                <flux:table.cell class="whitespace-nowrap py-2">
+                                    <flux:badge color="blue">{{ Str::upper($criterion->level) }}</flux:badge>
+                                </flux:table.cell>
+                                <flux:table.cell class="whitespace-nowrap py-2">
                                     @if ($criterion->url)
-                                        <a href="{{ $criterion->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-medium whitespace-nowrap">
-                                            W3C →
+                                        <a href="{{ $criterion->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                            {{ __('W3C') }} &rarr;
                                         </a>
                                     @endif
-                                </div>
-                                @if ($criterion->description_sv || $criterion->description_en)
-                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                        {{ $criterion->description_sv ?? $criterion->description_en }}
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                    </flux:table.rows>
+                </flux:table>
             </div>
         @endif
 
