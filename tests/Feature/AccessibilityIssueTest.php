@@ -194,7 +194,7 @@ test('issue edit uses Flux accordions and expands them when validation fails', f
         ->assertDontSee('<details', false);
 
     expect(substr_count($component->html(), 'data-flux-accordion-item'))->toBe(3)
-        ->and(substr_count($component->html(), 'open: true'))->toBe(1);
+        ->and(substr_count($component->html(), 'open: true'))->toBe(2);
 
     $component->set('title', '')
         ->call('update')

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\CreateAccessibilityIssue;
 use App\Livewire\EditAccessibilityIssue;
 use App\Models\AccessibilityIssue;
 use App\Models\AccessibilityProject;
@@ -9,6 +10,40 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+
+test('issue forms show a visible image upload dropzone', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'editor',
+    ]);
+    $issue = $project->issues()->create([
+        'title' => 'Missing alt text',
+        'description' => 'Images need alt text',
+        'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
+
+    $createHtml = Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee(__('Choose images or drop them here'))
+        ->assertSee(__('JPG, PNG, GIF or WebP. Max 5 MB per image.'))
+        ->html();
+
+    expect($createHtml)->toContain('data-flux-file-upload-dropzone')
+        ->and(strpos($createHtml, 'data-flux-file-upload-dropzone'))
+        ->toBeLessThan(strpos($createHtml, '<details'));
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSee(__('Choose images or drop them here'))
+        ->assertSee(__('JPG, PNG, GIF or WebP. Max 5 MB per image.'))
+        ->assertSee('open: true', false);
+});
 
 test('user can upload images when creating issue', function () {
     Storage::fake('public');

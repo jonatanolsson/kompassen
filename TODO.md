@@ -17,7 +17,7 @@ De som är åtgärdade kommer vara överstrukna och de som ännu inte är påbö
    4. ~~När jag väljer att lägga in ett framgångskriterie i ett issue så får jag inte upp en lista med framgångskriterier så bör jag få även upp exemplen vilket jag inte upplever att jag får.~~
    5. ~~Svårighet bör vara radio buttons där jag borde kunna välja svårighet.~~
    6. ~~Allvarlighetsgrad bör vara radio buttons där jag borde kunna välja svårighet.~~
-   7. Funktionen för att ladda upp bilder ser trasig ut. KNappt jag ser att det är en knapp eller yta att ladda upp bilder på.
+   7. ~~Funktionen för att ladda upp bilder ser trasig ut. KNappt jag ser att det är en knapp eller yta att ladda upp bilder på.~~
    8. Ser inte riktigt möjligheten att lägga in kodsnuttar eller dylikt. NU ser det bara ut som konsekvens och möjlighet till mermaid
    9. I listan när jag ska välja framgångskriterie så är det en dubbellista? är det eftersom vi har dubbla typer wcag 2.1 och 2.2
    10.

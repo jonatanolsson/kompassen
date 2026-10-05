@@ -96,13 +96,18 @@
                 <flux:accordion transition>
                     <flux:accordion.item
                         :heading="__('Images')"
-                        :expanded="count($databaseAttachments) > 0 || count($this->attachments) > 0 || $errors->any()"
+                        :expanded="true"
                     >
                 <div class="py-4">
 
                     <flux:field class="mb-4">
                         <flux:label>{{ __('Upload new images') }}</flux:label>
-                        <flux:file-upload wire:model="attachments" multiple accept="image/*" />
+                        <flux:file-upload wire:model="attachments" multiple accept="image/jpeg,image/png,image/gif,image/webp">
+                            <flux:file-upload.dropzone
+                                heading="{{ __('Choose images or drop them here') }}"
+                                text="{{ __('JPG, PNG, GIF or WebP. Max 5 MB per image.') }}"
+                            />
+                        </flux:file-upload>
                         <flux:error name="attachments" />
                     </flux:field>
 

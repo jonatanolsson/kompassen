@@ -39,6 +39,38 @@
                             <flux:error name="description" />
                         </flux:field>
 
+                        <flux:field>
+                            <flux:label>{{ __('Upload new images') }}</flux:label>
+                            <flux:file-upload
+                                wire:model="attachments"
+                                multiple
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                            >
+                                <flux:file-upload.dropzone
+                                    heading="{{ __('Choose images or drop them here') }}"
+                                    text="{{ __('JPG, PNG, GIF or WebP. Max 5 MB per image.') }}"
+                                />
+                            </flux:file-upload>
+                            <flux:error name="attachments" />
+
+                            @if (count($this->attachments) > 0)
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
+                                    @foreach ($this->attachments as $uploadedFile)
+                                        <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+                                            <img
+                                                src="{{ $uploadedFile->temporaryUrl() }}"
+                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
+                                                class="h-full w-full object-cover"
+                                            />
+                                            <span class="absolute bottom-2 left-2 rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">
+                                                {{ __('New') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </flux:field>
+
                         <details class="space-y-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
                             <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
                             <div class="mt-6 space-y-6">
@@ -78,33 +110,6 @@
                             <flux:text size="sm" x-show="rendering" x-cloak class="text-zinc-500 dark:text-zinc-400" aria-live="polite">
                                 {{ __('Rendering diagram…') }}
                             </flux:text>
-                        </flux:field>
-
-                        <flux:field>
-                            <flux:label>{{ __('Images/Evidence') }}</flux:label>
-                            <flux:file-upload
-                                wire:model="attachments"
-                                multiple
-                                accept="image/*"
-                            />
-                            <flux:error name="attachments" />
-
-                            @if (count($this->attachments) > 0)
-                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
-                                    @foreach ($this->attachments as $uploadedFile)
-                                        <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-                                            <img
-                                                src="{{ $uploadedFile->temporaryUrl() }}"
-                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
-                                                class="h-full w-full object-cover"
-                                            />
-                                            <span class="absolute bottom-2 left-2 rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">
-                                                {{ __('New') }}
-                                            </span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
                         </flux:field>
                             </div>
                         </details>
