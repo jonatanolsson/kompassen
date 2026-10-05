@@ -241,7 +241,10 @@
                             <flux:table.cell class="hidden lg:table-cell">
                                 <div class="flex items-center gap-1">
                                     @foreach ($issue->wcagCriteria->take(3) as $criterion)
-                                        <flux:badge size="sm" color="zinc">{{ $criterion->number }}</flux:badge>
+                                        <flux:badge size="sm" color="zinc">{{ $criterion->standard }} · {{ $criterion->number }}</flux:badge>
+                                        @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                            <flux:badge size="sm" color="amber">{{ __('Nice to have') }}</flux:badge>
+                                        @endif
                                     @endforeach
                                     @if ($issue->wcagCriteria->count() > 3)
                                         <flux:badge size="sm" color="zinc">+{{ $issue->wcagCriteria->count() - 3 }}</flux:badge>
@@ -281,7 +284,10 @@
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach ($issue->wcagCriteria as $c)
                                                     <div class="flex items-center gap-2 p-2 bg-white dark:bg-zinc-700 rounded">
-                                                        <flux:badge size="sm" color="zinc">{{ $c->number }}</flux:badge>
+                                                        <flux:badge size="sm" color="zinc">{{ $c->standard }} · {{ $c->number }}</flux:badge>
+                                                        @if ($c->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                                            <flux:badge size="sm" color="amber">{{ __('Nice to have') }}</flux:badge>
+                                                        @endif
                                                         <div class="text-sm">{{ $c->name }}</div>
                                                     </div>
                                                 @endforeach
@@ -310,7 +316,10 @@
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach ($issue->wcagCriteria as $c)
                                                     <div class="flex items-center gap-2 p-2 bg-white dark:bg-zinc-700 rounded">
-                                                        <flux:badge size="sm" color="zinc">{{ $c->number }}</flux:badge>
+                                                        <flux:badge size="sm" color="zinc">{{ $c->standard }} · {{ $c->number }}</flux:badge>
+                                                        @if ($c->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                                            <flux:badge size="sm" color="amber">{{ __('Nice to have') }}</flux:badge>
+                                                        @endif
                                                         <div class="text-sm">{{ $c->name }}</div>
                                                     </div>
                                                 @endforeach

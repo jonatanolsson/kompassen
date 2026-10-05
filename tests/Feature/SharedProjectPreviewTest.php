@@ -38,6 +38,7 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
     ]);
 
     $wcagCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
         'number' => '1.2.2',
         'level' => 'A',
         'name_en' => 'Captions (Prerecorded)',
@@ -45,6 +46,13 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         'description_en' => 'Captions are provided for prerecorded audio content.',
         'description_sv' => 'Textning tillhandahålls för inspelat ljudinnehåll.',
         'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html',
+    ]);
+    $wcag22Criterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '1.2.2',
+        'level' => 'A',
+        'name_en' => 'Captions (Prerecorded), updated',
+        'name_sv' => 'Textning (inspelad), uppdaterad',
     ]);
 
     foreach (['critical', 'major', 'moderate', 'minor'] as $severity) {
@@ -58,7 +66,7 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         ]);
 
         if ($severity === 'critical') {
-            $issue->wcagCriteria()->attach($wcagCriterion->id);
+            $issue->wcagCriteria()->attach([$wcagCriterion->id, $wcag22Criterion->id]);
         }
     }
 
@@ -82,6 +90,9 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         ->assertSee(__('Prioritized actions'))
         ->assertSee(__('View details'))
         ->assertSee(__('Affected WCAG requirements'))
+        ->assertSee('WCAG 2.1 · 1.2.2')
+        ->assertSee('WCAG 2.2 · 1.2.2')
+        ->assertSee(__('Nice to have'))
         ->assertSee('WCAG 2.1 nivå AA')
         ->assertSee(Carbon::parse('2026-09-01')->locale('sv')->translatedFormat('j M Y'))
         ->assertSee(__('Moderate'))
@@ -92,4 +103,8 @@ test('preview shows scope-aware metadata, statistics, and accessible modal struc
         ->assertSee('leading-[1.75]', false)
         ->assertSee('role="dialog"', false)
         ->assertSee('aria-modal="true"', false);
+
+    expect($response->getContent())
+        ->toContain(__('View criterion details: :criterion', ['criterion' => 'WCAG 2.1 1.2.2']))
+        ->toContain(__('View criterion details: :criterion', ['criterion' => 'WCAG 2.2 1.2.2']));
 });

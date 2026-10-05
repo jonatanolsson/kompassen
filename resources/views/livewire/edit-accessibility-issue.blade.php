@@ -314,11 +314,16 @@
                     <div class="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
                         @forelse ($availableCriteria as $criterion)
                             <div wire:key="edit-issue-criterion-{{ $criterion['id'] }}" class="rounded-lg px-3 py-2 transition hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                                <flux:checkbox
-                                    wire:model.live="wcag_criteria"
-                                    value="{{ $criterion['id'] }}"
-                                    :label="$criterion['standard'].' ('.$criterion['number'].') — '.($criterion['name_sv'] ?? $criterion['name_en'])"
-                                />
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <flux:checkbox
+                                        wire:model.live="wcag_criteria"
+                                        value="{{ $criterion['id'] }}"
+                                        :label="$criterion['standard'].' ('.$criterion['number'].') — '.($criterion['name_sv'] ?? $criterion['name_en'])"
+                                    />
+                                    @if ($criterion['is_nice_to_have'])
+                                        <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+                                    @endif
+                                </div>
                                 <flux:text size="xs" class="ml-7 mt-0.5 text-zinc-500 dark:text-zinc-400">
                                     {{ __('Level') }} {{ $criterion['level'] }}
                                 </flux:text>

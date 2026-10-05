@@ -54,12 +54,14 @@ test('can create accessibility project', function () {
         'name' => 'Test Project',
         'description' => 'Test description',
         'target_wcag_level' => 'AA',
+        'target_wcag_version' => '2.2',
     ]);
 
     $response->assertRedirect();
     $this->assertDatabaseHas('accessibility_projects', [
         'name' => 'Test Project',
         'team_id' => $team->id,
+        'target_wcag_version' => '2.2',
     ]);
 });
 
@@ -177,6 +179,32 @@ test('project form explains validation errors and keeps entered content', functi
         ->assertSee('projektnamn måste fyllas i.');
 });
 
+test('project forms create and update WCAG 2.2 target versions', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityProject::class)
+        ->assertSet('target_wcag_version', '2.1')
+        ->assertSee('WCAG 2.2')
+        ->set('name', 'WCAG 2.2 audit')
+        ->set('target_wcag_version', '2.2')
+        ->call('submit')
+        ->assertRedirect();
+
+    $project = AccessibilityProject::query()->where('name', 'WCAG 2.2 audit')->firstOrFail();
+    expect($project->target_wcag_version)->toBe('2.2');
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityProject::class, ['project' => $project])
+        ->assertSet('target_wcag_version', '2.2')
+        ->set('target_wcag_version', '2.1')
+        ->call('update')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($project->refresh()->target_wcag_version)->toBe('2.1');
+});
+
 test('can update project wcag level from edit form', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
@@ -194,10 +222,12 @@ test('can update project wcag level from edit form', function () {
     Livewire::actingAs($user)
         ->test(EditAccessibilityProject::class, ['project' => $project])
         ->set('target_wcag_level', 'AAA')
+        ->set('target_wcag_version', '2.2')
         ->call('update')
         ->assertRedirect(route('accessibility-projects.show', $project));
 
-    expect($project->refresh()->target_wcag_level)->toBe('AAA');
+    expect($project->refresh()->target_wcag_level)->toBe('AAA')
+        ->and($project->target_wcag_version)->toBe('2.2');
 });
 
 test('project primary website can be edited without changing page URLs', function () {

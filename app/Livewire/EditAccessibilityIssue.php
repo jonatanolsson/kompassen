@@ -227,8 +227,8 @@ class EditAccessibilityIssue extends Component
 
     public function render()
     {
-        $pages = AccessibilityProject::findOrFail($this->projectId)
-            ->pages()
+        $project = AccessibilityProject::findOrFail($this->projectId);
+        $pages = $project->pages()
             ->select('id', 'name', 'scope', 'resource_type')
             ->get()
             ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'scope' => $p->scope, 'resource_type' => $p->resource_type])
@@ -262,6 +262,7 @@ class EditAccessibilityIssue extends Component
                 'name_sv' => $c->name_sv,
                 'name_en' => $c->name_en,
                 'level' => $c->level,
+                'is_nice_to_have' => $c->isOutsideProjectTargetVersion($project->target_wcag_version),
             ])
             ->values()
             ->toArray();

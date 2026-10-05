@@ -36,6 +36,7 @@ class IssueExporter
         $markdown .= "**Severity**: {$data['severity']}\n";
         $markdown .= "**Difficulty**: {$data['difficulty']}\n";
         $markdown .= "**Status**: {$data['status']}\n\n";
+        $markdown .= '**'.__('Project WCAG target')."**: WCAG {$data['project_target_wcag_version']}\n";
 
         if ($data['description']) {
             $markdown .= "## Description\n\n{$data['description']}\n\n";
@@ -52,7 +53,7 @@ class IssueExporter
         if (! empty($data['wcag_criteria'])) {
             $markdown .= "\n## WCAG Success Criteria\n\n";
             foreach ($data['wcag_criteria'] as $criterion) {
-                $markdown .= "- **{$criterion['number']}** - {$criterion['name']}\n";
+                $markdown .= "- **{$criterion['label']}** - {$criterion['name']}\n";
             }
         }
 
@@ -70,7 +71,7 @@ class IssueExporter
     {
         $data = $this->getExportData();
 
-        $csv = "Title,Severity,Difficulty,Status,Description,Component Area,Page,WCAG Criteria,Attachments\n";
+        $csv = 'Title,Severity,Difficulty,Status,Description,Component Area,Page,'.__('Project WCAG target').",WCAG Criteria,Attachments\n";
         $csv .= $this->escapeCsvField($data['title']).',';
         $csv .= $this->escapeCsvField($data['severity']).',';
         $csv .= $this->escapeCsvField($data['difficulty']).',';
@@ -78,7 +79,8 @@ class IssueExporter
         $csv .= $this->escapeCsvField($data['description']).',';
         $csv .= $this->escapeCsvField($data['component_area']).',';
         $csv .= $this->escapeCsvField($data['page_name']).',';
-        $csv .= $this->escapeCsvField(implode('; ', array_column($data['wcag_criteria'], 'number'))).',';
+        $csv .= $this->escapeCsvField($data['project_target_wcag_version']).',';
+        $csv .= $this->escapeCsvField(implode('; ', array_column($data['wcag_criteria'], 'label'))).',';
         $csv .= $this->escapeCsvField(implode('; ', $data['attachments']))."\n";
 
         return $csv;
@@ -86,12 +88,17 @@ class IssueExporter
 
     private function getExportData(): array
     {
+        $this->issue->loadMissing(['project', 'page']);
+        $targetVersion = $this->issue->project->target_wcag_version;
         $wcagCriteria = $this->issue->wcagCriteria()
             ->get()
             ->map(fn ($criterion) => [
+                'standard' => $criterion->standard,
                 'number' => $criterion->number,
                 'name' => $criterion->name_sv ?? $criterion->name_en,
                 'level' => $criterion->level,
+                'nice_to_have' => $criterion->isOutsideProjectTargetVersion($targetVersion),
+                'label' => $criterion->standard.' '.$criterion->number.($criterion->isOutsideProjectTargetVersion($targetVersion) ? ' ('.__('Nice to have').')' : ''),
             ])
             ->toArray();
 
@@ -109,6 +116,7 @@ class IssueExporter
             'status' => Str::title($this->issue->status),
             'component_area' => $this->issue->component_area,
             'page_name' => $this->issue->page?->name,
+            'project_target_wcag_version' => $targetVersion,
             'wcag_criteria' => $wcagCriteria,
             'attachments' => $attachments,
             'created_at' => $this->issue->created_at->toIso8601String(),
@@ -116,9 +124,9 @@ class IssueExporter
         ];
     }
 
-    private function escapeCsvField(string $field): string
+    private function escapeCsvField(?string $field): string
     {
-        if (empty($field)) {
+        if ($field === null || $field === '') {
             return '';
         }
 

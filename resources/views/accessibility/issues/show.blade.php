@@ -208,8 +208,13 @@
                         @foreach ($wcagCriteria as $criterion)
                             <flux:table.row>
                                 <flux:table.cell class="min-w-0 py-2">
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                        <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">{{ $criterion->standard }} · {{ $criterion->number }}</span>
+                                        @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                            <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+                                        @endif
+                                    </div>
                                     <div>
-                                        <span class="mr-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">{{ $criterion->number }}</span>
                                         <span class="font-medium">{{ $criterion->name_sv ?? $criterion->name_en }}</span>
                                     </div>
                                     @if ($criterion->description_sv || $criterion->description_en)

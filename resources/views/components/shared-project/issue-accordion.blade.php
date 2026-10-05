@@ -1,4 +1,4 @@
-@props(['issue', 'pageName' => null])
+@props(['issue', 'pageName' => null, 'targetWcagVersion'])
 
 @php
     $descriptionSummary = Str::of(strip_tags($issue->description ?? ''))->squish()->limit(220);
@@ -29,9 +29,10 @@
                 <span>{{ __('Status') }}: {{ __($issue->status) }}</span>
             @endif
             @foreach ($issue->wcagCriteria as $criterion)
-                <flux:badge color="emerald" size="sm">
-                    WCAG {{ $criterion->number }}
-                </flux:badge>
+                <flux:badge color="emerald" size="sm">{{ $criterion->standard }} · {{ $criterion->number }}</flux:badge>
+                @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
+                    <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+                @endif
             @endforeach
         </div>
 
@@ -99,7 +100,10 @@
                     @foreach ($issue->wcagCriteria as $criterion)
                         <article class="border-t border-zinc-200 pt-3 dark:border-zinc-700 print:border-zinc-300">
                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $criterion->number }}</span>
+                                <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $criterion->standard }} · {{ $criterion->number }}</span>
+                                @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
+                                    <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+                                @endif
                                 <span class="font-medium text-zinc-900 dark:text-white">{{ $criterion->name_sv ?? $criterion->name_en }}</span>
                                 <span class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('Level') }} {{ Str::upper($criterion->level) }}</span>
                                 @if ($criterion->url)
@@ -127,7 +131,7 @@
                             @if ($criterion->pivot->screenshot_path)
                                 <img
                                     src="{{ asset('storage/'.$criterion->pivot->screenshot_path) }}"
-                                    alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->number]) }}"
+                                    alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}"
                                     class="mt-2 max-h-96 max-w-full rounded border border-zinc-200 object-contain dark:border-zinc-700 print:border-zinc-300"
                                 />
                             @endif

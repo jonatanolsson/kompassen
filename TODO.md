@@ -20,7 +20,7 @@ De som är åtgärdade kommer vara överstrukna och de som ännu inte är påbö
    7. ~~Funktionen för att ladda upp bilder ser trasig ut. KNappt jag ser att det är en knapp eller yta att ladda upp bilder på.~~
    8. ~~Ser inte riktigt möjligheten att lägga in kodsnuttar eller dylikt. NU ser det bara ut som konsekvens och möjlighet till mermaid~~
    9. ~~I listan när jag ska välja framgångskriterie så är det en dubbellista? är det eftersom vi har dubbla typer wcag 2.1 och 2.2~~
-   10. När ett kriteriums WCAG-version ligger utanför projektets omfång bör issue kunna beskrivas som "nice to have" eller bonus snarare än krav/behov.
+   10. ~~När ett kriteriums WCAG-version ligger utanför projektets omfång bör issue kunna beskrivas som "nice to have" eller bonus snarare än krav/behov. Kriterier märks individuellt per version; projekt kan välja WCAG 2.2.~~
 
 ## Rapport generering
 1.

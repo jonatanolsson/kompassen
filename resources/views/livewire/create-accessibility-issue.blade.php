@@ -220,11 +220,16 @@
 
                         <div class="space-y-2 max-h-96 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
                             @forelse ($wcagCriteria as $criterion)
-                                <flux:checkbox
-                                    wire:model.live="wcag_criteria"
-                                    value="{{ $criterion->id }}"
-                                    :label="$criterion->standard.' ('.$criterion->code.') — '.Str::limit($criterion->name, 80)"
-                                />
+                                <div wire:key="create-issue-criterion-{{ $criterion->id }}" class="flex flex-wrap items-center gap-2">
+                                    <flux:checkbox
+                                        wire:model.live="wcag_criteria"
+                                        value="{{ $criterion->id }}"
+                                        :label="$criterion->standard.' ('.$criterion->code.') — '.Str::limit($criterion->name, 80)"
+                                    />
+                                    @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                        <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+                                    @endif
+                                </div>
                             @empty
                                 <flux:text class="text-zinc-500">{{ __('No WCAG criteria available') }}</flux:text>
                             @endforelse

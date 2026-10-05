@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AccessibilityProject;
 use App\Services\ReportSiteIcon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -58,6 +59,7 @@ class EditAccessibilityProject extends Component
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'target_wcag_level' => 'required|in:A,AA,AAA',
+            'target_wcag_version' => ['required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'status' => 'required|in:planning,in_progress,completed',
             'client_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
             'report_site_url' => ReportSiteIcon::primarySiteRules(),
@@ -71,6 +73,7 @@ class EditAccessibilityProject extends Component
             'name' => $this->name,
             'description' => $this->description,
             'target_wcag_level' => $this->target_wcag_level,
+            'target_wcag_version' => $this->target_wcag_version,
             'status' => $this->status,
             'report_site_url' => ReportSiteIcon::origin($this->report_site_url),
         ]);

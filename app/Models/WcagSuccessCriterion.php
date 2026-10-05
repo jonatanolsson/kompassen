@@ -72,6 +72,11 @@ class WcagSuccessCriterion extends Model
         return $this->number;
     }
 
+    public function isOutsideProjectTargetVersion(string $targetVersion): bool
+    {
+        return $this->standard !== 'WCAG '.$targetVersion;
+    }
+
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();

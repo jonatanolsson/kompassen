@@ -1,4 +1,4 @@
-@props(['statusGroups', 'severityOrder', 'severityLabels', 'sampleScopeLabels', 'issueStatuses', 'reportOptions', 'descriptionSummaries'])
+@props(['statusGroups', 'severityOrder', 'severityLabels', 'sampleScopeLabels', 'issueStatuses', 'reportOptions', 'descriptionSummaries', 'targetWcagVersion'])
 
 @foreach ($issueStatuses as $status => $statusLabel)
     @php
@@ -63,11 +63,14 @@
                                 <p class="report-document__detail-title">{{ __('WCAG Criteria') }}</p>
                                 @foreach ($criteria as $criterion)
                                     @if ($reportOptions['wcag_index'] ?? false)
-                                        <a class="report-document__link" href="#wcag-{{ Str::slug((string) $criterion->number) }}">{{ $criterion->number }}</a>
+                                        <a class="report-document__link" href="#wcag-{{ Str::slug($criterion->standard.'-'.$criterion->number) }}">{{ $criterion->standard }} {{ $criterion->number }}</a>
                                     @else
-                                        <span>{{ $criterion->number }}</span>
+                                        <span>{{ $criterion->standard }} {{ $criterion->number }}</span>
                                     @endif
                                     <span> · {{ $criterion->name_sv ?? $criterion->name_en }}</span>
+                                    @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
+                                        <strong> — {{ __('Nice to have') }}</strong>
+                                    @endif
                                     @if (! $loop->last)
                                         <span>, </span>
                                     @endif

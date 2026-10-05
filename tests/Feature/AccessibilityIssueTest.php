@@ -7,6 +7,7 @@ use App\Models\ProjectMember;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WcagSuccessCriterion;
+use App\Services\IssueExporter;
 use Livewire\Livewire;
 
 test('resolving an issue keeps status and resolution status synchronized', function () {
@@ -170,6 +171,69 @@ test('issue create and edit forms use radio groups for severity and difficulty',
 
     expect($issue->refresh()->severity)->toBe('minor')
         ->and($issue->difficulty)->toBe('easy');
+});
+
+test('WCAG scope labels apply per criterion in forms, project views, and exports', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'target_wcag_version' => '2.1',
+    ]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+
+    $inScopeCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'level' => 'A',
+    ]);
+    $niceToHaveCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content, updated',
+        'name_sv' => 'Icke-textinnehåll, uppdaterat',
+        'level' => 'A',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee(__('Nice to have'))
+        ->set('title', 'Mixed WCAG issue')
+        ->set('wcag_criteria', [(string) $inScopeCriterion->id, (string) $niceToHaveCriterion->id])
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $issue = $project->issues()->firstOrFail();
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSee(__('Nice to have'));
+
+    $this->actingAs($user)
+        ->get(route('accessibility-issues.show', [$project, $issue]))
+        ->assertSuccessful()
+        ->assertSee('WCAG 2.1 · 1.1.1')
+        ->assertSee('WCAG 2.2 · 1.1.1')
+        ->assertSee(__('Nice to have'));
+
+    $this->actingAs($user)
+        ->get(route('accessibility-projects.show', $project))
+        ->assertSuccessful()
+        ->assertSee('WCAG 2.1 · 1.1.1')
+        ->assertSee('WCAG 2.2 · 1.1.1')
+        ->assertSee(__('Nice to have'));
+
+    $exporter = new IssueExporter($issue);
+    $json = json_decode($exporter->export('json'), true, flags: JSON_THROW_ON_ERROR);
+    $criteria = collect($json['wcag_criteria'])->keyBy('standard');
+
+    expect($json['project_target_wcag_version'])->toBe('2.1')
+        ->and($criteria['WCAG 2.1']['nice_to_have'])->toBeFalse()
+        ->and($criteria['WCAG 2.2']['nice_to_have'])->toBeTrue()
+        ->and($exporter->export('markdown'))->toContain('WCAG 2.2 1.1.1 ('.__('Nice to have').')')
+        ->and($exporter->export('csv'))->toContain(__('Project WCAG target'))
+        ->and($exporter->export('csv'))->toContain('WCAG 2.2 1.1.1 ('.__('Nice to have').')');
 });
 
 test('issue edit uses Flux accordions and expands them when validation fails', function () {

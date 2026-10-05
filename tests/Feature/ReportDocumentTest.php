@@ -13,6 +13,7 @@ function reportDocumentFixture(): array
     $project->setAttribute('id', 'project-1');
     $project->setAttribute('name', 'Example project');
     $project->setAttribute('target_wcag_level', 'AA');
+    $project->setAttribute('target_wcag_version', '2.1');
     $project->setAttribute('description', null);
     $project->setAttribute('client_logo', null);
     $team = new Team;
@@ -27,7 +28,7 @@ function reportDocumentFixture(): array
         'scope' => 'Public user journeys',
         'issues' => collect(),
         'counts' => ['critical' => 0, 'major' => 0, 'moderate' => 0, 'minor' => 0],
-        'templateVersion' => 9,
+        'templateVersion' => 10,
         'pageGroups' => collect(),
         'projectWideIssues' => collect(),
         'cleanPages' => collect(),
@@ -115,7 +116,7 @@ test('renders compact report navigation and groups issues by page status and sev
     ]);
 
     expect($html)
-        ->toContain('data-report-template="9"')
+        ->toContain('data-report-template="10"')
         ->toContain('href="#project-wide-issues"')
         ->toContain('href="#page-page-1"')
         ->toContain('id="issue-issue-open"')
@@ -227,7 +228,7 @@ test('renders optional evidence only when corresponding report options are enabl
         ->toContain('Fixed in the latest release.')
         ->toContain(__('Entire page or service'))
         ->not->toContain('>all<')
-        ->toContain('id="wcag-212"')
+        ->toContain('id="wcag-wcag-21-212"')
         ->toContain('trigger.focus();');
 
     $disabledHtml = renderReportDocument([

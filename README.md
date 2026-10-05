@@ -14,9 +14,9 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
 - **Dashboard** – visar öppna problem och senaste projektaktivitet med direktväg
   till granskningens nästa steg.
 - **Projekt** – skapa, redigera och följa upp tillgänglighetsprojekt med
-  målversion och målnivå för WCAG. Projektets valfria huvudwebbplats kan
-  ändras utan att sidornas URL:er påverkas; den visas som domän och kan
-  användas för rapportens webbplatsikon.
+  målversion (WCAG 2.0, 2.1 eller 2.2) och målnivå. Projektets valfria
+  huvudwebbplats kan ändras utan att sidornas URL:er påverkas; den visas som
+  domän och kan användas för rapportens webbplatsikon.
 - **Sidor och tjänster** – registrera både publika och inloggade resurser,
   exempelvis Mina sidor, med URL, beskrivning, åtkomstkontext och
   granskningsomfattning. Projektöversikten visar en kompakt sammanfattning;
@@ -31,7 +31,9 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   WCAG-kriterier och exempel. Nya problem börjar som öppna; status ändras
   efter sparande via åtgärden för lösning, med anteckning. Problem på sidor
   utanför granskningsomfattningen finns kvar i projektet och märks tydligt
-  där, men tas inte med i rapporter.
+  där, men tas inte med i rapporter. Kriterier vars WCAG-version ligger utanför
+  projektets målversion märks separat som **Bra att ha**, även när ett problem
+  har kriterier från flera versioner.
 - **Problemhantering** – tilldela eller ändra tilldelning till en medlem i
   projektet, lösa, exportera och följa upp problem.
 - **WCAG-kunskapsbank** – sökbara framgångskriterier, exempel och relaterade

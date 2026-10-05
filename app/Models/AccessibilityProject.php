@@ -15,6 +15,12 @@ class AccessibilityProject extends Model
 {
     use HasFactory;
 
+    public const WCAG_VERSIONS = ['2.0', '2.1', '2.2'];
+
+    protected $attributes = [
+        'target_wcag_version' => '2.1',
+    ];
+
     protected $keyType = 'string';
 
     public $incrementing = false;

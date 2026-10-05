@@ -75,7 +75,7 @@
     $wcagIndex = $allReportIssues
         ->flatMap(fn ($issue) => collect($issue->wcagCriteria ?? [])
             ->map(fn ($criterion) => ['criterion' => $criterion, 'issue' => $issue]))
-        ->groupBy(fn ($entry) => $entry['criterion']->number)
+        ->groupBy(fn ($entry) => $entry['criterion']->standard.'|'.$entry['criterion']->number)
         ->sortKeys();
 @endphp
 <!DOCTYPE html>
@@ -573,6 +573,7 @@
                         :sample-scope-labels="$sampleScopeLabels"
                         :issue-statuses="$issueStatuses"
                         :report-options="$reportOptions"
+                        :target-wcag-version="$project->target_wcag_version"
                     />
                 </section>
             @endif
@@ -632,6 +633,7 @@
                                 :sample-scope-labels="$sampleScopeLabels"
                                 :issue-statuses="$issueStatuses"
                                 :report-options="$reportOptions"
+                                :target-wcag-version="$project->target_wcag_version"
                             />
                         </section>
                     @endforeach
@@ -726,7 +728,10 @@
                                     <h4 class="report-document__detail-title">{{ __('WCAG evidence') }}</h4>
                                     @foreach ($issueCriteria as $criterion)
                                         <div class="report-document__evidence">
-                                            <strong>{{ $criterion->number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</strong>
+                                            <strong>{{ $criterion->standard }} {{ $criterion->number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</strong>
+                                            @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                                <strong> — {{ __('Nice to have') }}</strong>
+                                            @endif
                                             <span> ({{ __('Level') }} {{ Str::upper($criterion->level) }})</span>
                                             @if ($criterion->pivot?->failure_type)
                                                 <p>{{ __('Failure type') }}: {{ __($criterion->pivot->failure_type) }}</p>
@@ -753,8 +758,8 @@
                                     @foreach ($issueCriteria as $criterion)
                                         @if ($criterion->pivot?->screenshot_path)
                                             <figure class="report-document__evidence">
-                                                <img class="report-document__media report-document__media--large" src="{{ $reportImages[$criterion->pivot->screenshot_path] }}" alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->number]) }}">
-                                                <figcaption class="report-document__meta">{{ $criterion->number }}</figcaption>
+                                                <img class="report-document__media report-document__media--large" src="{{ $reportImages[$criterion->pivot->screenshot_path] }}" alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}">
+                                                <figcaption class="report-document__meta">{{ $criterion->standard }} {{ $criterion->number }}</figcaption>
                                             </figure>
                                         @endif
                                     @endforeach
@@ -838,12 +843,15 @@
             @if (($reportOptions['wcag_index'] ?? false) && $wcagIndex->isNotEmpty())
                 <section id="wcag-index" class="report-document__section report-document__section--break" aria-labelledby="wcag-index-heading">
                     <h2 id="wcag-index-heading" class="report-document__heading">{{ __('WCAG index') }}</h2>
-                    @foreach ($wcagIndex as $number => $entries)
+                    @foreach ($wcagIndex as $entries)
                         @php
                             $criterion = $entries->first()['criterion'];
                         @endphp
-                        <article id="wcag-{{ Str::slug((string) $number) }}" class="report-document__appendix-item">
-                            <h3 class="report-document__subheading">{{ $number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</h3>
+                        <article id="wcag-{{ Str::slug($criterion->standard.'-'.$criterion->number) }}" class="report-document__appendix-item">
+                            <h3 class="report-document__subheading">{{ $criterion->standard }} {{ $criterion->number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</h3>
+                            @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                <p><strong>{{ __('Nice to have') }}</strong></p>
+                            @endif
                             <p class="report-document__meta">{{ __('Level') }} {{ Str::upper($criterion->level) }}</p>
                             @foreach ($entries as $entry)
                                 <p><a class="report-document__link" href="#issue-{{ $entry['issue']->getKey() }}">{{ $entry['issue']->title }}</a></p>

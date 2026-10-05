@@ -108,7 +108,11 @@ test('can view report creation form', function () {
 test('can generate report with issues', function () {
     $household = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $household->id]);
-    $project = AccessibilityProject::factory()->create(['team_id' => $household->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $household->id,
+        'target_wcag_version' => '2.1',
+        'report_options' => ['wcag_index' => true],
+    ]);
 
     ProjectMember::create([
         'project_id' => $project->id,
@@ -117,7 +121,7 @@ test('can generate report with issues', function () {
     ]);
 
     // Create some issues
-    $project->issues()->createMany([
+    $issues = $project->issues()->createMany([
         [
             'title' => 'Missing alt text',
             'description' => 'Images lack alt text',
@@ -133,10 +137,26 @@ test('can generate report with issues', function () {
             'status' => 'open',
         ],
     ]);
+    $criterion21 = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'level' => 'A',
+    ]);
+    $criterion22 = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content, updated',
+        'name_sv' => 'Icke-textinnehåll, uppdaterat',
+        'level' => 'A',
+    ]);
+    $issues->first()->wcagCriteria()->attach([$criterion21->id, $criterion22->id]);
 
     $response = $this->actingAs($user)->post("/accessibility-projects/{$project->id}/reports", [
         'title' => 'Initial Audit Report',
         'scope' => 'Tested all pages',
+        'options' => ['wcag_index' => true],
     ]);
 
     $response->assertRedirect();
@@ -150,6 +170,18 @@ test('can generate report with issues', function () {
         'critical_count' => 1,
         'major_count' => 1,
     ])->exists())->toBeTrue();
+
+    $report = AccessibilityReport::query()
+        ->where('project_id', $project->id)
+        ->where('title', 'Initial Audit Report')
+        ->firstOrFail();
+
+    expect($report->html_content)
+        ->toContain('WCAG 2.1 1.1.1')
+        ->toContain('WCAG 2.2 1.1.1')
+        ->toContain(__('Nice to have'))
+        ->toContain('id="wcag-wcag-21-111"')
+        ->toContain('id="wcag-wcag-22-111"');
 });
 
 test('updating a report creates a new immutable version with saved configuration', function () {
@@ -928,7 +960,7 @@ test('owner can update an older report with current project evidence and templat
         ->and($newVersion->previous_version_id)->toBe($report->id)
         ->and($newVersion->total_issues)->toBe(1)
         ->and($newVersion->html_content)
-        ->toContain('data-report-template="9"')
+        ->toContain('data-report-template="10"')
         ->toContain('Keyboard trap')
         ->toContain('Dialog')
         ->toContain(__('Parts of the page or service'))

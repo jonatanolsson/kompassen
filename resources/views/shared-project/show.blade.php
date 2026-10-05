@@ -265,7 +265,7 @@
                                         
                                         <div class="space-y-3 print:space-y-2">
                                             @foreach ($page->issues as $issue)
-                                                <x-shared-project.issue-accordion :issue="$issue" :page-name="$page->name" />
+                                                <x-shared-project.issue-accordion :issue="$issue" :page-name="$page->name" :target-wcag-version="$project->target_wcag_version" />
                                             @endforeach
                                         </div>
                                     </div>
@@ -311,7 +311,7 @@
                     
                     <div class="space-y-6 print:space-y-4">
                         @foreach ($projectWideIssues as $issue)
-                            <x-shared-project.issue-accordion :issue="$issue" />
+                            <x-shared-project.issue-accordion :issue="$issue" :target-wcag-version="$project->target_wcag_version" />
                         @endforeach
                     </div>
                 </section>
@@ -328,10 +328,11 @@
                     </div>
                     
                     <div class="space-y-3 print:space-y-2">
-                        @foreach ($stats['wcag_mapping'] as $number => $mappings)
+                        @foreach ($stats['wcag_mapping'] as $mappings)
                             @php 
                                 $criterion = $mappings->first()['criterion'];
-                                $criterionData = $criterion->only('id', 'number', 'name_en', 'name_sv', 'level', 'description_en', 'description_sv', 'url');
+                                $criterionData = $criterion->only('id', 'standard', 'number', 'name_en', 'name_sv', 'level', 'description_en', 'description_sv', 'url');
+                                $criterionData['is_nice_to_have'] = $criterion->isOutsideProjectTargetVersion($project->target_wcag_version);
                                 $issuesData = $mappings->map(fn($m) => [
                                     ...$m['issue']->only('id', 'title', 'severity'),
                                     'severity_label' => __(Str::title(str_replace(['_', '-'], ' ', $m['issue']->severity))),
@@ -341,13 +342,16 @@
                                 type="button"
                                 data-criterion="{{ json_encode(array_merge($criterionData, ['issues' => $issuesData])) }}"
                                 @click="openModal('selectedCriterion', JSON.parse($el.dataset.criterion), $event)"
-                                aria-label="{{ __('View criterion details: :criterion', ['criterion' => $criterion->number]) }}"
+                                aria-label="{{ __('View criterion details: :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}"
                                 class="w-full rounded border border-zinc-200 bg-zinc-50 py-2 pl-4 pr-3 text-left transition hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 print:border-zinc-300 print:bg-white print:py-1.5 print:pl-3 print:hover:border-zinc-300 print:hover:bg-white"
                             >
                                 <flux:heading level="3" class="text-sm print:text-sm font-semibold">
-                                    <span class="font-bold text-accent-content print:text-blue-800">{{ $criterion->number }}</span>
+                                    <span class="font-bold text-accent-content print:text-blue-800">{{ $criterion->standard }} · {{ $criterion->number }}</span>
                                     – {{ $criterion->name_sv ?? $criterion->name_en }}
                                 </flux:heading>
+                                @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                    <flux:badge color="amber" size="sm" class="mt-1">{{ __('Nice to have') }}</flux:badge>
+                                @endif
                                 <flux:text class="text-xs mt-0.5 print:mt-0.5">
                                     {{ __('Level') }} <span class="font-medium">{{ Str::upper($criterion->level) }}</span>
                                     • <span class="font-medium">{{ $mappings->count() }}</span> {{ __('issue(s)') }}
@@ -414,10 +418,13 @@
                 <div class="flex justify-between items-start p-6 border-b border-zinc-200 dark:border-zinc-700">
                     <div class="flex-1 min-w-0">
                         <h2 id="criterion-modal-title" class="text-lg font-semibold text-zinc-900 dark:text-white">
-                            <span class="font-bold text-zinc-900 dark:text-zinc-100" x-text="selectedCriterion?.number || ''"></span>
+                            <span class="font-bold text-zinc-900 dark:text-zinc-100" x-text="(selectedCriterion?.standard || '') + ' · ' + (selectedCriterion?.number || '')"></span>
                             –
                             <span x-text="selectedCriterion?.name_sv || selectedCriterion?.name_en || ''"></span>
                         </h2>
+                        <p x-show="selectedCriterion?.is_nice_to_have" class="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                            {{ __('Nice to have') }}
+                        </p>
                     </div>
                     <button
                         type="button"

@@ -61,7 +61,7 @@ class GuestProjectController extends Controller
 
         $wcagMapping = $allIssues
             ->flatMap(fn ($issue) => $issue->wcagCriteria->map(fn ($criterion) => ['criterion' => $criterion, 'issue' => $issue]))
-            ->groupBy('criterion.number');
+            ->groupBy(fn ($mapping) => $mapping['criterion']->standard.'|'.$mapping['criterion']->number);
 
         $severityRank = ['critical' => 0, 'major' => 1, 'moderate' => 2, 'minor' => 3];
         $priorityIssues = $allIssues

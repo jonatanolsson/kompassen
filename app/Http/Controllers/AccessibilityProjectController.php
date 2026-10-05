@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AccessibilityProjectController extends Controller
 {
@@ -48,6 +49,7 @@ class AccessibilityProjectController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'target_wcag_level' => 'required|in:A,AA,AAA',
+            'target_wcag_version' => ['sometimes', 'required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'audit_date' => 'nullable|date',
             'report_site_url' => ReportSiteIcon::primarySiteRules(),
             'client_logo' => ['nullable', 'image', 'max:2048'],
@@ -104,6 +106,7 @@ class AccessibilityProjectController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'target_wcag_level' => 'required|in:A,AA,AAA',
+            'target_wcag_version' => ['sometimes', 'required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'audit_date' => 'nullable|date',
             'status' => 'required|in:planning,in_progress,completed',
             'report_site_url' => ReportSiteIcon::primarySiteRules(),

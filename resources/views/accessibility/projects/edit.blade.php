@@ -61,14 +61,24 @@
                     </div>
 
                     <flux:field>
+                        <flux:label>{{ __('Target WCAG Version') }}</flux:label>
+                        <flux:select name="target_wcag_version" required>
+                            @foreach (\App\Models\AccessibilityProject::WCAG_VERSIONS as $version)
+                                <option value="{{ $version }}" {{ old('target_wcag_version', $project->target_wcag_version) === $version ? 'selected' : '' }}>WCAG {{ $version }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="target_wcag_version" />
+                    </flux:field>
+
+                    <flux:field>
                         <flux:label>{{ __('Target WCAG Level') }}</flux:label>
                         <flux:select 
                             name="target_wcag_level" 
                             required
                         >
-                            <option value="A" {{ old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => $project->target_wcag_version, 'level' => 'A']) }}</option>
-                            <option value="AA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => $project->target_wcag_version, 'level' => 'AA']) }}</option>
-                            <option value="AAA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => $project->target_wcag_version, 'level' => 'AAA']) }}</option>
+                            <option value="A" {{ old('target_wcag_level', $project->target_wcag_level) === 'A' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => old('target_wcag_version', $project->target_wcag_version), 'level' => 'A']) }}</option>
+                            <option value="AA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AA' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => old('target_wcag_version', $project->target_wcag_version), 'level' => 'AA']) }}</option>
+                            <option value="AAA" {{ old('target_wcag_level', $project->target_wcag_level) === 'AAA' ? 'selected' : '' }}>{{ __('WCAG :version Level :level', ['version' => old('target_wcag_version', $project->target_wcag_version), 'level' => 'AAA']) }}</option>
                         </flux:select>
                         <flux:error name="target_wcag_level" />
                     </flux:field>
