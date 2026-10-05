@@ -317,7 +317,7 @@
                                 <flux:checkbox
                                     wire:model.live="wcag_criteria"
                                     value="{{ $criterion['id'] }}"
-                                    :label="$criterion['number'].' — '.($criterion['name_sv'] ?? $criterion['name_en'])"
+                                    :label="$criterion['standard'].' ('.$criterion['number'].') — '.($criterion['name_sv'] ?? $criterion['name_en'])"
                                 />
                                 <flux:text size="xs" class="ml-7 mt-0.5 text-zinc-500 dark:text-zinc-400">
                                     {{ __('Level') }} {{ $criterion['level'] }}

@@ -223,7 +223,7 @@
                                 <flux:checkbox
                                     wire:model.live="wcag_criteria"
                                     value="{{ $criterion->id }}"
-                                    :label="$criterion->code.' — '.Str::limit($criterion->name, 80)"
+                                    :label="$criterion->standard.' ('.$criterion->code.') — '.Str::limit($criterion->name, 80)"
                                 />
                             @empty
                                 <flux:text class="text-zinc-500">{{ __('No WCAG criteria available') }}</flux:text>

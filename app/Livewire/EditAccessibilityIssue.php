@@ -257,6 +257,7 @@ class EditAccessibilityIssue extends Component
             })
             ->map(fn ($c) => [
                 'id' => $c->id,
+                'standard' => $c->standard,
                 'number' => $c->number,
                 'name_sv' => $c->name_sv,
                 'name_en' => $c->name_en,

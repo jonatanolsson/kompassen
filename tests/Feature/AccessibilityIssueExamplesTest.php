@@ -30,6 +30,16 @@ test('user can link multiple knowledge base examples when creating an issue', fu
         'description_sv' => 'Textalternativ tillhandahålls.',
         'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
     ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/non-text-content',
+    ]);
     $firstExample = $criterion->examples()->create(['title' => 'Image alternative']);
     $secondExample = $criterion->examples()->create(['title' => 'Decorative image']);
     $diagram = "flowchart LR\n    A[Issue] --> B[Impact]";
@@ -37,6 +47,8 @@ test('user can link multiple knowledge base examples when creating an issue', fu
     Livewire::actingAs($user)
         ->test(CreateAccessibilityIssue::class, ['project' => $project])
         ->assertSee('1.1.1')
+        ->assertSee('WCAG 2.1 (1.1.1)')
+        ->assertSee('WCAG 2.2 (1.1.1)')
         ->set('title', 'Missing image alternatives')
         ->set('mermaid_diagram', $diagram)
         ->set('mermaid_svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#dbeafe"/></svg>')
@@ -76,6 +88,16 @@ test('user can change linked knowledge base examples when editing an issue', fun
         'description_sv' => 'Textalternativ tillhandahålls.',
         'url' => 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content',
     ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'level' => 'A',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'description_en' => 'Text alternatives are provided.',
+        'description_sv' => 'Textalternativ tillhandahålls.',
+        'url' => 'https://www.w3.org/WAI/WCAG21/Understanding/non-text-content',
+    ]);
     $firstExample = $criterion->examples()->create(['title' => 'Image alternative']);
     $secondExample = $criterion->examples()->create(['title' => 'Decorative image']);
     $issue = $project->issues()->create([
@@ -92,6 +114,8 @@ test('user can change linked knowledge base examples when editing an issue', fun
     Livewire::actingAs($user)
         ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
         ->assertSee('1.1.1')
+        ->assertSee('WCAG 2.1 (1.1.1)')
+        ->assertSee('WCAG 2.2 (1.1.1)')
         ->assertSet('example_ids', [(string) $firstExample->id])
         ->set('wcag_criteria', [])
         ->assertSet('example_ids', [])
