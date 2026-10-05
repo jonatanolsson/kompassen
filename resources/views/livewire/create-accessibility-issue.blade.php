@@ -177,8 +177,11 @@
 
                 <flux:separator />
 
-                <details class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
-                    <summary class="cursor-pointer font-medium">{{ __('WCAG criteria and examples') }}</summary>
+                <flux:accordion transition>
+                    <flux:accordion.item
+                        :heading="__('WCAG criteria and examples')"
+                        :expanded="count($wcag_criteria) > 0 || count($example_ids) > 0 || $errors->any()"
+                    >
                     <div class="mt-5 space-y-6">
                 <!-- WCAG Criteria -->
                 <div class="py-4">
@@ -265,7 +268,8 @@
                 </div>
 
                     </div>
-                </details>
+                    </flux:accordion.item>
+                </flux:accordion>
 
                 <!-- Actions -->
                 <div class="flex gap-4 pt-4">
