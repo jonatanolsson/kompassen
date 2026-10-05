@@ -713,7 +713,7 @@
                             $issueAttachments = collect($issue->attachments ?? []);
                             $hasEvidence = (($reportOptions['evidence'] ?? false) && $issueCriteria->isNotEmpty())
                                 || (($reportOptions['images'] ?? false) && ($issueAttachments->isNotEmpty() || $issueCriteria->contains(fn ($criterion) => $criterion->pivot?->screenshot_path)))
-                                || (($reportOptions['code'] ?? false) && ($issueCriteria->contains(fn ($criterion) => $criterion->pivot?->code_snippet) || $issueExamples->contains(fn ($example) => $example->code_language !== 'mermaid' && $example->code_snippet)))
+                                || (($reportOptions['code'] ?? false) && ($issue->problem_code_snippet || $issue->corrected_code_snippet || $issueCriteria->contains(fn ($criterion) => $criterion->pivot?->code_snippet) || $issueExamples->contains(fn ($example) => $example->code_language !== 'mermaid' && $example->code_snippet)))
                                 || (($reportOptions['diagrams'] ?? false) && $issue->mermaid_svg)
                                 || (($reportOptions['examples'] ?? false) && $issueExamples->isNotEmpty())
                                 || (($reportOptions['resolution'] ?? false) && ($issue->resolution_notes ?? null))
@@ -758,6 +758,22 @@
                                             </figure>
                                         @endif
                                     @endforeach
+                                @endif
+
+                                @if (($reportOptions['code'] ?? false) && ($issue->problem_code_snippet || $issue->corrected_code_snippet))
+                                    <h4 class="report-document__detail-title">{{ __('Issue-specific code') }}</h4>
+                                    @if ($issue->problem_code_snippet)
+                                        <div class="report-document__evidence">
+                                            <strong>{{ __('Code causing the issue') }}</strong>
+                                            <pre class="report-document__code">{{ $issue->problem_code_snippet }}</pre>
+                                        </div>
+                                    @endif
+                                    @if ($issue->corrected_code_snippet)
+                                        <div class="report-document__evidence">
+                                            <strong>{{ __('Suggested corrected code') }}</strong>
+                                            <pre class="report-document__code">{{ $issue->corrected_code_snippet }}</pre>
+                                        </div>
+                                    @endif
                                 @endif
 
                                 @if (($reportOptions['code'] ?? false) && $issueCriteria->contains(fn ($criterion) => $criterion->pivot?->code_snippet))

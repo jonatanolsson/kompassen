@@ -27,7 +27,7 @@ function reportDocumentFixture(): array
         'scope' => 'Public user journeys',
         'issues' => collect(),
         'counts' => ['critical' => 0, 'major' => 0, 'moderate' => 0, 'minor' => 0],
-        'templateVersion' => 8,
+        'templateVersion' => 9,
         'pageGroups' => collect(),
         'projectWideIssues' => collect(),
         'cleanPages' => collect(),
@@ -115,7 +115,7 @@ test('renders compact report navigation and groups issues by page status and sev
     ]);
 
     expect($html)
-        ->toContain('data-report-template="8"')
+        ->toContain('data-report-template="9"')
         ->toContain('href="#project-wide-issues"')
         ->toContain('href="#page-page-1"')
         ->toContain('id="issue-issue-open"')

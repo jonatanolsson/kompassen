@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class ReportGenerator
 {
-    public const TEMPLATE_VERSION = 8;
+    public const TEMPLATE_VERSION = 9;
 
     public function __construct(
         private AccessibilityProject $project,

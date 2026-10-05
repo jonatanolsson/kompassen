@@ -39,6 +39,12 @@ class EditAccessibilityIssue extends Component
     public string $impact = '';
 
     #[Validate('nullable|string|max:20000')]
+    public string $problem_code_snippet = '';
+
+    #[Validate('nullable|string|max:20000')]
+    public string $corrected_code_snippet = '';
+
+    #[Validate('nullable|string|max:20000')]
     public string $mermaid_diagram = '';
 
     #[Validate('nullable|string|max:'.IssueDiagramSvg::MAX_SVG_BYTES)]
@@ -80,6 +86,8 @@ class EditAccessibilityIssue extends Component
         $this->title = $issue->title;
         $this->description = $issue->description;
         $this->impact = $issue->impact ?? '';
+        $this->problem_code_snippet = $issue->problem_code_snippet ?? '';
+        $this->corrected_code_snippet = $issue->corrected_code_snippet ?? '';
         $this->mermaid_diagram = $issue->mermaid_diagram ?? '';
 
         if (IssueDiagramSvg::isCurrent($issue->mermaid_diagram, $issue->mermaid_svg, $issue->mermaid_source_hash)) {
@@ -99,7 +107,7 @@ class EditAccessibilityIssue extends Component
 
     public function update(IssueDiagramSvg $diagramSvg): void
     {
-        $this->validate();
+        $validated = $this->validate();
 
         $project = AccessibilityProject::findOrFail($this->projectId);
         $issue = AccessibilityIssue::findOrFail($this->issueId);
@@ -130,6 +138,8 @@ class EditAccessibilityIssue extends Component
             'title' => $this->title,
             'description' => $this->description,
             'impact' => $this->normalizedImpact($this->impact),
+            'problem_code_snippet' => filled($validated['problem_code_snippet'] ?? null) ? $validated['problem_code_snippet'] : null,
+            'corrected_code_snippet' => filled($validated['corrected_code_snippet'] ?? null) ? $validated['corrected_code_snippet'] : null,
             'mermaid_diagram' => $this->mermaid_diagram,
             'mermaid_svg' => $diagram['mermaid_svg'],
             'mermaid_source_hash' => $diagram['mermaid_source_hash'],

@@ -49,6 +49,8 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'problem_code_snippet' => 'nullable|string|max:20000',
+            'corrected_code_snippet' => 'nullable|string|max:20000',
             'mermaid_diagram' => 'nullable|string|max:20000',
             'page_id' => [
                 'nullable',
@@ -106,6 +108,8 @@ class AccessibilityIssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'problem_code_snippet' => 'nullable|string|max:20000',
+            'corrected_code_snippet' => 'nullable|string|max:20000',
             'mermaid_diagram' => 'nullable|string|max:20000',
             'page_id' => [
                 'nullable',

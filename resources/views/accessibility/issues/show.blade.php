@@ -72,6 +72,26 @@
             </div>
         @endif
 
+        @if ($issue->problem_code_snippet || $issue->corrected_code_snippet)
+            <div class="mb-8 rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10">
+                <flux:heading level="2" class="mb-4">{{ __('Issue-specific code') }}</flux:heading>
+                <div class="space-y-4">
+                    @if ($issue->problem_code_snippet)
+                        <div>
+                            <flux:heading level="3" class="mb-2 text-sm">{{ __('Code causing the issue') }}</flux:heading>
+                            <pre class="max-h-96 overflow-auto rounded-lg bg-zinc-950 p-4 text-sm text-zinc-100"><code>{{ $issue->problem_code_snippet }}</code></pre>
+                        </div>
+                    @endif
+                    @if ($issue->corrected_code_snippet)
+                        <div>
+                            <flux:heading level="3" class="mb-2 text-sm">{{ __('Suggested corrected code') }}</flux:heading>
+                            <pre class="max-h-96 overflow-auto rounded-lg bg-zinc-950 p-4 text-sm text-zinc-100"><code>{{ $issue->corrected_code_snippet }}</code></pre>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         @if ($issue->mermaid_diagram)
             <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <div class="mb-4 flex items-center justify-between gap-4">

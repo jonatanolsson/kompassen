@@ -23,7 +23,8 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   varje resurs har en separat detaljvy.
 - **Problem** – dokumentera tillgänglighetsproblem med allvarlighetsgrad,
   svårighetsgrad, status, tilldelad medlem, WCAG-kriterium, separat
-  användarkonsekvens i rich text och bilagor/skärmbilder. Mermaid-diagram
+  användarkonsekvens i rich text, felande och korrigerad kod samt
+  bilagor/skärmbilder. WCAG-exempel kan länkas samtidigt. Mermaid-diagram
   renderas med JavaScript vid sparande och lagras som sanerad SVG tillsammans
   med källkoden; en omrendering krävs när källkoden ändras. Formuläret visar
   grunduppgifter först och fördjupar med ytterligare underlag, påverkan samt

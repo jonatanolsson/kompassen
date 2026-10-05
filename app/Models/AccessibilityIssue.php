@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'page_id', 'title', 'description', 'impact', 'mermaid_diagram', 'mermaid_svg', 'mermaid_source_hash', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
+#[Fillable(['project_id', 'page_id', 'title', 'description', 'impact', 'problem_code_snippet', 'corrected_code_snippet', 'mermaid_diagram', 'mermaid_svg', 'mermaid_source_hash', 'severity', 'difficulty', 'component_area', 'sample_scope', 'status', 'screenshot_url', 'solution_suggestions', 'resolution_status', 'resolution_notes', 'resolved_at', 'assigned_to', 'assigned_at'])]
 class AccessibilityIssue extends Model
 {
     use HasFactory;

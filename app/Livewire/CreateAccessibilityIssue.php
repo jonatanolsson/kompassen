@@ -30,6 +30,10 @@ class CreateAccessibilityIssue extends Component
 
     public string $impact = '';
 
+    public string $problem_code_snippet = '';
+
+    public string $corrected_code_snippet = '';
+
     public string $mermaid_diagram = '';
 
     public ?string $mermaid_svg = null;
@@ -64,6 +68,8 @@ class CreateAccessibilityIssue extends Component
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'impact' => 'nullable|string',
+            'problem_code_snippet' => 'nullable|string|max:20000',
+            'corrected_code_snippet' => 'nullable|string|max:20000',
             'mermaid_diagram' => 'nullable|string|max:20000',
             'mermaid_svg' => 'nullable|string|max:'.IssueDiagramSvg::MAX_SVG_BYTES,
             'mermaid_source_hash' => 'nullable|string|size:64',
@@ -100,6 +106,8 @@ class CreateAccessibilityIssue extends Component
             'title' => $validated['title'],
             'description' => $validated['description'],
             'impact' => $this->normalizedImpact($validated['impact']),
+            'problem_code_snippet' => filled($validated['problem_code_snippet'] ?? null) ? $validated['problem_code_snippet'] : null,
+            'corrected_code_snippet' => filled($validated['corrected_code_snippet'] ?? null) ? $validated['corrected_code_snippet'] : null,
             'mermaid_diagram' => $validated['mermaid_diagram'],
             'mermaid_svg' => $diagram['mermaid_svg'],
             'mermaid_source_hash' => $diagram['mermaid_source_hash'],

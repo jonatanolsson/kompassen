@@ -53,6 +53,24 @@
             </section>
         @endif
 
+        @if ($issue->problem_code_snippet || $issue->corrected_code_snippet)
+            <section>
+                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Issue-specific code') }}</h4>
+                @if ($issue->problem_code_snippet)
+                    <div class="mb-3">
+                        <p class="mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ __('Code causing the issue') }}</p>
+                        <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100"><code>{{ $issue->problem_code_snippet }}</code></pre>
+                    </div>
+                @endif
+                @if ($issue->corrected_code_snippet)
+                    <div>
+                        <p class="mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ __('Suggested corrected code') }}</p>
+                        <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100"><code>{{ $issue->corrected_code_snippet }}</code></pre>
+                    </div>
+                @endif
+            </section>
+        @endif
+
         @if ($issue->mermaid_diagram)
             <section>
                 <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Issue diagram') }}</h4>

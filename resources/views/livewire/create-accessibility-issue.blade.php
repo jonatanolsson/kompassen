@@ -71,6 +71,27 @@
                             @endif
                         </flux:field>
 
+                        <div class="space-y-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                            <div>
+                                <flux:heading level="2" class="text-lg font-semibold">{{ __('Issue-specific code') }}</flux:heading>
+                                <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
+                                    {{ __('Add code that causes this issue and, if available, a corrected version. WCAG criterion examples remain separate.') }}
+                                </flux:text>
+                            </div>
+
+                            <flux:field>
+                                <flux:label>{{ __('Code causing the issue') }}</flux:label>
+                                <flux:textarea wire:model="problem_code_snippet" rows="5" class="font-mono text-sm" />
+                                <flux:error name="problem_code_snippet" />
+                            </flux:field>
+
+                            <flux:field>
+                                <flux:label>{{ __('Suggested corrected code') }}</flux:label>
+                                <flux:textarea wire:model="corrected_code_snippet" rows="5" class="font-mono text-sm" />
+                                <flux:error name="corrected_code_snippet" />
+                            </flux:field>
+                        </div>
+
                         <details class="space-y-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
                             <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
                             <div class="mt-6 space-y-6">

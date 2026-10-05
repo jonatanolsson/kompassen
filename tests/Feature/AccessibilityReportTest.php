@@ -928,7 +928,7 @@ test('owner can update an older report with current project evidence and templat
         ->and($newVersion->previous_version_id)->toBe($report->id)
         ->and($newVersion->total_issues)->toBe(1)
         ->and($newVersion->html_content)
-        ->toContain('data-report-template="8"')
+        ->toContain('data-report-template="9"')
         ->toContain('Keyboard trap')
         ->toContain('Dialog')
         ->toContain(__('Parts of the page or service'))
