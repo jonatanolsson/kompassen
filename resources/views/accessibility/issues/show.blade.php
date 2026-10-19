@@ -9,7 +9,7 @@
                         {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->severity))) }}
                     </flux:badge>
                     <flux:badge color="zinc">{{ __(Str::title(str_replace(['_', '-'], ' ', $issue->status))) }}</flux:badge>
-                    <flux:badge color="blue">{{ __('Difficulty') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}</flux:badge>
+                    <flux:badge color="blue">{{ __('Estimated remediation effort') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}</flux:badge>
                 </div>
             </div>
             <div class="flex gap-2 items-center">
@@ -65,6 +65,13 @@
         @endif
 
         <!-- Description -->
+        @if (filled($issue->summary))
+            <div class="mb-8 rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10">
+                <flux:heading level="2" class="mb-4">{{ __('Summary') }}</flux:heading>
+                <flux:text class="whitespace-pre-line">{{ $issue->summary }}</flux:text>
+            </div>
+        @endif
+
         @if ($issue->description)
             <div class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
                 <flux:heading level="2" class="mb-4">{{ __('Description') }}</flux:heading>

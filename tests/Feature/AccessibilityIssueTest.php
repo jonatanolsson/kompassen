@@ -83,6 +83,7 @@ test('issue detail uses a resolution modal instead of browser prompts', function
 
     $issue = $project->issues()->create([
         'title' => 'Missing alternative text',
+        'summary' => 'Images need descriptive alternatives.',
         'description' => 'Images lack alternatives.',
         'severity' => 'major',
         'difficulty' => 'easy',
@@ -93,6 +94,9 @@ test('issue detail uses a resolution modal instead of browser prompts', function
         ->get(route('accessibility-issues.show', [$project, $issue]))
         ->assertSuccessful()
         ->assertSee(__('Change resolution'))
+        ->assertSee(__('Summary'))
+        ->assertSee('Images need descriptive alternatives.')
+        ->assertSee(__('Description'))
         ->assertSee('resolve-issue-modal', false)
         ->assertDontSee('prompt(', false);
 });
@@ -105,11 +109,13 @@ test('issue creation starts open and rejects direct status changes', function ()
 
     Livewire::actingAs($user)->test(CreateAccessibilityIssue::class, ['project' => $project])
         ->set('title', 'Keyboard trap')
+        ->set('summary', 'Keyboard focus cannot leave a dialog.')
         ->call('submit')
         ->assertRedirect(route('accessibility-projects.show', $project));
 
     $issue = $project->issues()->firstOrFail();
-    expect($issue->status)->toBe('open');
+    expect($issue->status)->toBe('open')
+        ->and($issue->summary)->toBe('Keyboard focus cannot leave a dialog.');
 
     $this->actingAs($user)->post(route('accessibility-issues.store', $project), [
         'title' => 'Skipped resolution',
@@ -120,10 +126,65 @@ test('issue creation starts open and rejects direct status changes', function ()
 
     Livewire::actingAs($user)->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
         ->set('title', 'Keyboard trap updated')
+        ->assertSet('summary', 'Keyboard focus cannot leave a dialog.')
+        ->set('summary', 'Keyboard users cannot escape the dialog.')
         ->call('update')
         ->assertHasNoErrors();
 
-    expect($issue->refresh()->status)->toBe('open');
+    expect($issue->refresh()->status)->toBe('open')
+        ->and($issue->summary)->toBe('Keyboard users cannot escape the dialog.');
+});
+
+test('issue summaries persist through controller creation and issue exports', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+
+    $this->actingAs($user)->post(route('accessibility-issues.store', $project), [
+        'title' => 'Keyboard focus is obscured',
+        'summary' => 'Keyboard focus disappears behind the header.',
+        'description' => 'The sticky header covers the focused element while tabbing.',
+        'severity' => 'major',
+        'difficulty' => 'easy',
+    ])->assertRedirect(route('accessibility-projects.show', $project));
+
+    $issue = $project->issues()->firstOrFail();
+    $exporter = new IssueExporter($issue);
+    $json = json_decode($exporter->export('json'), true, flags: JSON_THROW_ON_ERROR);
+
+    expect($issue->summary)->toBe('Keyboard focus disappears behind the header.')
+        ->and($json['summary'])->toBe('Keyboard focus disappears behind the header.')
+        ->and($json['description'])->toBe('The sticky header covers the focused element while tabbing.')
+        ->and($exporter->export('markdown'))
+        ->toContain("## Summary\n\nKeyboard focus disappears behind the header.")
+        ->toContain("## Description\n\nThe sticky header covers the focused element while tabbing.")
+        ->toContain(__('Estimated remediation effort'))
+        ->and($exporter->export('csv'))
+        ->toContain('Title,Summary,Severity,'.__('Estimated remediation effort'))
+        ->toContain('Keyboard focus disappears behind the header.');
+});
+
+test('issue summary is limited to 500 characters in livewire and controller validation', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $longSummary = str_repeat('a', 501);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->set('title', 'Keyboard trap')
+        ->set('summary', $longSummary)
+        ->call('submit')
+        ->assertHasErrors(['summary' => 'max']);
+
+    $this->actingAs($user)->post(route('accessibility-issues.store', $project), [
+        'title' => 'Keyboard trap',
+        'summary' => $longSummary,
+        'severity' => 'major',
+        'difficulty' => 'easy',
+    ])->assertSessionHasErrors('summary');
 });
 
 test('issue create and edit forms use radio groups for severity and difficulty', function () {
@@ -132,13 +193,31 @@ test('issue create and edit forms use radio groups for severity and difficulty',
     $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
     ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
 
-    Livewire::actingAs($user)
-        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+    $createForm = Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project]);
+
+    $createHtml = $createForm->html();
+
+    expect(strpos($createHtml, __('Issue Information')))
+        ->toBeLessThan(strpos($createHtml, __('Location')))
+        ->and(strpos($createHtml, __('Location')))
+        ->toBeLessThan(strpos($createHtml, __('Classification')))
+        ->and(strpos($createHtml, __('Classification')))
+        ->toBeLessThan(strpos($createHtml, __('WCAG criteria and examples')))
+        ->and(strpos($createHtml, __('WCAG criteria and examples')))
+        ->toBeLessThan(strpos($createHtml, __('Additional evidence and user impact')));
+
+    $createForm
         ->assertSet('severity', 'major')
         ->assertSet('difficulty', 'medium')
+        ->assertSee(__('Summary'))
+        ->assertSee(__('Optional. Shown in the project preview; keep full details in the description.'))
+        ->assertSee(__('Estimated remediation effort'))
+        ->assertSee(__('Estimate implementation effort: easy is a small change, medium is a moderate change, and hard is a substantial change. Severity describes user impact separately.'))
         ->assertSeeHtml('data-flux-radio-group-buttons')
         ->assertSeeHtml('wire:model="severity"')
         ->assertSeeHtml('wire:model="difficulty"')
+        ->assertSeeHtml('wire:model="summary"')
         ->assertSeeHtml('value="critical"')
         ->assertSeeHtml('value="major"')
         ->assertSeeHtml('value="moderate"')
@@ -157,13 +236,30 @@ test('issue create and edit forms use radio groups for severity and difficulty',
     expect($issue->severity)->toBe('critical')
         ->and($issue->difficulty)->toBe('hard');
 
-    Livewire::actingAs($user)
-        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+    $editForm = Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue]);
+
+    $editHtml = $editForm->html();
+
+    expect(strpos($editHtml, __('Issue Information')))
+        ->toBeLessThan(strpos($editHtml, __('Location')))
+        ->and(strpos($editHtml, __('Location')))
+        ->toBeLessThan(strpos($editHtml, __('Classification')))
+        ->and(strpos($editHtml, __('Classification')))
+        ->toBeLessThan(strpos($editHtml, __('WCAG criteria and examples')))
+        ->and(strpos($editHtml, __('WCAG criteria and examples')))
+        ->toBeLessThan(strpos($editHtml, __('Additional evidence and user impact')));
+
+    $editForm
         ->assertSet('severity', 'critical')
         ->assertSet('difficulty', 'hard')
+        ->assertSee(__('Summary'))
+        ->assertSee(__('Estimated remediation effort'))
+        ->assertSee(__('Estimate implementation effort: easy is a small change, medium is a moderate change, and hard is a substantial change. Severity describes user impact separately.'))
         ->assertSeeHtml('data-flux-radio-group-buttons')
         ->assertSeeHtml('wire:model="severity"')
         ->assertSeeHtml('wire:model="difficulty"')
+        ->assertSeeHtml('wire:model="summary"')
         ->set('severity', 'minor')
         ->set('difficulty', 'easy')
         ->call('update')
@@ -171,6 +267,27 @@ test('issue create and edit forms use radio groups for severity and difficulty',
 
     expect($issue->refresh()->severity)->toBe('minor')
         ->and($issue->difficulty)->toBe('easy');
+});
+
+test('issue creation uses collapsed Flux accordions that expand after validation errors', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+
+    $component = Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee(__('Additional evidence and user impact'))
+        ->assertSee(__('WCAG criteria and examples'))
+        ->assertDontSee('<details', false);
+
+    expect(substr_count($component->html(), 'open: false'))->toBe(2)
+        ->and(substr_count($component->html(), 'open: true'))->toBe(0);
+
+    $component->call('submit')
+        ->assertHasErrors('title');
+
+    expect(substr_count($component->html(), 'open: true'))->toBe(2);
 });
 
 test('WCAG scope labels apply per criterion in forms, project views, and exports', function () {
@@ -199,6 +316,7 @@ test('WCAG scope labels apply per criterion in forms, project views, and exports
 
     Livewire::actingAs($user)
         ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->set('wcagCriteriaVersion', 'all')
         ->assertSee(__('Nice to have'))
         ->set('title', 'Mixed WCAG issue')
         ->set('wcag_criteria', [(string) $inScopeCriterion->id, (string) $niceToHaveCriterion->id])
@@ -236,6 +354,117 @@ test('WCAG scope labels apply per criterion in forms, project views, and exports
         ->and($exporter->export('csv'))->toContain('WCAG 2.2 1.1.1 ('.__('Nice to have').')');
 });
 
+test('WCAG issue selector defaults to the project target and can search other versions', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'target_wcag_version' => '2.2',
+    ]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Older non-text criterion',
+        'name_sv' => 'Äldre textalternativ',
+        'level' => 'A',
+    ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '1.1.1',
+        'name_en' => 'Target non-text criterion',
+        'name_sv' => 'Målversionens textalternativ',
+        'level' => 'A',
+    ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '2.4.11',
+        'name_en' => 'Focus Not Obscured',
+        'name_sv' => 'Fokus inte dolt',
+        'level' => 'AA',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee(__('Target version (WCAG :version)', ['version' => '2.2']))
+        ->assertSee('WCAG 2.2 (1.1.1)')
+        ->assertDontSee('WCAG 2.1 (1.1.1)')
+        ->set('wcagCriteriaVersion', 'all')
+        ->assertSee('WCAG 2.1 (1.1.1)')
+        ->set('wcagSearch', 'Focus Not Obscured')
+        ->assertSee('WCAG 2.2 (2.4.11)')
+        ->assertDontSee('WCAG 2.1 (1.1.1)');
+});
+
+test('WCAG issue edit keeps selected other-version criteria visible under target filter', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'target_wcag_version' => '2.2',
+    ]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $selectedCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Selected older criterion',
+        'name_sv' => 'Valt äldre kriterium',
+        'level' => 'A',
+    ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.2.1',
+        'name_en' => 'Unselected older criterion',
+        'name_sv' => 'Ovalt äldre kriterium',
+        'level' => 'A',
+    ]);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.2',
+        'number' => '1.1.1',
+        'name_en' => 'Target criterion',
+        'name_sv' => 'Målkriterium',
+        'level' => 'A',
+    ]);
+    $issue = $project->issues()->create([
+        'title' => 'Previously classified issue',
+        'description' => '<p>Existing issue description.</p>',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+    ]);
+    $issue->wcagCriteria()->attach($selectedCriterion->id);
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
+        ->assertSee('WCAG 2.1 (1.1.1)')
+        ->assertSee('WCAG 2.2 (1.1.1)')
+        ->assertDontSee('WCAG 2.1 (1.2.1)')
+        ->assertSee(__('Nice to have'));
+});
+
+test('WCAG target without available criteria explains why all supported versions are shown', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'target_wcag_version' => '2.0',
+    ]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'level' => 'A',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->assertSee(__('No criteria are available for WCAG :version yet. Showing all supported versions.', ['version' => '2.0']))
+        ->assertSee('WCAG 2.1 (1.1.1)');
+});
+
 test('issue edit uses Flux accordions and expands them when validation fails', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
@@ -253,18 +482,18 @@ test('issue edit uses Flux accordions and expands them when validation fails', f
     $component = Livewire::actingAs($user)
         ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
         ->assertSee(__('Additional evidence and user impact'))
-        ->assertSee(__('Images'))
+        ->assertSee(__('Upload new images'))
         ->assertSee(__('WCAG criteria and examples'))
         ->assertDontSee('<details', false);
 
-    expect(substr_count($component->html(), 'data-flux-accordion-item'))->toBe(3)
-        ->and(substr_count($component->html(), 'open: true'))->toBe(2);
+    expect(substr_count($component->html(), 'data-flux-accordion-item'))->toBe(2)
+        ->and(substr_count($component->html(), 'open: true'))->toBe(1);
 
     $component->set('title', '')
         ->call('update')
         ->assertHasErrors('title');
 
-    expect(substr_count($component->html(), 'open: true'))->toBe(3);
+    expect(substr_count($component->html(), 'open: true'))->toBe(2);
 });
 
 test('closing an issue requires a resolution note', function () {

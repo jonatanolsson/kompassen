@@ -36,13 +36,22 @@ test('issue forms show a visible image upload dropzone', function () {
 
     expect($createHtml)->toContain('data-flux-file-upload-dropzone')
         ->and(strpos($createHtml, 'data-flux-file-upload-dropzone'))
-        ->toBeLessThan(strpos($createHtml, '<details'));
+        ->toBeLessThan(strpos($createHtml, 'data-flux-accordion-item'))
+        ->and($createHtml)->not->toContain('<details');
 
-    Livewire::actingAs($user)
+    $editHtml = Livewire::actingAs($user)
         ->test(EditAccessibilityIssue::class, ['project' => $project, 'issue' => $issue])
         ->assertSee(__('Choose images or drop them here'))
         ->assertSee(__('JPG, PNG, GIF or WebP. Max 5 MB per image.'))
-        ->assertSee('open: true', false);
+        ->html();
+
+    expect($editHtml)
+        ->toContain('data-flux-file-upload-dropzone')
+        ->toContain('data-flux-accordion-item')
+        ->not->toContain('<details');
+
+    expect(strpos($editHtml, 'data-flux-file-upload-dropzone'))
+        ->toBeLessThan(strpos($editHtml, 'data-flux-accordion-item'));
 });
 
 test('user can upload images when creating issue', function () {

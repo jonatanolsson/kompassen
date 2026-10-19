@@ -48,6 +48,7 @@ class AccessibilityIssueController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'summary' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'problem_code_snippet' => 'nullable|string|max:20000',
             'corrected_code_snippet' => 'nullable|string|max:20000',
@@ -107,6 +108,7 @@ class AccessibilityIssueController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'summary' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'problem_code_snippet' => 'nullable|string|max:20000',
             'corrected_code_snippet' => 'nullable|string|max:20000',

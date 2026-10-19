@@ -2,28 +2,6 @@ let mermaidPromise;
 let mermaidQueue = Promise.resolve();
 let livewireHooksRegistered = false;
 let activeMermaidTheme = null;
-let printDetails = [];
-
-const expandPrintDetails = () => {
-    printDetails = [...document.querySelectorAll('details[data-print-expand]')].map((details) => ({
-        details,
-        wasOpen: details.open,
-    }));
-
-    printDetails.forEach(({ details }) => {
-        details.open = true;
-    });
-};
-
-const restorePrintDetails = () => {
-    printDetails.forEach(({ details, wasOpen }) => {
-        details.open = wasOpen;
-    });
-    printDetails = [];
-};
-
-window.addEventListener('beforeprint', expandPrintDetails);
-window.addEventListener('afterprint', restorePrintDetails);
 
 const isDarkMode = () => document.documentElement.classList.contains('dark');
 

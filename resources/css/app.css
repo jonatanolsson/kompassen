@@ -30,7 +30,19 @@
 }
 
 @media print {
-    details[data-print-expand] > [data-print-details] {
+    [data-print-accordion] [data-flux-accordion-content] {
         display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        visibility: visible !important;
+    }
+
+    [data-print-accordion] [data-flux-accordion-heading] svg {
+        display: none !important;
+    }
+
+    [data-print-accordion] [data-flux-accordion-heading] {
+        color: inherit !important;
+        cursor: default !important;
     }
 }

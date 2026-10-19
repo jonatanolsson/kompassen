@@ -390,12 +390,14 @@
                                                     <pre class="max-h-56 overflow-auto bg-zinc-950 px-4 py-3 text-sm text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
                                                 @endif
                                                 @if ($example->code_language === 'mermaid')
-                                                    <details class="border-t border-zinc-200 dark:border-zinc-700">
-                                                        <summary class="cursor-pointer px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800">
-                                                            {{ __('View source code') }}
-                                                        </summary>
-                                                        <pre class="max-h-56 overflow-auto border-t border-zinc-200 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 dark:border-zinc-700"><code>{{ $example->code_snippet }}</code></pre>
-                                                    </details>
+                                                    <flux:accordion transition>
+                                                        <flux:accordion.item wire:key="knowledge-example-source-{{ $example->id }}" class="border-t border-zinc-200 dark:border-zinc-700">
+                                                            <flux:accordion.heading class="px-3 py-2 text-sm">{{ __('View source code') }}</flux:accordion.heading>
+                                                            <flux:accordion.content>
+                                                                <pre class="max-h-56 overflow-auto border-t border-zinc-200 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 dark:border-zinc-700"><code>{{ $example->code_snippet }}</code></pre>
+                                                            </flux:accordion.content>
+                                                        </flux:accordion.item>
+                                                    </flux:accordion>
                                                 @endif
                                             </div>
                                         @endif

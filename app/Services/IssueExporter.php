@@ -34,9 +34,13 @@ class IssueExporter
 
         $markdown = "# {$data['title']}\n\n";
         $markdown .= "**Severity**: {$data['severity']}\n";
-        $markdown .= "**Difficulty**: {$data['difficulty']}\n";
+        $markdown .= '**'.__('Estimated remediation effort')."**: {$data['difficulty']}\n";
         $markdown .= "**Status**: {$data['status']}\n\n";
         $markdown .= '**'.__('Project WCAG target')."**: WCAG {$data['project_target_wcag_version']}\n";
+
+        if ($data['summary']) {
+            $markdown .= "## Summary\n\n{$data['summary']}\n\n";
+        }
 
         if ($data['description']) {
             $markdown .= "## Description\n\n{$data['description']}\n\n";
@@ -71,8 +75,9 @@ class IssueExporter
     {
         $data = $this->getExportData();
 
-        $csv = 'Title,Severity,Difficulty,Status,Description,Component Area,Page,'.__('Project WCAG target').",WCAG Criteria,Attachments\n";
+        $csv = 'Title,Summary,Severity,'.$this->escapeCsvField(__('Estimated remediation effort')).',Status,Description,Component Area,Page,'.__('Project WCAG target').",WCAG Criteria,Attachments\n";
         $csv .= $this->escapeCsvField($data['title']).',';
+        $csv .= $this->escapeCsvField($data['summary']).',';
         $csv .= $this->escapeCsvField($data['severity']).',';
         $csv .= $this->escapeCsvField($data['difficulty']).',';
         $csv .= $this->escapeCsvField($data['status']).',';
@@ -110,6 +115,7 @@ class IssueExporter
         return [
             'id' => $this->issue->id,
             'title' => $this->issue->title,
+            'summary' => $this->issue->summary,
             'description' => $this->issue->description,
             'severity' => Str::title($this->issue->severity),
             'difficulty' => Str::title($this->issue->difficulty),

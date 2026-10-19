@@ -22,6 +22,20 @@
                 </flux:field>
 
                 <flux:field>
+                    <flux:label>{{ __('Summary') }}</flux:label>
+                    <flux:textarea
+                        name="summary"
+                        rows="2"
+                        maxlength="500"
+                        placeholder="{{ __('Short summary') }}"
+                    >{{ old('summary') }}</flux:textarea>
+                    <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                        {{ __('Optional. Shown in the project preview; keep full details in the description.') }}
+                    </flux:text>
+                    <flux:error name="summary" />
+                </flux:field>
+
+                <flux:field>
                     <flux:label>{{ __('Description') }}</flux:label>
                     <flux:textarea
                         name="description"

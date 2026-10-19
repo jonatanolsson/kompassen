@@ -32,6 +32,9 @@ class EditAccessibilityIssue extends Component
     #[Validate('required|string|max:255')]
     public string $title = '';
 
+    #[Validate('nullable|string|max:500')]
+    public string $summary = '';
+
     #[Validate('nullable|string')]
     public string $description = '';
 
@@ -68,6 +71,8 @@ class EditAccessibilityIssue extends Component
 
     public string $wcagSearch = '';
 
+    public string $wcagCriteriaVersion = 'target';
+
     public array $wcag_criteria = [];
 
     public array $example_ids = [];
@@ -84,6 +89,7 @@ class EditAccessibilityIssue extends Component
         $this->projectId = $project->id;
         $this->issueId = $issue->id;
         $this->title = $issue->title;
+        $this->summary = $issue->summary ?? '';
         $this->description = $issue->description;
         $this->impact = $issue->impact ?? '';
         $this->problem_code_snippet = $issue->problem_code_snippet ?? '';
@@ -136,6 +142,7 @@ class EditAccessibilityIssue extends Component
 
         $issue->update([
             'title' => $this->title,
+            'summary' => $this->summary,
             'description' => $this->description,
             'impact' => $this->normalizedImpact($this->impact),
             'problem_code_snippet' => filled($validated['problem_code_snippet'] ?? null) ? $validated['problem_code_snippet'] : null,
@@ -245,16 +252,36 @@ class EditAccessibilityIssue extends Component
             ])
             ->toArray();
 
-        $availableCriteria = WcagSuccessCriterion::wcag()
-            ->get()
-            ->when($this->wcagSearch, function ($criteria) {
-                return $criteria->filter(function ($c) {
-                    return str_contains(
-                        strtolower($c->number.' '.($c->name_sv ?? '').' '.($c->name_en ?? '')),
-                        strtolower($this->wcagSearch)
-                    );
+        $targetStandard = 'WCAG '.$project->target_wcag_version;
+        $hasTargetVersionCriteria = WcagSuccessCriterion::wcag()
+            ->where('standard', $targetStandard)
+            ->exists();
+        $criteriaQuery = WcagSuccessCriterion::wcag();
+
+        if ($this->wcagCriteriaVersion === 'target' && $hasTargetVersionCriteria) {
+            $selectedIds = $this->wcag_criteria;
+            $criteriaQuery->where(function ($query) use ($targetStandard, $selectedIds): void {
+                $query->where('standard', $targetStandard);
+
+                if ($selectedIds !== []) {
+                    $query->orWhereIn('id', $selectedIds);
+                }
+            });
+        }
+
+        $availableCriteria = $criteriaQuery
+            ->when(trim($this->wcagSearch) !== '', function ($query): void {
+                $search = '%'.trim($this->wcagSearch).'%';
+
+                $query->where(function ($query) use ($search): void {
+                    $query->where('number', 'like', $search)
+                        ->orWhere('name_sv', 'like', $search)
+                        ->orWhere('name_en', 'like', $search);
                 });
             })
+            ->orderBy('standard')
+            ->orderBy('number')
+            ->get()
             ->map(fn ($c) => [
                 'id' => $c->id,
                 'standard' => $c->standard,
@@ -285,9 +312,11 @@ class EditAccessibilityIssue extends Component
             ->get();
 
         return view('livewire.edit-accessibility-issue', [
+            'project' => $project,
             'pages' => $pages,
             'databaseAttachments' => $attachmentsList,
             'availableCriteria' => $availableCriteria,
+            'hasTargetVersionCriteria' => $hasTargetVersionCriteria,
             'availableExamples' => $availableExamples,
         ]);
     }

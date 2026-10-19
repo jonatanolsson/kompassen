@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\AccessibilityIssue;
+use App\Models\AccessibilityPage;
+use App\Models\AccessibilityProject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,9 +20,10 @@ class AccessibilityIssueFactory extends Factory
     public function definition(): array
     {
         return [
-            'accessibility_project_id' => \App\Models\AccessibilityProject::factory(),
-            'page_id' => \App\Models\AccessibilityPage::factory(),
+            'accessibility_project_id' => AccessibilityProject::factory(),
+            'page_id' => AccessibilityPage::factory(),
             'title' => fake()->sentence(),
+            'summary' => fake()->optional()->sentence(),
             'description' => fake()->paragraph(),
             'severity' => fake()->randomElement(['critical', 'major', 'moderate', 'minor']),
             'difficulty' => fake()->randomElement(['easy', 'medium', 'hard']),

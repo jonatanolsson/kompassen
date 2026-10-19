@@ -109,6 +109,7 @@ test('issue detail and shared issue view escape issue-specific code', function (
         ->get(route('accessibility-issues.show', [$this->project, $issue]))
         ->assertSuccessful()
         ->assertSee(__('Issue-specific code'))
+        ->assertSee(__('Estimated remediation effort'))
         ->assertSee('&lt;script&gt;alert(&quot;unsafe&quot;)&lt;/script&gt;', false)
         ->assertSee('&lt;button type=&quot;button&quot;&gt;Continue&lt;/button&gt;', false)
         ->assertDontSee('<script>alert', false);
@@ -117,6 +118,7 @@ test('issue detail and shared issue view escape issue-specific code', function (
 
     expect($sharedHtml)
         ->toContain(__('Issue-specific code'))
+        ->toContain(__('Estimated remediation effort'))
         ->toContain('&lt;script&gt;alert(&quot;unsafe&quot;)&lt;/script&gt;')
         ->not->toContain('<script>alert');
 });

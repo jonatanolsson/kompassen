@@ -26,6 +26,8 @@ class CreateAccessibilityIssue extends Component
 
     public string $title = '';
 
+    public string $summary = '';
+
     public string $description = '';
 
     public string $impact = '';
@@ -50,6 +52,10 @@ class CreateAccessibilityIssue extends Component
 
     public array $wcag_criteria = [];
 
+    public string $wcagCriteriaVersion = 'target';
+
+    public string $wcagSearch = '';
+
     public array $example_ids = [];
 
     public string $exampleSearch = '';
@@ -66,6 +72,7 @@ class CreateAccessibilityIssue extends Component
     {
         return [
             'title' => 'required|string|max:255',
+            'summary' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'impact' => 'nullable|string',
             'problem_code_snippet' => 'nullable|string|max:20000',
@@ -104,6 +111,7 @@ class CreateAccessibilityIssue extends Component
 
         $issue_data = [
             'title' => $validated['title'],
+            'summary' => $validated['summary'],
             'description' => $validated['description'],
             'impact' => $this->normalizedImpact($validated['impact']),
             'problem_code_snippet' => filled($validated['problem_code_snippet'] ?? null) ? $validated['problem_code_snippet'] : null,
@@ -172,7 +180,36 @@ class CreateAccessibilityIssue extends Component
     {
         $project = AccessibilityProject::findOrFail($this->projectId);
         $pages = $project->pages;
-        $wcagCriteria = WcagSuccessCriterion::wcag()->get();
+        $targetStandard = 'WCAG '.$project->target_wcag_version;
+        $hasTargetVersionCriteria = WcagSuccessCriterion::wcag()
+            ->where('standard', $targetStandard)
+            ->exists();
+        $criteriaQuery = WcagSuccessCriterion::wcag();
+
+        if ($this->wcagCriteriaVersion === 'target' && $hasTargetVersionCriteria) {
+            $selectedIds = $this->wcag_criteria;
+            $criteriaQuery->where(function ($query) use ($targetStandard, $selectedIds): void {
+                $query->where('standard', $targetStandard);
+
+                if ($selectedIds !== []) {
+                    $query->orWhereIn('id', $selectedIds);
+                }
+            });
+        }
+
+        $wcagCriteria = $criteriaQuery
+            ->when(trim($this->wcagSearch) !== '', function ($query): void {
+                $search = '%'.trim($this->wcagSearch).'%';
+
+                $query->where(function ($query) use ($search): void {
+                    $query->where('number', 'like', $search)
+                        ->orWhere('name_sv', 'like', $search)
+                        ->orWhere('name_en', 'like', $search);
+                });
+            })
+            ->orderBy('standard')
+            ->orderBy('number')
+            ->get();
         $availableExamples = WcagCriterionExample::query()
             ->visibleToTeam($this->currentTeamId())
             ->with('criterion')
@@ -194,6 +231,7 @@ class CreateAccessibilityIssue extends Component
             'project',
             'pages',
             'wcagCriteria',
+            'hasTargetVersionCriteria',
             'availableExamples'
         ));
     }

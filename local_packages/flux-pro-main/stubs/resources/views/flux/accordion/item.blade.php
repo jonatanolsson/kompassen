@@ -24,7 +24,7 @@ $state = $wireModel?->value ? '$wire.' . $wireModel->value : ($expanded ? 'true'
 
 $classes = Flux::classes()
     ->add('block pt-4 first:pt-0 pb-4 last:pb-0')
-    ->add('border-b last:border-b-0 border-zinc-800/10 dark:border-white/10')
+    ->add('border-b border-zinc-800/10 dark:border-white/10')
     ;
 @endphp
 

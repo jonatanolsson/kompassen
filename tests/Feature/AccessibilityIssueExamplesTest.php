@@ -46,6 +46,7 @@ test('user can link multiple knowledge base examples when creating an issue', fu
 
     Livewire::actingAs($user)
         ->test(CreateAccessibilityIssue::class, ['project' => $project])
+        ->set('wcagCriteriaVersion', 'all')
         ->assertSee('1.1.1')
         ->assertSee('WCAG 2.1 (1.1.1)')
         ->assertSee('WCAG 2.2 (1.1.1)')

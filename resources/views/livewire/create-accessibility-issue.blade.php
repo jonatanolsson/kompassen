@@ -31,119 +31,37 @@
                         </flux:field>
 
                         <flux:field>
+                            <flux:label>{{ __('Summary') }}</flux:label>
+                            <flux:textarea
+                                wire:model="summary"
+                                rows="2"
+                                maxlength="500"
+                                placeholder="{{ __('Short summary') }}"
+                            />
+                            <flux:text size="sm" class="mt-2 text-zinc-500">{{ __('Optional. Shown in the project preview; keep full details in the description.') }}</flux:text>
+                            <flux:error name="summary" />
+                        </flux:field>
+
+                        <flux:field>
                             <flux:label>{{ __('Description') }}</flux:label>
                             <flux:editor
                                 wire:model="description"
                                 placeholder="{{ __('Describe the issue in detail...') }}"
                             />
+                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                {{ __('Supports Markdown formatting') }}
+                            </flux:text>
                             <flux:error name="description" />
                         </flux:field>
-
-                        <flux:field>
-                            <flux:label>{{ __('Upload new images') }}</flux:label>
-                            <flux:file-upload
-                                wire:model="attachments"
-                                multiple
-                                accept="image/jpeg,image/png,image/gif,image/webp"
-                            >
-                                <flux:file-upload.dropzone
-                                    heading="{{ __('Choose images or drop them here') }}"
-                                    text="{{ __('JPG, PNG, GIF or WebP. Max 5 MB per image.') }}"
-                                />
-                            </flux:file-upload>
-                            <flux:error name="attachments" />
-
-                            @if (count($this->attachments) > 0)
-                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
-                                    @foreach ($this->attachments as $uploadedFile)
-                                        <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-                                            <img
-                                                src="{{ $uploadedFile->temporaryUrl() }}"
-                                                alt="{{ $uploadedFile->getClientOriginalName() }}"
-                                                class="h-full w-full object-cover"
-                                            />
-                                            <span class="absolute bottom-2 left-2 rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">
-                                                {{ __('New') }}
-                                            </span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </flux:field>
-
-                        <div class="space-y-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-                            <div>
-                                <flux:heading level="2" class="text-lg font-semibold">{{ __('Issue-specific code') }}</flux:heading>
-                                <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
-                                    {{ __('Add code that causes this issue and, if available, a corrected version. WCAG criterion examples remain separate.') }}
-                                </flux:text>
-                            </div>
-
-                            <flux:field>
-                                <flux:label>{{ __('Code causing the issue') }}</flux:label>
-                                <flux:textarea wire:model="problem_code_snippet" rows="5" class="font-mono text-sm" />
-                                <flux:error name="problem_code_snippet" />
-                            </flux:field>
-
-                            <flux:field>
-                                <flux:label>{{ __('Suggested corrected code') }}</flux:label>
-                                <flux:textarea wire:model="corrected_code_snippet" rows="5" class="font-mono text-sm" />
-                                <flux:error name="corrected_code_snippet" />
-                            </flux:field>
-                        </div>
-
-                        <details class="space-y-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" @if ($errors->any()) open @endif>
-                            <summary class="cursor-pointer font-medium">{{ __('Additional evidence and user impact') }}</summary>
-                            <div class="mt-6 space-y-6">
-                        <flux:field>
-                            <flux:label>{{ __('Impact') }}</flux:label>
-                            <flux:editor
-                                wire:model="impact"
-                                placeholder="{{ __('Describe how the issue affects users...') }}"
-                            />
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
-                                {{ __('Optional. Explain the consequences for users; shown in reports.') }}
-                            </flux:text>
-                            <flux:error name="impact" />
-                        </flux:field>
-
-                        <flux:field>
-                            <flux:label>{{ __('Mermaid diagram') }}</flux:label>
-                            <flux:textarea
-                                wire:model="mermaid_diagram"
-                                rows="8"
-                                placeholder="flowchart LR&#10;    A[Observed issue] --> B[Impact]"
-                                class="font-mono text-sm"
-                            />
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
-                                {{ __('Optional Mermaid source. It is rendered in your browser when you save and stored as a sanitized SVG for reports.') }}
-                            </flux:text>
-                            <flux:error name="mermaid_diagram" />
-                            <div
-                                x-ref="diagramError"
-                                x-show="diagramError"
-                                x-cloak
-                                tabindex="-1"
-                                role="alert"
-                                class="text-sm font-medium text-red-600 dark:text-red-400"
-                                x-text="diagramError"
-                            ></div>
-                            <flux:text size="sm" x-show="rendering" x-cloak class="text-zinc-500 dark:text-zinc-400" aria-live="polite">
-                                {{ __('Rendering diagram…') }}
-                            </flux:text>
-                        </flux:field>
-                            </div>
-                        </details>
                     </div>
                 </div>
 
                 <flux:separator />
 
-                <!-- Location & Classification -->
+                <!-- Location Section -->
                 <div class="py-4">
-                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Classification') }}</flux:heading>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Location') }}</flux:heading>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <flux:field>
                             <flux:label>{{ __('Page/Service') }}</flux:label>
                             <flux:select wire:model.live="page_id">
@@ -171,10 +89,18 @@
                             />
                             <flux:error name="component_area" />
                         </flux:field>
+                    </div>
+                </div>
 
+                <flux:separator />
+
+                <!-- Classification Section -->
+                <div class="py-4">
+                    <flux:heading level="2" class="mb-4 text-lg font-semibold">{{ __('Classification') }}</flux:heading>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <flux:radio.group
-                            variant="buttons"
-                            wire:model="severity"
+                        variant="buttons"
+                        wire:model="severity"
                             label="{{ __('Severity') }}"
                             required
                         >
@@ -185,23 +111,59 @@
                         </flux:radio.group>
                         <flux:error name="severity" />
 
-                        <flux:radio.group
-                            variant="buttons"
-                            wire:model="difficulty"
-                            label="{{ __('Difficulty to Fix') }}"
-                            required
-                        >
-                            <flux:radio value="easy" label="{{ __('Easy') }}" />
-                            <flux:radio value="medium" label="{{ __('Medium') }}" />
-                            <flux:radio value="hard" label="{{ __('Hard') }}" />
-                        </flux:radio.group>
-                        <flux:error name="difficulty" />
-
+                        <div class="space-y-2">
+                            <flux:radio.group
+                                variant="buttons"
+                                wire:model="difficulty"
+                                label="{{ __('Estimated remediation effort') }}"
+                                required
+                            >
+                                <flux:radio value="easy" label="{{ __('Easy') }}" />
+                                <flux:radio value="medium" label="{{ __('Medium') }}" />
+                                <flux:radio value="hard" label="{{ __('Hard') }}" />
+                            </flux:radio.group>
+                            <flux:error name="difficulty" />
+                            <flux:text size="sm" class="text-zinc-600 dark:text-zinc-400">
+                                {{ __('Estimate implementation effort: easy is a small change, medium is a moderate change, and hard is a substantial change. Severity describes user impact separately.') }}
+                            </flux:text>
+                        </div>
                     </div>
                     <flux:text size="sm" class="mt-4 text-zinc-600 dark:text-zinc-400">{{ __('New issues start open. Change status with a resolution note after saving.') }}</flux:text>
                 </div>
 
                 <flux:separator />
+
+                <flux:field>
+                    <flux:label>{{ __('Upload new images') }}</flux:label>
+                    <flux:file-upload
+                        wire:model="attachments"
+                        multiple
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                    >
+                        <flux:file-upload.dropzone
+                            heading="{{ __('Choose images or drop them here') }}"
+                            text="{{ __('JPG, PNG, GIF or WebP. Max 5 MB per image.') }}"
+                        />
+                    </flux:file-upload>
+                    <flux:error name="attachments" />
+
+                    @if (count($this->attachments) > 0)
+                        <div class="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-3 lg:grid-cols-4">
+                            @foreach ($this->attachments as $uploadedFile)
+                                <div class="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+                                    <img
+                                        src="{{ $uploadedFile->temporaryUrl() }}"
+                                        alt="{{ $uploadedFile->getClientOriginalName() }}"
+                                        class="h-full w-full object-cover"
+                                    />
+                                    <span class="absolute bottom-2 left-2 rounded bg-blue-600/85 px-2 py-1 text-xs font-semibold text-white">
+                                        {{ __('New') }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </flux:field>
 
                 <flux:accordion transition>
                     <flux:accordion.item
@@ -217,6 +179,33 @@
                         <flux:text size="sm" class="text-zinc-600 dark:text-zinc-400">
                             {{ __('Select which WCAG success criteria this issue relates to.') }}
                         </flux:text>
+
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            <flux:field>
+                                <flux:label>{{ __('Criteria version') }}</flux:label>
+                                <flux:select wire:model.live="wcagCriteriaVersion">
+                                    <option value="target">{{ __('Target version (WCAG :version)', ['version' => $project->target_wcag_version]) }}</option>
+                                    <option value="all">{{ __('All supported WCAG versions') }}</option>
+                                </flux:select>
+                            </flux:field>
+                            <flux:field>
+                                <flux:label>{{ __('Search WCAG criteria') }}</flux:label>
+                                <flux:input
+                                    type="search"
+                                    wire:model.live.debounce.300ms="wcagSearch"
+                                    placeholder="{{ __('Search by number or name...') }}"
+                                    icon="magnifying-glass"
+                                />
+                            </flux:field>
+                        </div>
+                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                            {{ __('Criteria from other versions are marked as Nice to have.') }}
+                        </flux:text>
+                        @if (! $hasTargetVersionCriteria)
+                            <flux:callout icon="information-circle" color="amber">
+                                <flux:callout.text>{{ __('No criteria are available for WCAG :version yet. Showing all supported versions.', ['version' => $project->target_wcag_version]) }}</flux:callout.text>
+                            </flux:callout>
+                        @endif
 
                         <div class="space-y-2 max-h-96 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
                             @forelse ($wcagCriteria as $criterion)
@@ -299,6 +288,75 @@
                 </div>
 
                     </div>
+                    </flux:accordion.item>
+                </flux:accordion>
+
+                <flux:accordion transition>
+                    <flux:accordion.item
+                        :heading="__('Additional evidence and user impact')"
+                        :expanded="filled($problem_code_snippet) || filled($corrected_code_snippet) || filled($impact) || filled($mermaid_diagram) || count($this->attachments) > 0 || $errors->any()"
+                    >
+                        <div class="mt-5 space-y-6">
+
+                            <div class="space-y-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                                <div>
+                                    <flux:heading level="3" class="text-lg font-semibold">{{ __('Issue-specific code') }}</flux:heading>
+                                    <flux:text size="sm" class="mt-1 text-zinc-600 dark:text-zinc-400">
+                                        {{ __('Add code that causes this issue and, if available, a corrected version. WCAG criterion examples remain separate.') }}
+                                    </flux:text>
+                                </div>
+
+                                <flux:field>
+                                    <flux:label>{{ __('Code causing the issue') }}</flux:label>
+                                    <flux:textarea wire:model="problem_code_snippet" rows="5" class="font-mono text-sm" />
+                                    <flux:error name="problem_code_snippet" />
+                                </flux:field>
+
+                                <flux:field>
+                                    <flux:label>{{ __('Suggested corrected code') }}</flux:label>
+                                    <flux:textarea wire:model="corrected_code_snippet" rows="5" class="font-mono text-sm" />
+                                    <flux:error name="corrected_code_snippet" />
+                                </flux:field>
+                            </div>
+
+                            <flux:field>
+                                <flux:label>{{ __('Impact') }}</flux:label>
+                                <flux:editor
+                                    wire:model="impact"
+                                    placeholder="{{ __('Describe how the issue affects users...') }}"
+                                />
+                                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                    {{ __('Optional. Explain the consequences for users; shown in reports.') }}
+                                </flux:text>
+                                <flux:error name="impact" />
+                            </flux:field>
+
+                            <flux:field>
+                                <flux:label>{{ __('Mermaid diagram') }}</flux:label>
+                                <flux:textarea
+                                    wire:model="mermaid_diagram"
+                                    rows="8"
+                                    placeholder="flowchart LR&#10;    A[Observed issue] --> B[Impact]"
+                                    class="font-mono text-sm"
+                                />
+                                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                    {{ __('Optional Mermaid source. It is rendered in your browser when you save and stored as a sanitized SVG for reports.') }}
+                                </flux:text>
+                                <flux:error name="mermaid_diagram" />
+                                <div
+                                    x-ref="diagramError"
+                                    x-show="diagramError"
+                                    x-cloak
+                                    tabindex="-1"
+                                    role="alert"
+                                    class="text-sm font-medium text-red-600 dark:text-red-400"
+                                    x-text="diagramError"
+                                ></div>
+                                <flux:text size="sm" x-show="rendering" x-cloak class="text-zinc-500 dark:text-zinc-400" aria-live="polite">
+                                    {{ __('Rendering diagram…') }}
+                                </flux:text>
+                            </flux:field>
+                        </div>
                     </flux:accordion.item>
                 </flux:accordion>
 
