@@ -227,8 +227,10 @@
                 @endphp
 
                 <flux:accordion transition>
-                    <flux:accordion.item class="rounded-xl border border-zinc-200 px-4 dark:border-zinc-700">
-                        <flux:accordion.heading>{{ __('Advanced report content') }}</flux:accordion.heading>
+                    <flux:accordion.item>
+                        <flux:accordion.heading class="min-h-12 py-3">
+                            {{ __('Advanced report content') }}
+                        </flux:accordion.heading>
                         <flux:accordion.content>
                             <flux:text size="sm" class="text-zinc-600 dark:text-zinc-400">
                                 {{ __('These selections become the project defaults for future report versions.') }}
