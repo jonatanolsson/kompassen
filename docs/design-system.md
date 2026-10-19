@@ -95,6 +95,32 @@ enbart byter namn på eller duplicerar en Flux-komponent.
   konflikt med Flux standardstilar.
 - Färg får förstärka status, men status ska alltid ha en läsbar textetikett.
   Kontroller ska ha synlig tangentbordsfokus och tillgängliga namn.
+- Använd `<flux:accordion>` för utfällbart innehåll. Låt valfria avsnitt vara
+  stängda som standard och utelämna `exclusive` när flera avsnitt ska kunna
+  vara öppna samtidigt. Behåll motiverade initiallägen, till exempel befintligt
+  innehåll i ett redigeringsformulär, och öppna relevanta avsnitt efter
+  valideringsfel.
+- Använd inte utfällbara tabellrader för kompletterande detaljer. Håll
+  översiktstabeller kompakta och länka till resursens detaljsida.
+- I projektförhandsvisningen ska utfällbart innehåll fortfarande synas vid
+  utskrift. Märk accordion-gruppen med `data-print-accordion`; utskriftsregeln
+  i `resources/css/app.css` visar dess Flux-innehåll utan att ändra interaktivt
+  öppningsläge.
+- Använd flikar för att växla mellan närliggande vyer och accordions för
+  valfria detaljer. Dölj inte viktig information som behövs för att förstå
+  sidan eller slutföra en uppgift.
+- I projektförhandsvisningen ska sidor och tjänster vara plana grupper med
+  stora rubriker och metadata; visa rubriken `Problem (antal)` direkt under
+  sidinformationen. Varje problem är ett eget rundat accordion-kort med titel
+  och allvarlighetsgrad i rubriken. Håll rubrikrad, metadata, WCAG-badges och
+  den separata, valfria sammanfattningen oförändrade i båda lägena; härled inte
+  den från beskrivningen. Öppning lägger enbart mer innehåll under dem, där
+  den fullständiga beskrivningen visas en gång. Låt chevron visa läget i
+  stället för att växla mellan ”Visa” och ”Dölj detaljer”. Duplicera inte
+  metadata i det öppnade innehållet. Håll kortets inre sektioner plana: använd
+  rubriker, mellanrum och diskreta delare i stället för kort-i-kort. Bevara
+  mörkt läge samt utskriftsstil. Projektövergripande problem följer samma
+  kortmönster under egen rubrik.
 
 ## Så arbetar vi med designsystemet
 

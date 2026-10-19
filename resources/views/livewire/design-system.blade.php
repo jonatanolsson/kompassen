@@ -223,7 +223,7 @@
         :title="__('Accordion example')"
         :description="__('Use accordions for optional, expandable detail such as FAQs.')"
     >
-        <flux:accordion exclusive transition>
+        <flux:accordion transition>
             <flux:accordion.item :heading="__('When should I use tabs?')">
                 <flux:text>{{ __('Use tabs to switch between related panels without leaving the page.') }}</flux:text>
             </flux:accordion.item>
