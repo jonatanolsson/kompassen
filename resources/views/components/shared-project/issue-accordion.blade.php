@@ -1,138 +1,174 @@
-@props(['issue', 'pageName' => null, 'targetWcagVersion'])
+@props(['issue', 'targetWcagVersion', 'issueHeadingLevel' => 3, 'sectionHeadingLevel' => 4, 'editUrl' => null])
 
 @php
-    $descriptionSummary = Str::of(strip_tags($issue->description ?? ''))->squish()->limit(220);
+    $issueFacts = collect([
+        __('Component Area') => $issue->component_area,
+        __('Estimated remediation effort') => $issue->difficulty ? __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) : null,
+        __('Status') => $issue->status ? __($issue->status) : null,
+    ])->filter(fn (?string $value): bool => filled($value));
 @endphp
 
-<details
+<flux:accordion.item
+    wire:key="shared-issue-{{ $issue->id }}"
     id="issue-{{ $issue->id }}"
-    data-print-expand
-    class="group rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 print:page-break-inside-avoid"
+    class="overflow-hidden rounded-lg border border-zinc-200 bg-white p-0 dark:border-zinc-700 dark:bg-zinc-900 print:border-zinc-300 print:page-break-inside-avoid"
 >
-    <summary class="cursor-pointer list-none p-4 marker:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 print:p-3">
-        <div class="flex items-start justify-between gap-3">
-            <h3 class="font-semibold text-zinc-900 dark:text-white print:text-black">{{ $issue->title }}</h3>
-            <x-shared-project.severity-badge :severity="$issue->severity" />
-        </div>
+    <flux:accordion.heading class="items-start p-4 text-start print:p-3">
+        <span class="flex w-full min-w-0 flex-col items-start gap-3">
+            <span class="flex w-full items-start justify-between gap-3">
+                <span role="heading" aria-level="{{ $issueHeadingLevel }}" class="text-base font-semibold text-zinc-900 dark:text-white print:text-black">{{ $issue->title }}</span>
+                <span class="shrink-0">
+                    <x-shared-project.severity-badge :severity="$issue->severity" />
+                </span>
+            </span>
 
-        <div class="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600 dark:text-zinc-300 print:text-zinc-700">
-            @if ($pageName)
-                <span>{{ __('Affected page or service') }}: {{ $pageName }}</span>
-            @endif
-            @if ($issue->component_area)
-                <span>{{ $issue->component_area }}</span>
-            @endif
-            @if ($issue->difficulty)
-                <span>{{ __('Difficulty') }}: {{ __(Str::title(str_replace(['_', '-'], ' ', $issue->difficulty))) }}</span>
-            @endif
-            @if ($issue->status)
-                <span>{{ __('Status') }}: {{ __($issue->status) }}</span>
-            @endif
-            @foreach ($issue->wcagCriteria as $criterion)
-                <flux:badge color="emerald" size="sm">{{ $criterion->standard }} · {{ $criterion->number }}</flux:badge>
-                @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
-                    <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
+            <span class="w-full space-y-3">
+                @if ($issueFacts->isNotEmpty())
+                    <dl class="grid w-full grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+                        @foreach ($issueFacts as $label => $value)
+                            <div class="min-w-0">
+                                <dt class="text-xs text-zinc-500 dark:text-zinc-400 print:text-zinc-700">{{ $label }}</dt>
+                                <dd class="truncate text-sm font-medium text-zinc-700 dark:text-zinc-200 print:text-black">{{ $value }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
                 @endif
-            @endforeach
-        </div>
 
-        @if ($descriptionSummary->isNotEmpty())
-            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $descriptionSummary }}</p>
+                @if ($issue->wcagCriteria->isNotEmpty())
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        @foreach ($issue->wcagCriteria->take(2) as $criterion)
+                            <flux:badge color="zinc" size="sm" class="print:border print:border-zinc-400 print:bg-transparent print:text-black">{{ $criterion->standard }} · {{ $criterion->number }}</flux:badge>
+                            @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
+                                <flux:badge color="amber" size="sm" class="print:border print:border-zinc-400 print:bg-transparent print:text-black">{{ __('Nice to have') }}</flux:badge>
+                            @endif
+                        @endforeach
+                        @if ($issue->wcagCriteria->count() > 2)
+                            <flux:badge color="zinc" size="sm">+{{ $issue->wcagCriteria->count() - 2 }}</flux:badge>
+                        @endif
+                    </div>
+                @endif
+
+                @if (filled($issue->summary))
+                    <span class="block max-w-5xl space-y-0.5">
+                        <span class="block text-xs font-medium text-zinc-500 dark:text-zinc-400 print:text-zinc-700">{{ __('Summary') }}</span>
+                        <span class="block text-sm leading-6 text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $issue->summary }}</span>
+                    </span>
+                @endif
+            </span>
+        </span>
+    </flux:accordion.heading>
+
+    <flux:accordion.content class="space-y-4 border-t border-zinc-200 p-4 text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 print:p-3">
+        @if ($editUrl)
+            <div class="flex justify-end print:hidden">
+                <flux:button href="{{ $editUrl }}" variant="ghost" size="sm" icon="pencil">
+                    {{ __('Edit finding') }}
+                </flux:button>
+            </div>
         @endif
 
-        <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-zinc-600 dark:text-zinc-400 print:hidden">
-            {{ __('Show or hide details') }}
-            <span aria-hidden="true" class="transition-transform group-open:rotate-180">⌄</span>
-        </span>
-    </summary>
-
-    <div data-print-details class="space-y-5 border-t border-zinc-200 p-4 dark:border-zinc-700 print:p-3">
         @if ($issue->description)
             <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Problem') }}</h4>
-                <x-user-content :content="$issue->description" class="text-sm text-zinc-700 dark:text-zinc-300" />
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('Description') }}</div>
+                <x-user-content :content="$issue->description" class="text-sm leading-6 text-zinc-700 dark:text-zinc-300 print:text-zinc-700" />
+            </section>
+        @endif
+
+        @if ($issue->solution_suggestions)
+            <section>
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-emerald-950 dark:text-emerald-100 print:text-black">{{ __('Recommended action') }}</div>
+                <x-user-content :content="$issue->solution_suggestions" class="text-sm leading-6 text-zinc-800 dark:text-zinc-200 print:text-zinc-700" />
             </section>
         @endif
 
         @if ($issue->problem_code_snippet || $issue->corrected_code_snippet)
             <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Issue-specific code') }}</h4>
-                @if ($issue->problem_code_snippet)
-                    <div class="mb-3">
-                        <p class="mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ __('Code causing the issue') }}</p>
-                        <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100"><code>{{ $issue->problem_code_snippet }}</code></pre>
-                    </div>
-                @endif
-                @if ($issue->corrected_code_snippet)
-                    <div>
-                        <p class="mb-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ __('Suggested corrected code') }}</p>
-                        <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100"><code>{{ $issue->corrected_code_snippet }}</code></pre>
-                    </div>
-                @endif
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('Issue-specific code') }}</div>
+                <div class="space-y-4">
+                    @if ($issue->problem_code_snippet)
+                        <div class="space-y-2">
+                            <p class="text-xs font-medium text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ __('Code causing the issue') }}</p>
+                            <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100 print:border print:border-zinc-300 print:bg-white print:text-zinc-900"><code>{{ $issue->problem_code_snippet }}</code></pre>
+                        </div>
+                    @endif
+                    @if ($issue->corrected_code_snippet)
+                        <div class="space-y-2">
+                            <p class="text-xs font-medium text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ __('Suggested corrected code') }}</p>
+                            <pre class="overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100 print:border print:border-zinc-300 print:bg-white print:text-zinc-900"><code>{{ $issue->corrected_code_snippet }}</code></pre>
+                        </div>
+                    @endif
+                </div>
             </section>
         @endif
 
         @if ($issue->mermaid_diagram)
             <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Issue diagram') }}</h4>
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('Issue diagram') }}</div>
                 <div
                     id="issue-diagram-{{ $issue->id }}"
                     data-mermaid-diagram
                     data-mermaid-source="{{ $issue->mermaid_diagram }}"
                     role="img"
                     aria-label="{{ __('Issue diagram') }}"
-                    class="mermaid min-h-24 overflow-auto rounded bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 print:border print:border-zinc-300"
+                    class="mermaid min-h-24 overflow-auto rounded bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 print:border print:border-zinc-300 print:bg-white print:text-zinc-900"
                 >{{ $issue->mermaid_diagram }}</div>
-            </section>
-        @endif
-
-        @if ($issue->solution_suggestions)
-            <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Recommended action') }}</h4>
-                <x-user-content :content="$issue->solution_suggestions" class="text-sm text-zinc-700 dark:text-zinc-300" />
             </section>
         @endif
 
         @if ($issue->wcagCriteria->isNotEmpty())
             <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('WCAG Criteria') }}</h4>
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('WCAG Criteria') }}</div>
                 <div class="space-y-3">
                     @foreach ($issue->wcagCriteria as $criterion)
-                        <article class="border-t border-zinc-200 pt-3 dark:border-zinc-700 print:border-zinc-300">
-                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $criterion->standard }} · {{ $criterion->number }}</span>
-                                @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
-                                    <flux:badge color="amber" size="sm">{{ __('Nice to have') }}</flux:badge>
-                                @endif
-                                <span class="font-medium text-zinc-900 dark:text-white">{{ $criterion->name_sv ?? $criterion->name_en }}</span>
-                                <span class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('Level') }} {{ Str::upper($criterion->level) }}</span>
-                                @if ($criterion->url)
-                                    <a href="{{ $criterion->url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-zinc-700 underline dark:text-zinc-300 print:hidden">
-                                        W3C
-                                    </a>
-                                @endif
+                        <article class="border-t border-zinc-200 pt-3 first:border-t-0 first:pt-0 dark:border-zinc-700">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0 space-y-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-xs font-semibold tracking-wide text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $criterion->standard }} · {{ $criterion->number }}</span>
+                                        @if ($criterion->isOutsideProjectTargetVersion($targetWcagVersion))
+                                            <flux:badge color="amber" size="sm" class="print:border print:border-zinc-400 print:bg-transparent print:text-black">{{ __('Nice to have') }}</flux:badge>
+                                        @endif
+                                    </div>
+                                    <p class="font-medium text-zinc-900 dark:text-white print:text-black">{{ $criterion->name_sv ?? $criterion->name_en }}</p>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-2">
+                                    <flux:badge color="zinc" size="sm" class="print:border print:border-zinc-400 print:bg-transparent print:text-black">{{ __('Level') }} {{ Str::upper($criterion->level) }}</flux:badge>
+                                    @if ($criterion->url)
+                                        <a href="{{ $criterion->url }}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-accent-content underline print:hidden">W3C</a>
+                                    @endif
+                                </div>
                             </div>
+
                             @if ($criterion->description_sv || $criterion->description_en)
-                                <p class="mt-2 text-sm text-zinc-700 dark:text-zinc-300">{{ $criterion->description_sv ?? $criterion->description_en }}</p>
+                                <p class="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $criterion->description_sv ?? $criterion->description_en }}</p>
                             @endif
-                            @if ($criterion->pivot->failure_type)
-                                <p class="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                                    <span class="font-medium">{{ __('Failure type') }}:</span> {{ __($criterion->pivot->failure_type) }}
-                                </p>
+
+                            @if ($criterion->pivot->failure_type || $criterion->pivot->comment)
+                                <dl class="mt-3 grid gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-700 sm:grid-cols-2">
+                                    @if ($criterion->pivot->failure_type)
+                                        <div>
+                                            @php $isManualAssessment = strtolower(trim($criterion->pivot->failure_type)) === 'manual'; @endphp
+                                            <dt class="text-xs text-zinc-500 dark:text-zinc-400 print:text-zinc-700">{{ $isManualAssessment ? __('Assessment method') : __('Failure type') }}</dt>
+                                            <dd class="mt-1 text-sm text-zinc-800 dark:text-zinc-200 print:text-black">{{ $isManualAssessment ? __('Manual assessment') : __($criterion->pivot->failure_type) }}</dd>
+                                        </div>
+                                    @endif
+                                    @if ($criterion->pivot->comment)
+                                        <div>
+                                            <dt class="text-xs text-zinc-500 dark:text-zinc-400 print:text-zinc-700">{{ __('Evidence') }}</dt>
+                                            <dd class="mt-1 text-sm text-zinc-800 dark:text-zinc-200 print:text-black">{{ $criterion->pivot->comment }}</dd>
+                                        </div>
+                                    @endif
+                                </dl>
                             @endif
-                            @if ($criterion->pivot->comment)
-                                <p class="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                                    <span class="font-medium">{{ __('Evidence') }}:</span> {{ $criterion->pivot->comment }}
-                                </p>
-                            @endif
+
                             @if ($criterion->pivot->code_snippet)
-                                <pre class="mt-2 overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100"><code>{{ $criterion->pivot->code_snippet }}</code></pre>
+                                <pre class="mt-3 overflow-auto rounded bg-zinc-950 p-3 text-xs text-zinc-100 print:border print:border-zinc-300 print:bg-white print:text-zinc-900"><code>{{ $criterion->pivot->code_snippet }}</code></pre>
                             @endif
                             @if ($criterion->pivot->screenshot_path)
                                 <img
                                     src="{{ asset('storage/'.$criterion->pivot->screenshot_path) }}"
                                     alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}"
-                                    class="mt-2 max-h-96 max-w-full rounded border border-zinc-200 object-contain dark:border-zinc-700 print:border-zinc-300"
+                                    class="mt-3 max-h-96 max-w-full rounded border border-zinc-200 object-contain dark:border-zinc-700 print:border-zinc-300"
                                 />
                             @endif
                         </article>
@@ -143,7 +179,7 @@
 
         @if ($issue->attachments->isNotEmpty())
             <section>
-                <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">{{ __('Screenshots') }}</h4>
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white print:text-black">{{ __('Screenshots') }}</div>
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     @foreach ($issue->attachments as $attachment)
                         <div>
@@ -172,15 +208,15 @@
         @endif
 
         @if ($issue->examples->isNotEmpty())
-            <section class="border-t border-zinc-200 pt-4 dark:border-zinc-700">
-                <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
+            <section>
+                <div role="heading" aria-level="{{ $sectionHeadingLevel }}" class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
                     {{ __('Knowledge Base Examples') }} ({{ $issue->examples->count() }})
-                </h4>
-                <div class="space-y-4">
+                </div>
+                <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($issue->examples as $example)
-                        <article class="space-y-3 border-t border-zinc-200 pt-4 dark:border-zinc-700 print:page-break-inside-avoid">
+                        <article class="space-y-3 py-4 first:pt-0 last:pb-0 print:page-break-inside-avoid">
                             <div class="flex flex-wrap items-start justify-between gap-2">
-                                <h5 class="font-medium text-zinc-900 dark:text-white">{{ $example->title }}</h5>
+                                <p class="font-medium text-zinc-900 dark:text-white">{{ $example->title }}</p>
                                 @if ($example->criterion)
                                     <span class="text-xs text-zinc-600 dark:text-zinc-400">
                                         {{ $example->criterion->standard }} · {{ $example->criterion->number }}
@@ -223,12 +259,16 @@
                                         class="mermaid min-h-24 overflow-auto rounded bg-white px-4 py-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 print:border print:border-zinc-300"
                                     >{{ $example->code_snippet }}</div>
                                 @endif
-                                <details data-print-expand class="group rounded bg-zinc-100 dark:bg-zinc-800">
-                                    <summary class="cursor-pointer px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                                        {{ __('Show source code') }}{{ $example->code_language ? ' · '.strtoupper($example->code_language) : '' }}
-                                    </summary>
-                                    <pre data-print-details class="overflow-auto bg-zinc-950 px-3 py-2 text-xs text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
-                                </details>
+                                <flux:accordion transition data-print-accordion class="px-3">
+                                    <flux:accordion.item wire:key="shared-example-source-{{ $example->id }}" class="border-0">
+                                        <flux:accordion.heading class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                            {{ __('Show source code') }}{{ $example->code_language ? ' · '.strtoupper($example->code_language) : '' }}
+                                        </flux:accordion.heading>
+                                        <flux:accordion.content>
+                                            <pre class="overflow-auto bg-zinc-950 px-3 py-2 text-xs text-zinc-100"><code>{{ $example->code_snippet }}</code></pre>
+                                        </flux:accordion.content>
+                                    </flux:accordion.item>
+                                </flux:accordion>
                             @endif
 
                             @if ($example->url)
@@ -251,5 +291,5 @@
                 </div>
             </section>
         @endif
-    </div>
-</details>
+    </flux:accordion.content>
+</flux:accordion.item>

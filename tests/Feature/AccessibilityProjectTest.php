@@ -53,6 +53,8 @@ test('can create accessibility project', function () {
     $response = $this->actingAs($user)->post('/accessibility-projects', [
         'name' => 'Test Project',
         'description' => 'Test description',
+        'audit_scope' => 'Test account and payment journeys.',
+        'scope_limitations' => 'Desktop browsers only.',
         'target_wcag_level' => 'AA',
         'target_wcag_version' => '2.2',
     ]);
@@ -62,6 +64,8 @@ test('can create accessibility project', function () {
         'name' => 'Test Project',
         'team_id' => $team->id,
         'target_wcag_version' => '2.2',
+        'audit_scope' => 'Test account and payment journeys.',
+        'scope_limitations' => 'Desktop browsers only.',
     ]);
 });
 
@@ -82,12 +86,15 @@ test('page scope uses yes and no radio options on create and edit forms', functi
         ->assertSeeHtml('data-flux-radio-group')
         ->assertSeeHtml('value="in_scope"')
         ->assertSeeHtml('value="out_of_scope"')
+        ->assertSeeHtml('wire:model.live="scope"')
+        ->assertDontSee(__('Reason for exclusion'))
         ->assertDontSeeHtml('<select wire:model="scope"');
 
     $page = $project->pages()->create([
         'name' => 'Out of scope service',
         'resource_type' => 'service',
         'scope' => 'out_of_scope',
+        'scope_exclusion_reason' => 'This service is being replaced.',
     ]);
 
     $this->actingAs($user)
@@ -99,11 +106,104 @@ test('page scope uses yes and no radio options on create and edit forms', functi
         ->assertSee(__('Yes'))
         ->assertSee(__('No'))
         ->assertSeeHtml('data-flux-radio-group')
-        ->assertSeeHtml('wire:model="scope"')
+        ->assertSeeHtml('wire:model.live="scope"')
         ->assertSeeHtml('value="in_scope"')
         ->assertSeeHtml('value="out_of_scope"')
         ->assertSeeHtml('checked')
+        ->assertSee(__('Reason for exclusion'))
+        ->assertSee('This service is being replaced.')
         ->assertDontSeeHtml('<select wire:model="scope"');
+});
+
+test('project scope is stored separately from its background description', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityProject::class)
+        ->set('name', 'Scope audit')
+        ->set('description', '<p>Project background</p>')
+        ->set('audit_scope', 'Test account creation and payment journeys.')
+        ->set('scope_limitations', 'Only desktop Chrome is available.')
+        ->call('submit')
+        ->assertRedirect();
+
+    $project = AccessibilityProject::query()->where('name', 'Scope audit')->firstOrFail();
+    expect($project->description)->toBe('<p>Project background</p>')
+        ->and($project->audit_scope)->toBe('Test account creation and payment journeys.')
+        ->and($project->scope_limitations)->toBe('Only desktop Chrome is available.');
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityProject::class, ['project' => $project])
+        ->assertSet('audit_scope', 'Test account creation and payment journeys.')
+        ->set('audit_scope', 'Test the account creation journey.')
+        ->call('update')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($project->refresh()->description)->toBe('<p>Project background</p>')
+        ->and($project->audit_scope)->toBe('Test the account creation journey.');
+});
+
+test('excluding a page requires a reason and removing it from scope clears the reason', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityPage::class, ['project' => $project])
+        ->set('name', 'Legacy service')
+        ->set('scope', 'out_of_scope')
+        ->call('submit')
+        ->assertHasErrors(['scopeExclusionReason' => 'required_if']);
+
+    Livewire::actingAs($user)
+        ->test(CreateAccessibilityPage::class, ['project' => $project])
+        ->set('name', 'Legacy service')
+        ->set('scope', 'out_of_scope')
+        ->set('scopeExclusionReason', 'This service has been retired.')
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $page = $project->pages()->where('name', 'Legacy service')->firstOrFail();
+    expect($page->scope_exclusion_reason)->toBe('This service has been retired.');
+
+    Livewire::actingAs($user)
+        ->test(EditAccessibilityPage::class, ['project' => $project, 'page' => $page])
+        ->set('scope', 'in_scope')
+        ->call('submit')
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($page->refresh()->scope_exclusion_reason)->toBeNull();
+
+    $controllerPageData = [
+        'name' => 'Legacy account',
+        'scope' => 'out_of_scope',
+    ];
+    $this->actingAs($user)
+        ->post(route('accessibility-pages.store', $project), $controllerPageData)
+        ->assertSessionHasErrors('scope_exclusion_reason');
+
+    $this->actingAs($user)
+        ->post(route('accessibility-pages.store', $project), [
+            ...$controllerPageData,
+            'scope_exclusion_reason' => 'This resource is no longer maintained.',
+        ])
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    $controllerPage = $project->pages()->where('name', 'Legacy account')->firstOrFail();
+    $this->actingAs($user)
+        ->put(route('accessibility-pages.update', [$project, $controllerPage]), [
+            'name' => 'Legacy account',
+            'scope' => 'in_scope',
+        ])
+        ->assertRedirect(route('accessibility-projects.show', $project));
+
+    expect($controllerPage->refresh()->scope_exclusion_reason)->toBeNull();
 });
 
 test('project editor can update page description with Flux rich text', function () {
@@ -384,7 +484,7 @@ test('project issue list warns only for pages outside the audit scope', function
     expect($rows[0])->toHaveCount(2)
         ->and(substr_count($content, '<tbody'))->toBe(substr_count($content, '</tbody>'));
 
-    $response->assertSee($description)
+    $response->assertSee('data-desc="'.strtolower($description).'"', false)
         ->assertSee('Included page')
         ->assertSee('Excluded page')
         ->assertSee(__('Page'))
@@ -394,13 +494,20 @@ test('project issue list warns only for pages outside the audit scope', function
 
     foreach ($rows[1] as $row) {
         preg_match_all('/<td\b[^>]*>(.*?)<\/td>/s', $row, $cells);
-        expect(strip_tags($cells[1][2]))->not->toContain($description);
+        expect(strip_tags(implode($cells[1])))->not->toContain($description);
     }
 
     $included = collect($rows[0])->first(fn (string $row): bool => str_contains($row, 'Included page issue'));
     $excluded = collect($rows[0])->first(fn (string $row): bool => str_contains($row, 'Excluded page issue'));
     expect($included)->not->toContain($warning)
         ->and($excluded)->toContain($warning);
+
+    $response->assertDontSee('data-issue-details', false)
+        ->assertDontSee('toggleIssueDetails', false)
+        ->assertSee(route('accessibility-issues.show', [
+            $project,
+            $project->issues()->where('title', 'Included page issue')->firstOrFail(),
+        ]));
 });
 
 test('project resolution modal explains required notes and shows validation errors', function () {
@@ -452,7 +559,7 @@ test('renders project description as formatted user content', function () {
         ->assertSee('First step');
 });
 
-test('project preview expands issue details with linked examples and diagrams', function () {
+test('project preview renders collapsed Flux issue accordions with linked examples and diagrams', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $team->id]);
     $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
@@ -464,9 +571,20 @@ test('project preview expands issue details with linked examples and diagrams', 
     $issue = $project->issues()->create([
         'page_id' => $page->id,
         'title' => 'Navigation cannot be used with keyboard',
+        'summary' => 'Keyboard focus is hidden by navigation.',
         'description' => 'Tab focus disappears behind sticky navigation.',
+        'solution_suggestions' => '<p>Replace generic link labels.</p>',
         'mermaid_diagram' => 'flowchart LR; A[Start] --> B[Fix]',
         'severity' => 'major',
+        'difficulty' => 'easy',
+        'status' => 'open',
+        'component_area' => 'Navigation',
+    ]);
+    $legacyIssue = $project->issues()->create([
+        'page_id' => $page->id,
+        'title' => 'Legacy issue without a summary',
+        'description' => 'Existing detailed content is not auto-summarized.',
+        'severity' => 'minor',
         'difficulty' => 'easy',
         'status' => 'open',
     ]);
@@ -508,9 +626,37 @@ test('project preview expands issue details with linked examples and diagrams', 
 
     $response = $this->actingAs($user)->get(route('accessibility-projects.preview', $project));
 
+    expect(substr_count($response->getContent(), 'Tab focus disappears behind sticky navigation.'))->toBe(1);
+    expect(substr_count($response->getContent(), 'Existing detailed content is not auto-summarized.'))->toBe(1);
+
     $response->assertSuccessful()
         ->assertSee('id="issue-'.$issue->id.'"', false)
-        ->assertSee('data-print-expand', false)
+        ->assertSee('id="issue-'.$legacyIssue->id.'"', false)
+        ->assertSee(__('Summary'))
+        ->assertSee('Keyboard focus is hidden by navigation.')
+        ->assertSee(__('Description'))
+        ->assertSee('Tab focus disappears behind sticky navigation.')
+        ->assertSee('data-flux-accordion-item', false)
+        ->assertSee('data-flux-accordion-content', false)
+        ->assertSee('data-print-accordion', false)
+        ->assertSee('x-data="{ open: false }"', false)
+        ->assertDontSee('x-show="!open"', false)
+        ->assertDontSee(__('Show details'))
+        ->assertDontSee(__('Hide details'))
+        ->assertDontSee(__('Facts'))
+        ->assertSee(__('Recommended action'))
+        ->assertSee('overflow-hidden rounded-lg border border-zinc-200 bg-white p-0 dark:border-zinc-700 dark:bg-zinc-900', false)
+        ->assertDontSee('rounded-md border border-zinc-200 bg-white p-4', false)
+        ->assertSee('divide-y divide-zinc-200 dark:divide-zinc-700', false)
+        ->assertSee('aria-level="5"', false)
+        ->assertSee('aria-level="6"', false)
+        ->assertSee(__('Failure type'))
+        ->assertSee(__('Level'))
+        ->assertSee('Replace generic link labels.')
+        ->assertSee('position: fixed;')
+        ->assertSee(__('Component Area'))
+        ->assertSee('Navigation')
+        ->assertDontSee('<details', false)
         ->assertSee('bg-amber-400/25', false)
         ->assertSee('dark:bg-emerald-400/40', false)
         ->assertSee('data-mermaid-source=', false)
@@ -559,6 +705,7 @@ test('can add page to project', function () {
         'name' => 'Homepage',
         'url' => 'https://example.com/',
         'scope' => 'out_of_scope',
+        'scope_exclusion_reason' => 'This page is outside the agreed audit sample.',
     ]);
 
     $response->assertRedirect();
@@ -585,6 +732,7 @@ test('can add an out of scope page from the livewire form', function () {
         ->set('name', 'External service')
         ->set('url', 'https://external.example.com/')
         ->set('scope', 'out_of_scope')
+        ->set('scopeExclusionReason', 'This service is owned by another organization.')
         ->call('submit')
         ->assertRedirect(route('accessibility-projects.show', $project));
 
@@ -672,6 +820,7 @@ test('can update page scope', function () {
         'url' => $page->url,
         'description' => $page->description,
         'scope' => 'out_of_scope',
+        'scope_exclusion_reason' => 'This page is outside the agreed audit sample.',
     ]);
 
     $response->assertRedirect();

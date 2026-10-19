@@ -48,6 +48,8 @@ class AccessibilityProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'audit_scope' => 'nullable|string|max:10000',
+            'scope_limitations' => 'nullable|string|max:10000',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'target_wcag_version' => ['sometimes', 'required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'audit_date' => 'nullable|date',
@@ -105,6 +107,8 @@ class AccessibilityProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'audit_scope' => 'nullable|string|max:10000',
+            'scope_limitations' => 'nullable|string|max:10000',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'target_wcag_version' => ['sometimes', 'required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'audit_date' => 'nullable|date',

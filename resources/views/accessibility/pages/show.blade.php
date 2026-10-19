@@ -37,6 +37,12 @@
                         <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Scope') }}</dt>
                         <dd class="text-sm font-medium">{{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}</dd>
                     </div>
+                    @if ($page->scope === 'out_of_scope' && $page->scope_exclusion_reason)
+                        <div class="space-y-1 sm:col-span-2">
+                            <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Reason for exclusion') }}</dt>
+                            <dd class="text-sm font-medium">{{ $page->scope_exclusion_reason }}</dd>
+                        </div>
+                    @endif
                     <div class="space-y-1">
                         <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('URL') }}</dt>
                         <dd class="break-all text-sm font-medium">{{ $page->url ?: __('Not specified') }}</dd>

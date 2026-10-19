@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessibilityProject;
 use App\Models\ProjectShareLink;
+use App\Services\ReportPreflight;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -33,13 +34,15 @@ class GuestProjectController extends Controller
             ->header('Content-Security-Policy', "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
     }
 
-    public function preview(AccessibilityProject $project): View
+    public function preview(AccessibilityProject $project, ReportPreflight $preflight): View
     {
         $this->authorize('view', $project);
 
-        $link = null;
+        $canEditProject = auth()->user()?->can('update', $project) ?? false;
+        $previewData = $this->previewData($project);
+        $scopeSummary = $preflight->assessScope($project, $project->pages);
 
-        return view('shared-project.show', $this->previewData($project) + compact('link'));
+        return view('shared-project.show', $previewData + compact('canEditProject', 'scopeSummary'));
     }
 
     private function calculateStats(AccessibilityProject $project): array
@@ -125,6 +128,13 @@ class GuestProjectController extends Controller
             'issues.examples.attachments',
             'issues.examples.referenceLinks',
         ]);
+        $project->setRelation(
+            'methodologies',
+            $project->methodologies()
+                ->availableToTeam((string) $project->team_id)
+                ->orderBy('name')
+                ->get(),
+        );
 
         return [
             'project' => $project,

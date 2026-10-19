@@ -27,6 +27,12 @@ class EditAccessibilityProject extends Component
     #[Validate('nullable|string')]
     public string $description = '';
 
+    #[Validate('nullable|string|max:10000')]
+    public string $audit_scope = '';
+
+    #[Validate('nullable|string|max:10000')]
+    public string $scope_limitations = '';
+
     #[Validate('required|in:A,AA,AAA')]
     public string $target_wcag_level = 'AA';
 
@@ -47,6 +53,8 @@ class EditAccessibilityProject extends Component
         $this->projectId = $project->id;
         $this->name = $project->name;
         $this->description = $project->description;
+        $this->audit_scope = $project->audit_scope ?? '';
+        $this->scope_limitations = $project->scope_limitations ?? '';
         $this->target_wcag_level = $project->target_wcag_level;
         $this->target_wcag_version = $project->target_wcag_version ?? '2.1';
         $this->report_site_url = $project->report_site_url;
@@ -58,6 +66,8 @@ class EditAccessibilityProject extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'audit_scope' => 'nullable|string|max:10000',
+            'scope_limitations' => 'nullable|string|max:10000',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'target_wcag_version' => ['required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'status' => 'required|in:planning,in_progress,completed',
@@ -72,6 +82,8 @@ class EditAccessibilityProject extends Component
         $project->update([
             'name' => $this->name,
             'description' => $this->description,
+            'audit_scope' => $this->audit_scope,
+            'scope_limitations' => $this->scope_limitations,
             'target_wcag_level' => $this->target_wcag_level,
             'target_wcag_version' => $this->target_wcag_version,
             'status' => $this->status,

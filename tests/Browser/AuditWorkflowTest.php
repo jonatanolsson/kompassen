@@ -38,6 +38,12 @@ test('auditor can create a project, page, and resolved issue in a browser', func
         ->assertSee(__('Issue created successfully.'));
 
     $issue = $project->issues()->where('title', 'Missing alternative text')->firstOrFail();
+    $project->issues()->create([
+        'title' => 'Keyboard order is unclear',
+        'severity' => 'minor',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
 
     $page->navigate(route('accessibility-issues.show', [$project, $issue]))
         ->click(__('Actions'))
@@ -50,15 +56,30 @@ test('auditor can create a project, page, and resolved issue in a browser', func
         ->assertNoJavaScriptErrors();
 
     $page->navigate(route('accessibility-projects.preview', $project))
+        ->assertSee(__('Current project preview'))
+        ->assertSee(__('This preview reflects current project data. It is not a saved report version.'))
         ->assertSee('Missing alternative text')
-        ->assertScript("document.querySelector('details[data-print-expand]').open", false);
+        ->assertScript("document.querySelectorAll('button[data-flux-accordion-heading]').length", 2)
+        ->assertScript("document.querySelector('button[data-flux-accordion-heading]').getAttribute('aria-expanded')", 'false')
+        ->click('button[data-flux-accordion-heading]')
+        ->assertScript("document.querySelector('button[data-flux-accordion-heading]').getAttribute('aria-expanded')", 'true');
 
-    $page->script("window.dispatchEvent(new Event('beforeprint'))");
-    $page->assertScript("document.querySelector('details[data-print-expand]').open", true);
-    $page->script("window.dispatchEvent(new Event('afterprint'))");
-    $page->assertScript("document.querySelector('details[data-print-expand]').open", false)
+    $page->script("document.querySelectorAll('button[data-flux-accordion-heading]')[1].click()");
+    $page
+        ->assertScript("document.querySelectorAll('button[data-flux-accordion-heading]')[0].getAttribute('aria-expanded')", 'true')
+        ->assertScript("document.querySelectorAll('button[data-flux-accordion-heading]')[1].getAttribute('aria-expanded')", 'true')
         ->assertNoJavaScriptErrors();
 
-    expect($issue->refresh()->resolution_status)->toBe('fixed')
-        ->and($page->script('document.documentElement.scrollWidth <= window.innerWidth'))->toBeTrue();
+    expect($page->script('document.documentElement.scrollWidth <= window.innerWidth'))->toBeTrue();
+
+    $page->click(__('Review readiness and generate report'))
+        ->assertSee(__('Review report readiness'))
+        ->fill('title', 'Browser audit report')
+        ->click(__('Generate Report'))
+        ->assertSee('Browser audit report')
+        ->assertSee(__('Version :version', ['version' => 1]))
+        ->assertSee(__('No tracked project changes have been detected since this version.'))
+        ->assertNoJavaScriptErrors();
+
+    expect($issue->refresh()->resolution_status)->toBe('fixed');
 });

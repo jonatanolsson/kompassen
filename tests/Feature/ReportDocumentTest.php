@@ -28,7 +28,7 @@ function reportDocumentFixture(): array
         'scope' => 'Public user journeys',
         'issues' => collect(),
         'counts' => ['critical' => 0, 'major' => 0, 'moderate' => 0, 'minor' => 0],
-        'templateVersion' => 10,
+        'templateVersion' => 13,
         'pageGroups' => collect(),
         'projectWideIssues' => collect(),
         'cleanPages' => collect(),
@@ -40,7 +40,7 @@ function reportDocumentFixture(): array
             'diagrams',
             'examples',
             'resolution',
-            'scope',
+            'sample_scope',
             'methodologies',
             'clean_pages',
             'wcag_index',
@@ -116,7 +116,7 @@ test('renders compact report navigation and groups issues by page status and sev
     ]);
 
     expect($html)
-        ->toContain('data-report-template="10"')
+        ->toContain('data-report-template="13"')
         ->toContain('href="#project-wide-issues"')
         ->toContain('href="#page-page-1"')
         ->toContain('id="issue-issue-open"')
@@ -139,6 +139,10 @@ test('renders compact report navigation and groups issues by page status and sev
         ->toContain('font-family: Verdana, "DejaVu Sans", sans-serif')
         ->toContain('line-height: 1.7')
         ->toContain('margin-top: 38px')
+        ->toContain('margin-top: 20px;')
+        ->toContain('page-break-after: avoid;')
+        ->toContain('break-after: avoid;')
+        ->not->toContain('.report-document__detail:first-of-type')
         ->not->toContain('Sammanfattning för beslutsfattare')
         ->not->toContain('Executive Summary')
         ->toContain('2026')
@@ -199,7 +203,7 @@ test('renders optional evidence only when corresponding report options are enabl
         'diagrams',
         'examples',
         'resolution',
-        'scope',
+        'sample_scope',
         'methodologies',
         'clean_pages',
         'wcag_index',
@@ -217,6 +221,7 @@ test('renders optional evidence only when corresponding report options are enabl
 
     expect($enabledHtml)
         ->toContain('id="evidence-appendix"')
+        ->toContain('<div class="report-document__detail">')
         ->toContain('Focus remains inside the dialog.')
         ->toContain('src="data:image/png;base64,'.base64_encode('issue-image-content').'"')
         ->toContain('src="data:image/png;base64,'.base64_encode('criterion-image-content').'"')
@@ -230,6 +235,10 @@ test('renders optional evidence only when corresponding report options are enabl
         ->not->toContain('>all<')
         ->toContain('id="wcag-wcag-21-212"')
         ->toContain('trigger.focus();');
+
+    expect($enabledHtml)
+        ->toMatch('/<div class="report-document__detail">\s*<h4 class="report-document__detail-title">'.preg_quote(__('Resolution Notes'), '/').'<\/h4>\s*<div class="report-document__rich-text">/u')
+        ->toMatch('/<div class="report-document__detail">\s*<h4 class="report-document__detail-title">'.preg_quote(__('Sample scope'), '/').'<\/h4>\s*<p>/u');
 
     $disabledHtml = renderReportDocument([
         ...$data,
@@ -263,6 +272,7 @@ test('sanitizes rich text rendered in issue cards', function () {
 
 test('keeps issue cards concise and preserves full long descriptions in appendix', function () {
     $issue = reportDocumentIssue('issue-long-description', 'Detailed keyboard failure', 'major', 'open');
+    $issue->setAttribute('summary', 'A separate concise finding summary.');
     $description = 'Short finding. '.str_repeat('Full technical context with reproduction steps and affected controls. ', 7);
     $issue->setAttribute('description', '<p>'.$description.'</p>');
     $issue->setAttribute('impact', '<p>Keyboard users cannot complete this task.</p>');
@@ -276,12 +286,30 @@ test('keeps issue cards concise and preserves full long descriptions in appendix
     $appendixPosition = strpos($html, 'id="full-descriptions-appendix"');
     $fullTextPosition = strpos($html, 'affected controls.', $appendixPosition);
 
-    expect($appendixPosition)->not->toBeFalse()
+    expect(substr_count($html, 'Short finding.'))->toBe(1)
+        ->and($appendixPosition)->not->toBeFalse()
         ->and($fullTextPosition)->not->toBeFalse()
         ->and($fullTextPosition)->toBeGreaterThan($appendixPosition)
+        ->and($html)->toContain('A separate concise finding summary.')
         ->and($html)->toContain('Short finding.')
         ->toContain('Keyboard users cannot complete this task.')
         ->toContain('Restore keyboard focus after the dialog closes.')
         ->toContain(__('Full issue descriptions'))
         ->toContain('href="#full-descriptions-appendix"');
+});
+
+test('preserves short full descriptions in appendix when a separate summary is set', function () {
+    $issue = reportDocumentIssue('issue-summary', 'Concise card issue', 'major', 'open');
+    $issue->setAttribute('summary', 'The menu labels do not describe their destinations.');
+    $issue->setAttribute('description', '<p>The menu has several links labeled “More”.</p>');
+
+    $html = renderReportDocument([
+        'issues' => collect([$issue]),
+        'projectWideIssues' => collect([$issue]),
+    ]);
+
+    expect($html)
+        ->toContain('The menu labels do not describe their destinations.')
+        ->toContain('The menu has several links labeled “More”.')
+        ->toContain('id="full-descriptions-appendix"');
 });

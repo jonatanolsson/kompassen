@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['project_id', 'name', 'resource_type', 'url', 'access_context', 'description', 'scope'])]
+#[Fillable(['project_id', 'name', 'resource_type', 'url', 'access_context', 'description', 'scope', 'scope_exclusion_reason'])]
 class AccessibilityPage extends Model
 {
     use HasFactory;

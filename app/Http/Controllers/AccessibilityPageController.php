@@ -23,12 +23,14 @@ class AccessibilityPageController extends Controller
             'access_context' => 'nullable|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
             'scope' => 'required|in:in_scope,out_of_scope',
+            'scope_exclusion_reason' => 'required_if:scope,out_of_scope|string|max:10000',
         ]);
 
         $project->pages()->create([
             ...$validated,
             'resource_type' => $validated['resource_type'] ?? 'page',
             'access_context' => $validated['access_context'] ?? 'not_applicable',
+            'scope_exclusion_reason' => $validated['scope'] === 'out_of_scope' ? $validated['scope_exclusion_reason'] : null,
         ]);
 
         return redirect()->route('accessibility-projects.show', $project)
@@ -53,12 +55,14 @@ class AccessibilityPageController extends Controller
             'access_context' => 'nullable|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
             'scope' => 'required|in:in_scope,out_of_scope',
+            'scope_exclusion_reason' => 'required_if:scope,out_of_scope|string|max:10000',
         ]);
 
         $page->update([
             ...$validated,
             'resource_type' => $validated['resource_type'] ?? 'page',
             'access_context' => $validated['access_context'] ?? 'not_applicable',
+            'scope_exclusion_reason' => $validated['scope'] === 'out_of_scope' ? $validated['scope_exclusion_reason'] : null,
         ]);
 
         return redirect()->route('accessibility-projects.show', $project)

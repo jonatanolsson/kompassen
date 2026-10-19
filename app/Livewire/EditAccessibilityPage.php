@@ -33,6 +33,8 @@ class EditAccessibilityPage extends Component
 
     public string $scope = 'in_scope';
 
+    public string $scopeExclusionReason = '';
+
     public function mount(AccessibilityProject $project, AccessibilityPage $page): void
     {
         $this->authorize('update', $project);
@@ -47,6 +49,7 @@ class EditAccessibilityPage extends Component
         $this->accessContext = $page->access_context ?? 'not_applicable';
         $this->description = $page->description ?? '';
         $this->scope = $page->scope ?? 'in_scope';
+        $this->scopeExclusionReason = $page->scope_exclusion_reason ?? '';
     }
 
     protected function rules(): array
@@ -58,6 +61,7 @@ class EditAccessibilityPage extends Component
             'accessContext' => 'required|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
             'scope' => 'required|in:in_scope,out_of_scope',
+            'scopeExclusionReason' => 'required_if:scope,out_of_scope|string|max:10000',
         ];
     }
 
@@ -74,6 +78,7 @@ class EditAccessibilityPage extends Component
             'access_context' => $validated['accessContext'],
             'description' => $validated['description'],
             'scope' => $validated['scope'],
+            'scope_exclusion_reason' => $validated['scope'] === 'out_of_scope' ? $validated['scopeExclusionReason'] : null,
         ]);
 
         session()->flash('success', __('Page or service updated successfully.'));

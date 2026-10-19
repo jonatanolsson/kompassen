@@ -28,6 +28,8 @@ class CreateAccessibilityPage extends Component
 
     public string $scope = 'in_scope';
 
+    public string $scopeExclusionReason = '';
+
     public function mount(AccessibilityProject $project): void
     {
         $this->authorize('update', $project);
@@ -43,6 +45,7 @@ class CreateAccessibilityPage extends Component
             'accessContext' => 'required|in:not_applicable,public,authenticated,mixed',
             'description' => 'nullable|string',
             'scope' => 'required|in:in_scope,out_of_scope',
+            'scopeExclusionReason' => 'required_if:scope,out_of_scope|string|max:10000',
         ];
     }
 
@@ -60,6 +63,7 @@ class CreateAccessibilityPage extends Component
             'access_context' => $validated['accessContext'],
             'description' => $validated['description'],
             'scope' => $validated['scope'],
+            'scope_exclusion_reason' => $validated['scope'] === 'out_of_scope' ? $validated['scopeExclusionReason'] : null,
         ]);
 
         return redirect()->route('accessibility-projects.show', $project)

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AccessibilityPage;
 use App\Models\AccessibilityProject;
 use App\Models\AccessibilityReport;
 use App\Models\AppSetting;
@@ -13,18 +14,18 @@ use Illuminate\Validation\ValidationException;
 
 class ReportGenerator
 {
-    public const TEMPLATE_VERSION = 10;
+    public const TEMPLATE_VERSION = 13;
 
     public function __construct(
         private AccessibilityProject $project,
     ) {}
 
-    public function generate(string $title, ?string $scope = null, ?array $options = null, ?AccessibilityReport $previous = null, ?string $siteUrl = null): AccessibilityReport
+    public function generate(string $title, ?string $scopeNotes = null, ?array $options = null, ?AccessibilityReport $previous = null, ?string $siteUrl = null): AccessibilityReport
     {
         $selectedSite = $siteUrl ?? $this->project->report_site_url ?? '';
         $siteIcon = $selectedSite !== '' ? app(ReportSiteIcon::class)->fetch($this->project, $selectedSite) : null;
 
-        return DB::transaction(function () use ($title, $scope, $options, $previous, $selectedSite, $siteIcon): AccessibilityReport {
+        return DB::transaction(function () use ($title, $scopeNotes, $options, $previous, $selectedSite, $siteIcon): AccessibilityReport {
             $this->project = AccessibilityProject::query()->lockForUpdate()->findOrFail($this->project->id);
             $seriesId = $previous?->series_id ?? $previous?->id;
             $latest = $previous
@@ -47,7 +48,15 @@ class ReportGenerator
                 'siteUrl' => $selectedSite,
                 'creator' => auth()->user()->name,
             ];
-            $reportData = $this->reportData($title, $scope, $resolvedOptions, $documentMeta);
+            $pages = $this->project->pages()->orderBy('name')->get();
+            $scopeSnapshot = $this->buildScopeSnapshot($scopeNotes, $pages);
+            $reportData = $this->reportData($title, $scopeSnapshot, $resolvedOptions, $documentMeta, $pages);
+            $documentMeta['source_fingerprints'] = (new ReportChangeSummary)->fingerprints(
+                $this->project,
+                $pages,
+                $reportData['issues'],
+                $this->project->methodologies,
+            );
 
             $report = new AccessibilityReport([
                 'project_id' => $this->project->id,
@@ -63,9 +72,11 @@ class ReportGenerator
                     'brand_logo' => $brandLogo,
                     'site_url' => $selectedSite,
                     'target_wcag_level' => $this->project->target_wcag_level,
+                    'source_fingerprints' => $documentMeta['source_fingerprints'],
                 ],
                 'title' => $title,
-                'scope' => $scope,
+                'scope' => $scopeSnapshot,
+                'scope_notes' => $scopeNotes,
                 'target_wcag_level' => $this->project->target_wcag_level,
                 'total_issues' => $reportData['issues']->count(),
                 'critical_count' => $reportData['counts']['critical'] ?? 0,
@@ -86,14 +97,14 @@ class ReportGenerator
 
     public function regenerate(AccessibilityReport $report): AccessibilityReport
     {
-        return $this->generate($report->title, $report->scope, $report->report_options, $report);
+        return $this->generate($report->title, $report->scope_notes ?? $report->scope, $report->report_options, $report);
     }
 
     /**
      * @return array{
      *     title: string,
      *     project: AccessibilityProject,
-     *     scope: ?string,
+     *     scope: string,
      *     counts: array<string, int>,
      *     issues: Collection,
      *     templateVersion: int,
@@ -105,17 +116,14 @@ class ReportGenerator
      *     documentMeta: array<string, mixed>
      * }
      */
-    private function reportData(string $title, ?string $scope, array $options, array $documentMeta): array
+    private function reportData(string $title, string $scope, array $options, array $documentMeta, Collection $pages): array
     {
         $this->project->loadMissing('team');
         $this->project->setRelation(
             'methodologies',
             $this->project->methodologies()->availableToTeam((string) $this->project->team_id)->get(),
         );
-        $this->project->setRelation(
-            'pages',
-            $this->project->pages()->where('scope', 'in_scope')->orderBy('name')->get(),
-        );
+        $this->project->setRelation('pages', $pages->where('scope', 'in_scope')->values());
         $issues = $this->project->issues()
             ->where(function ($query) {
                 $query
@@ -142,7 +150,9 @@ class ReportGenerator
                 $issue->id,
             ))->values();
         foreach ($issues as $issue) {
-            $issue->mermaid_svg = IssueDiagramSvg::assertCurrent($issue, 'report');
+            if ($options['diagrams']) {
+                $issue->mermaid_svg = IssueDiagramSvg::assertCurrent($issue, 'report');
+            }
             if ($options['examples'] && $options['diagrams']) {
                 foreach ($issue->examples as $example) {
                     if ($example->code_language === 'mermaid' && filled($example->code_snippet)) {
@@ -183,6 +193,51 @@ class ReportGenerator
             'documentMeta' => $documentMeta,
             'reportImages' => $this->reportImages($issues, $options),
         ];
+    }
+
+    private function buildScopeSnapshot(?string $scopeNotes, Collection $pages): string
+    {
+        $formatPage = static function (AccessibilityPage $page): string {
+            $label = $page->name;
+
+            if (filled($page->url)) {
+                $label .= ' ('.$page->url.')';
+            }
+
+            return $label;
+        };
+        $includedPages = $pages->where('scope', 'in_scope')->map($formatPage);
+        $excludedPages = $pages->where('scope', 'out_of_scope')->map(
+            static fn (AccessibilityPage $page): string => $formatPage($page).(filled($page->scope_exclusion_reason) ? ' — '.$page->scope_exclusion_reason : ''),
+        );
+        $sections = [
+            __('Review target')."\n".__('WCAG :version Level :level', [
+                'version' => $this->project->target_wcag_version,
+                'level' => $this->project->target_wcag_level,
+            ]),
+        ];
+
+        if (filled($this->project->audit_scope)) {
+            $sections[] = __('Purpose and included user journeys')."\n".$this->project->audit_scope;
+        }
+
+        $sections[] = __('Pages and services included in this review')."\n".(
+            $includedPages->isNotEmpty() ? $includedPages->implode("\n") : __('No pages or services are included in this review.')
+        );
+
+        if ($excludedPages->isNotEmpty()) {
+            $sections[] = __('Pages and services excluded from this review')."\n".$excludedPages->implode("\n");
+        }
+
+        if (filled($this->project->scope_limitations)) {
+            $sections[] = __('Project limitations')."\n".$this->project->scope_limitations;
+        }
+
+        if (filled($scopeNotes)) {
+            $sections[] = __('Report-specific notes')."\n".$scopeNotes;
+        }
+
+        return implode("\n\n", $sections);
     }
 
     private function reportImages(Collection $issues, array $options): array

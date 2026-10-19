@@ -23,6 +23,10 @@ class CreateAccessibilityProject extends Component
 
     public string $description = '';
 
+    public string $audit_scope = '';
+
+    public string $scope_limitations = '';
+
     public string $target_wcag_level = 'AA';
 
     public string $target_wcag_version = '2.1';
@@ -38,6 +42,8 @@ class CreateAccessibilityProject extends Component
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'audit_scope' => 'nullable|string|max:10000',
+            'scope_limitations' => 'nullable|string|max:10000',
             'target_wcag_level' => 'required|in:A,AA,AAA',
             'target_wcag_version' => ['required', Rule::in(AccessibilityProject::WCAG_VERSIONS)],
             'audit_date' => 'nullable|date',
@@ -53,6 +59,8 @@ class CreateAccessibilityProject extends Component
         $project_data = [
             'name' => $validated['name'],
             'description' => $validated['description'],
+            'audit_scope' => $validated['audit_scope'],
+            'scope_limitations' => $validated['scope_limitations'],
             'target_wcag_level' => $validated['target_wcag_level'],
             'target_wcag_version' => $validated['target_wcag_version'],
             'audit_date' => $validated['audit_date'],

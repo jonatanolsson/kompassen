@@ -65,10 +65,10 @@
 
                         <div class="md:col-span-2">
                             <flux:field>
-                                <flux:label>{{ __('Description') }}</flux:label>
+                                <flux:label>{{ __('Project background') }}</flux:label>
                                 <flux:editor
                                     wire:model="description"
-                                    placeholder="{{ __('Add details about the audit scope...') }}"
+                                    placeholder="{{ __('Add background information about this project...') }}"
                                 />
                                 <flux:text size="sm" class="text-zinc-500 mt-2">
                                     {{ __('Supports Markdown formatting') }}
@@ -76,6 +76,22 @@
                                 <flux:error name="description" />
                             </flux:field>
                         </div>
+                    </div>
+
+                    <div class="mt-6 space-y-6">
+                        <flux:heading level="3">{{ __('Audit scope') }}</flux:heading>
+                        <flux:field>
+                            <flux:label>{{ __('Purpose and included user journeys') }}</flux:label>
+                            <flux:textarea wire:model="audit_scope" rows="4" />
+                            <flux:description>{{ __('Describe the purpose of the audit and user journeys that should be tested.') }}</flux:description>
+                            <flux:error name="audit_scope" />
+                        </flux:field>
+                        <flux:field>
+                            <flux:label>{{ __('Project limitations') }}</flux:label>
+                            <flux:textarea wire:model="scope_limitations" rows="4" />
+                            <flux:description>{{ __('Record project-wide limitations such as environments, devices, or test constraints.') }}</flux:description>
+                            <flux:error name="scope_limitations" />
+                        </flux:field>
                     </div>
                 </div>
 

@@ -43,7 +43,9 @@
         ];
     });
     $longDescriptionIssues = $allReportIssues
-        ->filter(fn ($issue) => $descriptionSummaries[$issue->getKey()]['isTruncated'] ?? false)
+        ->filter(fn ($issue) => filled($issue->description) && (
+            filled($issue->summary) || ($descriptionSummaries[$issue->getKey()]['isTruncated'] ?? false)
+        ))
         ->values();
     $documentSections = collect();
 
@@ -340,14 +342,16 @@
             margin: 0 0 12px;
         }
         .report-document__detail {
-            margin-top: 16px;
+            margin-top: 20px;
         }
         .report-document__detail-title {
             color: #3f3f46;
             font-size: 10px;
             font-weight: 700;
             margin: 0 0 6px;
+            page-break-after: avoid;
             text-transform: uppercase;
+            break-after: avoid;
         }
         .report-document__status {
             color: #27272a;
@@ -490,7 +494,7 @@
                 @if ($scope)
                     <div class="report-document__scope">
                         <span class="report-document__label">{{ __('Report scope') }}</span>
-                        <div>{{ $scope }}</div>
+                        <div class="whitespace-pre-line">{{ $scope }}</div>
                     </div>
                 @endif
             </header>
@@ -522,7 +526,7 @@
                 <p class="report-document__meta">{{ __('Prioritize open critical and major issues before lower-severity findings.') }}</p>
                 @if ($project->description)
                     <div class="report-document__detail">
-                        <h3 class="report-document__detail-title">{{ __('Description') }}</h3>
+                        <h3 class="report-document__detail-title">{{ __('Project background') }}</h3>
                         <div class="report-document__rich-text">{!! \App\Helpers\MarkdownHelper::toHtml($project->description) !!}</div>
                     </div>
                 @endif
@@ -549,7 +553,7 @@
                     @if (($reportOptions['clean_pages'] ?? false) && $cleanPages->isNotEmpty())
                         <li><a href="#clean-pages">{{ __('Clean pages') }}</a></li>
                     @endif
-                    @if (($reportOptions['evidence'] ?? false) || ($reportOptions['images'] ?? false) || ($reportOptions['code'] ?? false) || ($reportOptions['diagrams'] ?? false) || ($reportOptions['examples'] ?? false) || ($reportOptions['resolution'] ?? false) || ($reportOptions['scope'] ?? false))
+                    @if (($reportOptions['evidence'] ?? false) || ($reportOptions['images'] ?? false) || ($reportOptions['code'] ?? false) || ($reportOptions['diagrams'] ?? false) || ($reportOptions['examples'] ?? false) || ($reportOptions['resolution'] ?? false) || ($reportOptions['sample_scope'] ?? false))
                         <li><a href="#evidence-appendix">{{ __('Evidence Appendix') }}</a></li>
                     @endif
                     @if (($reportOptions['wcag_index'] ?? false) && $wcagIndex->isNotEmpty())
@@ -705,7 +709,7 @@
                 </section>
             @endif
 
-            @if (($reportOptions['evidence'] ?? false) || ($reportOptions['images'] ?? false) || ($reportOptions['code'] ?? false) || ($reportOptions['diagrams'] ?? false) || ($reportOptions['examples'] ?? false) || ($reportOptions['resolution'] ?? false) || ($reportOptions['scope'] ?? false))
+            @if (($reportOptions['evidence'] ?? false) || ($reportOptions['images'] ?? false) || ($reportOptions['code'] ?? false) || ($reportOptions['diagrams'] ?? false) || ($reportOptions['examples'] ?? false) || ($reportOptions['resolution'] ?? false) || ($reportOptions['sample_scope'] ?? false))
                 <section id="evidence-appendix" class="report-document__section report-document__section--break" aria-labelledby="evidence-heading">
                     <h2 id="evidence-heading" class="report-document__heading">{{ __('Evidence Appendix') }}</h2>
                     @foreach ($allReportIssues as $issue)
@@ -719,120 +723,139 @@
                                 || (($reportOptions['diagrams'] ?? false) && $issue->mermaid_svg)
                                 || (($reportOptions['examples'] ?? false) && $issueExamples->isNotEmpty())
                                 || (($reportOptions['resolution'] ?? false) && ($issue->resolution_notes ?? null))
-                                || (($reportOptions['scope'] ?? false) && ($issue->sample_scope ?? null));
+                                || (($reportOptions['sample_scope'] ?? false) && ($issue->sample_scope ?? null));
                         @endphp
                         @if ($hasEvidence)
                             <article class="report-document__appendix-item">
                                 <h3 class="report-document__subheading"><a class="report-document__link" href="#issue-{{ $issue->getKey() }}">{{ $issue->title }}</a></h3>
                                 @if (($reportOptions['evidence'] ?? false) && $issueCriteria->isNotEmpty())
-                                    <h4 class="report-document__detail-title">{{ __('WCAG evidence') }}</h4>
-                                    @foreach ($issueCriteria as $criterion)
-                                        <div class="report-document__evidence">
-                                            <strong>{{ $criterion->standard }} {{ $criterion->number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</strong>
-                                            @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
-                                                <strong> — {{ __('Nice to have') }}</strong>
-                                            @endif
-                                            <span> ({{ __('Level') }} {{ Str::upper($criterion->level) }})</span>
-                                            @if ($criterion->pivot?->failure_type)
-                                                <p>{{ __('Failure type') }}: {{ __($criterion->pivot->failure_type) }}</p>
-                                            @endif
-                                            @if ($criterion->pivot?->comment)
-                                                <p>{{ __('Evidence') }}: {{ $criterion->pivot->comment }}</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('WCAG evidence') }}</h4>
+                                        @foreach ($issueCriteria as $criterion)
+                                            <div class="report-document__evidence">
+                                                <strong>{{ $criterion->standard }} {{ $criterion->number }} · {{ $criterion->name_sv ?? $criterion->name_en }}</strong>
+                                                @if ($criterion->isOutsideProjectTargetVersion($project->target_wcag_version))
+                                                    <strong> — {{ __('Nice to have') }}</strong>
+                                                @endif
+                                                <span> ({{ __('Level') }} {{ Str::upper($criterion->level) }})</span>
+                                                @if ($criterion->pivot?->failure_type)
+                                                    @php $isManualAssessment = strtolower(trim($criterion->pivot->failure_type)) === 'manual'; @endphp
+                                                    <p>{{ $isManualAssessment ? __('Assessment method') : __('Failure type') }}: {{ $isManualAssessment ? __('Manual assessment') : __($criterion->pivot->failure_type) }}</p>
+                                                @endif
+                                                @if ($criterion->pivot?->comment)
+                                                    <p>{{ __('Evidence') }}: {{ $criterion->pivot->comment }}</p>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['images'] ?? false) && $issueAttachments->isNotEmpty())
-                                    <h4 class="report-document__detail-title">{{ __('Screenshots') }}</h4>
-                                    @foreach ($issueAttachments as $attachment)
-                                        <figure class="report-document__evidence">
-                                            <img class="report-document__media report-document__media--large" src="{{ $reportImages[$attachment->path] }}" alt="{{ $attachment->original_filename }}">
-                                            <figcaption class="report-document__meta">{{ $attachment->original_filename }}</figcaption>
-                                        </figure>
-                                    @endforeach
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Screenshots') }}</h4>
+                                        @foreach ($issueAttachments as $attachment)
+                                            <figure class="report-document__evidence">
+                                                <img class="report-document__media report-document__media--large" src="{{ $reportImages[$attachment->path] }}" alt="{{ $attachment->original_filename }}">
+                                                <figcaption class="report-document__meta">{{ $attachment->original_filename }}</figcaption>
+                                            </figure>
+                                        @endforeach
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['images'] ?? false) && $issueCriteria->contains(fn ($criterion) => $criterion->pivot?->screenshot_path))
-                                    <h4 class="report-document__detail-title">{{ __('WCAG screenshots') }}</h4>
-                                    @foreach ($issueCriteria as $criterion)
-                                        @if ($criterion->pivot?->screenshot_path)
-                                            <figure class="report-document__evidence">
-                                                <img class="report-document__media report-document__media--large" src="{{ $reportImages[$criterion->pivot->screenshot_path] }}" alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}">
-                                                <figcaption class="report-document__meta">{{ $criterion->standard }} {{ $criterion->number }}</figcaption>
-                                            </figure>
-                                        @endif
-                                    @endforeach
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('WCAG screenshots') }}</h4>
+                                        @foreach ($issueCriteria as $criterion)
+                                            @if ($criterion->pivot?->screenshot_path)
+                                                <figure class="report-document__evidence">
+                                                    <img class="report-document__media report-document__media--large" src="{{ $reportImages[$criterion->pivot->screenshot_path] }}" alt="{{ __('WCAG failure evidence for :criterion', ['criterion' => $criterion->standard.' '.$criterion->number]) }}">
+                                                    <figcaption class="report-document__meta">{{ $criterion->standard }} {{ $criterion->number }}</figcaption>
+                                                </figure>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['code'] ?? false) && ($issue->problem_code_snippet || $issue->corrected_code_snippet))
-                                    <h4 class="report-document__detail-title">{{ __('Issue-specific code') }}</h4>
-                                    @if ($issue->problem_code_snippet)
-                                        <div class="report-document__evidence">
-                                            <strong>{{ __('Code causing the issue') }}</strong>
-                                            <pre class="report-document__code">{{ $issue->problem_code_snippet }}</pre>
-                                        </div>
-                                    @endif
-                                    @if ($issue->corrected_code_snippet)
-                                        <div class="report-document__evidence">
-                                            <strong>{{ __('Suggested corrected code') }}</strong>
-                                            <pre class="report-document__code">{{ $issue->corrected_code_snippet }}</pre>
-                                        </div>
-                                    @endif
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Issue-specific code') }}</h4>
+                                        @if ($issue->problem_code_snippet)
+                                            <div class="report-document__evidence">
+                                                <strong>{{ __('Code causing the issue') }}</strong>
+                                                <pre class="report-document__code">{{ $issue->problem_code_snippet }}</pre>
+                                            </div>
+                                        @endif
+                                        @if ($issue->corrected_code_snippet)
+                                            <div class="report-document__evidence">
+                                                <strong>{{ __('Suggested corrected code') }}</strong>
+                                                <pre class="report-document__code">{{ $issue->corrected_code_snippet }}</pre>
+                                            </div>
+                                        @endif
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['code'] ?? false) && $issueCriteria->contains(fn ($criterion) => $criterion->pivot?->code_snippet))
-                                    <h4 class="report-document__detail-title">{{ __('Code examples') }}</h4>
-                                    @foreach ($issueCriteria as $criterion)
-                                        @if ($criterion->pivot?->code_snippet)
-                                            <pre class="report-document__code">{{ $criterion->pivot->code_snippet }}</pre>
-                                        @endif
-                                    @endforeach
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Code examples') }}</h4>
+                                        @foreach ($issueCriteria as $criterion)
+                                            @if ($criterion->pivot?->code_snippet)
+                                                <pre class="report-document__code">{{ $criterion->pivot->code_snippet }}</pre>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['diagrams'] ?? false) && $issue->mermaid_svg)
-                                    <h4 class="report-document__detail-title">{{ __('Issue diagram') }}</h4>
-                                    <div class="report-document__evidence report-document__diagram">
-                                        <img src="data:image/svg+xml;base64,{{ base64_encode($issue->mermaid_svg) }}" alt="{{ __('Diagram for :title', ['title' => $issue->title]) }}">
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Issue diagram') }}</h4>
+                                        <div class="report-document__evidence report-document__diagram">
+                                            <img src="data:image/svg+xml;base64,{{ base64_encode($issue->mermaid_svg) }}" alt="{{ __('Diagram for :title', ['title' => $issue->title]) }}">
+                                        </div>
                                     </div>
                                 @endif
 
                                 @if (($reportOptions['examples'] ?? false) && $issueExamples->isNotEmpty())
-                                    <h4 class="report-document__detail-title">{{ __('Knowledge Base Examples') }}</h4>
-                                    @foreach ($issueExamples as $example)
-                                        <div class="report-document__evidence">
-                                            <strong>{{ $example->title }}</strong>
-                                            @if ($example->description)
-                                                <div class="report-document__rich-text">{!! \App\Helpers\MarkdownHelper::toHtml($example->description) !!}</div>
-                                            @endif
-                                            @if (($reportOptions['diagrams'] ?? false) && $example->code_language === 'mermaid' && $example->mermaid_svg)
-                                                <img class="report-document__media report-document__media--large" src="data:image/svg+xml;base64,{{ base64_encode($example->mermaid_svg) }}" alt="{{ __('Diagram for :title', ['title' => $example->title]) }}">
-                                            @endif
-                                            @if (($reportOptions['code'] ?? false) && $example->code_language !== 'mermaid' && $example->code_snippet)
-                                                <pre class="report-document__code">{{ $example->code_snippet }}</pre>
-                                            @endif
-                                            @if ($example->url)
-                                                <p><a class="report-document__link" href="{{ $example->url }}">{{ $example->url_label ?: $example->url }}</a></p>
-                                            @endif
-                                            @foreach ($example->referenceLinks ?? [] as $link)
-                                                <p><a class="report-document__link" href="{{ $link->url }}">{{ $link->label ?: $link->url }}</a></p>
-                                            @endforeach
-                                            @if (($reportOptions['images'] ?? false))
-                                                @foreach ($example->attachments ?? [] as $attachment)
-                                                    <img class="report-document__media report-document__media--large" src="{{ $reportImages[$attachment->path] }}" alt="{{ $attachment->alt_text ?: $attachment->original_filename }}">
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Knowledge Base Examples') }}</h4>
+                                        @foreach ($issueExamples as $example)
+                                            <div class="report-document__evidence">
+                                                <strong>{{ $example->title }}</strong>
+                                                @if ($example->description)
+                                                    <div class="report-document__rich-text">{!! \App\Helpers\MarkdownHelper::toHtml($example->description) !!}</div>
+                                                @endif
+                                                @if (($reportOptions['diagrams'] ?? false) && $example->code_language === 'mermaid' && $example->mermaid_svg)
+                                                    <img class="report-document__media report-document__media--large" src="data:image/svg+xml;base64,{{ base64_encode($example->mermaid_svg) }}" alt="{{ __('Diagram for :title', ['title' => $example->title]) }}">
+                                                @endif
+                                                @if (($reportOptions['code'] ?? false) && $example->code_language !== 'mermaid' && $example->code_snippet)
+                                                    <pre class="report-document__code">{{ $example->code_snippet }}</pre>
+                                                @endif
+                                                @if ($example->url)
+                                                    <p><a class="report-document__link" href="{{ $example->url }}">{{ $example->url_label ?: $example->url }}</a></p>
+                                                @endif
+                                                @foreach ($example->referenceLinks ?? [] as $link)
+                                                    <p><a class="report-document__link" href="{{ $link->url }}">{{ $link->label ?: $link->url }}</a></p>
                                                 @endforeach
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                                @if (($reportOptions['images'] ?? false))
+                                                    @foreach ($example->attachments ?? [] as $attachment)
+                                                        <img class="report-document__media report-document__media--large" src="{{ $reportImages[$attachment->path] }}" alt="{{ $attachment->alt_text ?: $attachment->original_filename }}">
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @endif
 
                                 @if (($reportOptions['resolution'] ?? false) && ($issue->resolution_notes ?? null))
-                                    <h4 class="report-document__detail-title">{{ __('Resolution Notes') }}</h4>
-                                    <div class="report-document__rich-text">{!! \App\Helpers\MarkdownHelper::toHtml($issue->resolution_notes) !!}</div>
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Resolution Notes') }}</h4>
+                                        <div class="report-document__rich-text">{!! \App\Helpers\MarkdownHelper::toHtml($issue->resolution_notes) !!}</div>
+                                    </div>
                                 @endif
-                                @if (($reportOptions['scope'] ?? false) && $issue->sample_scope)
-                                    <h4 class="report-document__detail-title">{{ __('Sample scope') }}</h4>
-                                    <p>{{ $sampleScopeLabels[$issue->sample_scope] ?? throw new \UnexpectedValueException('Unsupported issue sample scope') }}</p>
+                                @if (($reportOptions['sample_scope'] ?? false) && $issue->sample_scope)
+                                    <div class="report-document__detail">
+                                        <h4 class="report-document__detail-title">{{ __('Sample scope') }}</h4>
+                                        <p>{{ $sampleScopeLabels[$issue->sample_scope] ?? throw new \UnexpectedValueException('Unsupported issue sample scope') }}</p>
+                                    </div>
                                 @endif
                             </article>
                         @endif

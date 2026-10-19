@@ -14,6 +14,7 @@ class AccessibilityReport extends Model
         'project_id',
         'title',
         'scope',
+        'scope_notes',
         'target_wcag_level',
         'total_issues',
         'critical_count',

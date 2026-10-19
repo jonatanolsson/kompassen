@@ -179,6 +179,39 @@
             </flux:callout>
         @endif
 
+        @if ($reportChangeSummary)
+            @if (! $reportChangeSummary['tracking_available'])
+                <flux:callout variant="warning" icon="exclamation-triangle">
+                    <flux:callout.heading>{{ __('Change tracking is unavailable for this report version.') }}</flux:callout.heading>
+                    <flux:callout.text>{{ __('Create a new version to enable change comparisons for future reports.') }}</flux:callout.text>
+                    <div class="mt-4">
+                        <flux:button type="submit" form="regenerate-report" variant="primary" icon="arrow-path">
+                            {{ __('Create new version') }}
+                        </flux:button>
+                    </div>
+                </flux:callout>
+            @elseif ($reportChangeSummary['has_changes'])
+                <flux:callout variant="warning" icon="exclamation-triangle">
+                    <flux:callout.heading>{{ __('Project data changed since this report version.') }}</flux:callout.heading>
+                    <flux:callout.text>{{ __('These sections differ from the saved snapshot. A new version will use current project data.') }}</flux:callout.text>
+                    <ul class="mt-3 list-disc space-y-1 pl-5">
+                        @foreach ($reportChangeSummary['changed_sections'] as $section)
+                            <li>{{ $section }}</li>
+                        @endforeach
+                    </ul>
+                    <div class="mt-4">
+                        <flux:button type="submit" form="regenerate-report" variant="primary" icon="arrow-path">
+                            {{ __('Create new version') }}
+                        </flux:button>
+                    </div>
+                </flux:callout>
+            @else
+                <flux:callout color="green" icon="check">
+                    <flux:callout.heading>{{ __('No tracked project changes have been detected since this version.') }}</flux:callout.heading>
+                </flux:callout>
+            @endif
+        @endif
+
         <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-white">
             <iframe
                 title="{{ __('Saved report preview') }}"

@@ -6,9 +6,11 @@ use App\Models\AccessibilityReport;
 use App\Models\AppSetting;
 use App\Models\ProjectMember;
 use App\Models\Team;
+use App\Models\TestingMethodology;
 use App\Models\User;
 use App\Models\WcagSuccessCriterion;
 use App\Services\IssueDiagramSvg;
+use App\Services\ReportOptions;
 use App\Services\ReportSiteIcon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -105,6 +107,137 @@ test('can view report creation form', function () {
     $response->assertSee('/livewire/livewire.js', false);
 });
 
+test('report preflight identifies scope gaps, incomplete findings, excluded issues, stale diagrams, and empty sections', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'audit_scope' => null,
+        'scope_limitations' => null,
+    ]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+
+    $includedPage = $project->pages()->create([
+        'name' => 'Included page',
+        'url' => 'https://example.com/included',
+        'scope' => 'in_scope',
+    ]);
+    $excludedPage = $project->pages()->create([
+        'name' => 'Excluded page',
+        'url' => 'https://example.com/excluded',
+        'scope' => 'out_of_scope',
+        'scope_exclusion_reason' => null,
+    ]);
+    $incompleteIssue = $project->issues()->create([
+        'page_id' => $includedPage->id,
+        'title' => 'Keyboard trap',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+        'mermaid_diagram' => 'flowchart LR; A --> B',
+    ]);
+    $project->issues()->create([
+        'page_id' => $excludedPage->id,
+        'title' => 'Excluded finding',
+        'severity' => 'minor',
+        'difficulty' => 'easy',
+        'status' => 'open',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('accessibility-reports.create', $project))
+        ->assertSuccessful()
+        ->assertSee(__('Review report readiness'))
+        ->assertSee(__('No structured project scope is recorded. The report will still include the target WCAG version and resource list.'))
+        ->assertSee(__('Excluded pages or services without an explanation: :count.', ['count' => 1]))
+        ->assertSee(__('Findings without a short summary: :count.', ['count' => 1]))
+        ->assertSee(__('Findings without a WCAG success criterion: :count.', ['count' => 1]))
+        ->assertSee(__('Findings on excluded pages are omitted from this report: :count.', ['count' => 1]))
+        ->assertSee(__('Issue diagrams need to be rendered again before they can be included: :count.', ['count' => 1]))
+        ->assertSee(__('No testing methodology is linked to this project.'))
+        ->assertSee(route('accessibility-issues.edit', [$project, $incompleteIssue]), false)
+        ->assertSee(__('No matching content is currently recorded.'))
+        ->assertSee(__('The project scope, target WCAG level, included and excluded resources, and core issue details are always included.'))
+        ->assertSee(__('These selections become the project defaults for future report versions.'));
+});
+
+test('report detail summarizes project changes without changing the saved snapshot', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'audit_scope' => 'Review public account registration.',
+    ]);
+    ProjectMember::create([
+        'project_id' => $project->id,
+        'user_id' => $user->id,
+        'role' => 'owner',
+    ]);
+    $page = $project->pages()->create([
+        'name' => 'Registration',
+        'url' => 'https://example.com/register',
+        'scope' => 'in_scope',
+    ]);
+    $issue = $project->issues()->create([
+        'page_id' => $page->id,
+        'title' => 'Unclear form instructions',
+        'summary' => 'Form guidance is incomplete.',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+    ]);
+    $methodology = TestingMethodology::create([
+        'name' => 'Keyboard-only test',
+        'team_id' => $team->id,
+        'category' => 'testing_tool',
+        'description' => 'Check with keyboard navigation.',
+        'is_custom' => true,
+    ]);
+    $project->methodologies()->attach($methodology->id, [
+        'id' => (string) Str::ulid(),
+        'notes' => 'Use every form control.',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('accessibility-reports.store', $project), ['title' => 'Baseline report'])
+        ->assertRedirect();
+    $report = $project->reports()->firstOrFail();
+    $savedHtml = $report->html_content;
+
+    $this->get(route('accessibility-reports.show', [$project, $report]))
+        ->assertSuccessful()
+        ->assertSee(__('No tracked project changes have been detected since this version.'));
+
+    $project->update(['audit_scope' => 'Review account registration and recovery.']);
+    $page->update(['name' => 'Registration form']);
+    $issue->update(['summary' => 'Instructions do not describe the required format.']);
+    $methodology->update(['description' => 'Repeat with keyboard navigation and zoom.']);
+
+    $this->get(route('accessibility-reports.show', [$project, $report]))
+        ->assertSuccessful()
+        ->assertSee(__('Project data changed since this report version.'))
+        ->assertSee(__('Project details and audit scope'))
+        ->assertSee(__('Pages and services'))
+        ->assertSee(__('Findings and supporting evidence'))
+        ->assertSee(__('Testing methodologies'))
+        ->assertSee(__('Create new version'));
+
+    $legacyMetadata = $report->fresh()->document_metadata;
+    unset($legacyMetadata['source_fingerprints']);
+    $report->update(['document_metadata' => $legacyMetadata]);
+
+    $this->get(route('accessibility-reports.show', [$project, $report]))
+        ->assertSuccessful()
+        ->assertSee(__('Change tracking is unavailable for this report version.'))
+        ->assertDontSee(__('No tracked project changes have been detected since this version.'));
+
+    expect($report->fresh()->html_content)->toBe($savedHtml);
+});
+
 test('can generate report with issues', function () {
     $household = Team::factory()->create();
     $user = User::factory()->create(['team_id' => $household->id]);
@@ -165,7 +298,7 @@ test('can generate report with issues', function () {
     expect(AccessibilityReport::where([
         'project_id' => $project->id,
         'title' => 'Initial Audit Report',
-        'scope' => 'Tested all pages',
+        'scope_notes' => 'Tested all pages',
         'total_issues' => 2,
         'critical_count' => 1,
         'major_count' => 1,
@@ -285,6 +418,8 @@ test('report creation form uses project defaults and unchecked choices remain di
     $this->actingAs($user)->get(route('accessibility-reports.create', $project))
         ->assertSuccessful()
         ->assertSee(__('Advanced report content'))
+        ->assertSee('data-flux-accordion-item', false)
+        ->assertDontSee('<details', false)
         ->assertSee('name="options[images]" value="0"', false);
 
     $this->actingAs($user)->post(route('accessibility-reports.store', $project), [
@@ -294,6 +429,136 @@ test('report creation form uses project defaults and unchecked choices remain di
 
     expect($project->reports()->firstOrFail()->report_options['images'])->toBeFalse()
         ->and($project->fresh()->report_options['images'])->toBeFalse();
+});
+
+test('report scope snapshots project resources and keeps earlier versions unchanged', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create([
+        'team_id' => $team->id,
+        'description' => 'Project background context.',
+        'audit_scope' => 'Test the account registration journey.',
+        'scope_limitations' => 'Only desktop browsers are available.',
+        'target_wcag_version' => '2.2',
+        'report_options' => ['scope' => true],
+    ]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $project->pages()->create([
+        'name' => 'Registration',
+        'url' => 'https://example.test/register',
+        'scope' => 'in_scope',
+    ]);
+    $excludedPage = $project->pages()->create([
+        'name' => 'Legacy account service',
+        'url' => 'https://example.test/legacy',
+        'scope' => 'out_of_scope',
+        'scope_exclusion_reason' => 'The service is being decommissioned.',
+    ]);
+
+    $this->actingAs($user)->post(route('accessibility-reports.store', $project), [
+        'title' => 'Initial scope report',
+        'scope_notes' => 'The review was completed in October.',
+        'options' => ['scope' => '0'],
+    ])->assertRedirect();
+
+    $report = $project->reports()->firstOrFail();
+    expect($report->scope)
+        ->toContain('WCAG 2.2')
+        ->toContain('Test the account registration journey.')
+        ->toContain('Registration (https://example.test/register)')
+        ->toContain('Legacy account service (https://example.test/legacy) — The service is being decommissioned.')
+        ->toContain('Only desktop browsers are available.')
+        ->toContain('The review was completed in October.')
+        ->and($report->scope_notes)->toBe('The review was completed in October.')
+        ->and($report->report_options['sample_scope'])->toBeFalse()
+        ->and($report->html_content)->toContain('Project background context.');
+
+    expect(ReportOptions::resolve(['scope' => false])['sample_scope'])->toBeFalse();
+
+    $project->update([
+        'audit_scope' => 'Test account registration and recovery.',
+        'scope_limitations' => 'Desktop and tablet browsers are available.',
+    ]);
+    $excludedPage->update(['scope_exclusion_reason' => 'The service is deprecated and unavailable.']);
+
+    $this->actingAs($user)
+        ->post(route('accessibility-reports.regenerate', [$project, $report]))
+        ->assertRedirect();
+
+    $newVersion = $project->reports()->where('version', 2)->firstOrFail();
+    expect($report->fresh()->scope)
+        ->toContain('Test the account registration journey.')
+        ->toContain('The service is being decommissioned.')
+        ->and($newVersion->scope)
+        ->toContain('Test account registration and recovery.')
+        ->toContain('The service is deprecated and unavailable.')
+        ->toContain('The review was completed in October.')
+        ->and($newVersion->scope_notes)->toBe('The review was completed in October.');
+});
+
+test('regenerating a legacy report preserves its free-text scope as report notes', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $report = AccessibilityReport::create([
+        'project_id' => $project->id,
+        'version' => 1,
+        'title' => 'Legacy report',
+        'scope' => 'This review covered the public website.',
+        'target_wcag_level' => 'AA',
+        'html_content' => '<main>Legacy report snapshot</main>',
+        'created_by' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('accessibility-reports.regenerate', [$project, $report]))
+        ->assertRedirect();
+
+    $newVersion = $project->reports()->where('version', 2)->firstOrFail();
+    expect($report->fresh()->html_content)->toBe('<main>Legacy report snapshot</main>')
+        ->and($report->fresh()->scope)->toBe('This review covered the public website.')
+        ->and($newVersion->scope_notes)->toBe('This review covered the public website.')
+        ->and($newVersion->scope)->toContain('This review covered the public website.');
+});
+
+test('report labels manual WCAG assessment without changing failure codes', function () {
+    $team = Team::factory()->create();
+    $user = User::factory()->create(['team_id' => $team->id]);
+    $project = AccessibilityProject::factory()->create(['team_id' => $team->id]);
+    ProjectMember::create(['project_id' => $project->id, 'user_id' => $user->id, 'role' => 'owner']);
+    $issue = $project->issues()->create([
+        'title' => 'Manual WCAG assessment',
+        'severity' => 'major',
+        'difficulty' => 'medium',
+        'status' => 'open',
+    ]);
+    $manualCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.1.1',
+        'name_en' => 'Non-text Content',
+        'name_sv' => 'Icke-textinnehåll',
+        'level' => 'A',
+    ]);
+    $codedCriterion = WcagSuccessCriterion::create([
+        'standard' => 'WCAG 2.1',
+        'number' => '1.3.1',
+        'name_en' => 'Info and Relationships',
+        'name_sv' => 'Information och relationer',
+        'level' => 'A',
+    ]);
+    $issue->wcagCriteria()->attach($manualCriterion->id, ['failure_type' => 'manual']);
+    $issue->wcagCriteria()->attach($codedCriterion->id, ['failure_type' => 'F16']);
+
+    $this->actingAs($user)->post(route('accessibility-reports.store', $project), [
+        'title' => 'Assessment report',
+    ])->assertRedirect();
+
+    $report = $project->reports()->firstOrFail();
+    expect($report->html_content)
+        ->toContain(__('Assessment method').': '.__('Manual assessment'))
+        ->toContain(__('Failure type').': F16')
+        ->not->toContain(__('Failure type').': manual');
 });
 
 test('report generation rejects stale Mermaid diagrams without saving a version', function () {
@@ -317,6 +582,20 @@ test('report generation rejects stale Mermaid diagrams without saving a version'
 
     expect($project->reports()->count())->toBe(0)
         ->and($project->fresh()->report_options)->toBeNull();
+
+    $this->actingAs($user)->post(route('accessibility-reports.store', $project), [
+        'title' => 'Audit without diagrams',
+        'options' => ['diagrams' => false],
+    ])->assertRedirect();
+
+    $report = $project->reports()->firstOrFail();
+
+    expect($project->reports()->count())->toBe(1)
+        ->and($report->html_content)->not->toContain(__('Issue diagram'));
+
+    $this->get(route('accessibility-reports.show', [$project, $report]))
+        ->assertSuccessful()
+        ->assertSee(__('No tracked project changes have been detected since this version.'));
 });
 
 test('failed report update preserves previous version and profile', function () {
@@ -852,7 +1131,7 @@ test('generated report excludes out-of-scope pages and issues but keeps project-
         ->toContain('Included issue')
         ->toContain('Moderate included issue')
         ->toContain('Project-wide issue')
-        ->not->toContain('Excluded page')
+        ->toContain('Excluded page')
         ->not->toContain('Excluded issue')
         ->toContain(__('Moderate'))
         ->toContain(__('Minor'));
@@ -960,7 +1239,7 @@ test('owner can update an older report with current project evidence and templat
         ->and($newVersion->previous_version_id)->toBe($report->id)
         ->and($newVersion->total_issues)->toBe(1)
         ->and($newVersion->html_content)
-        ->toContain('data-report-template="10"')
+        ->toContain('data-report-template="13"')
         ->toContain('Keyboard trap')
         ->toContain('Dialog')
         ->toContain(__('Parts of the page or service'))

@@ -57,7 +57,7 @@
                         </flux:field>
 
                         <flux:radio.group
-                            wire:model="scope"
+                            wire:model.live="scope"
                             label="{{ __('Scope') }}"
                             description="{{ __('Choose whether this page or service is included in the audit.') }}"
                         >
@@ -65,6 +65,14 @@
                             <flux:radio value="out_of_scope" label="{{ __('No') }}" />
                         </flux:radio.group>
                         <flux:error name="scope" />
+                        @if ($scope === 'out_of_scope')
+                            <flux:field>
+                                <flux:label>{{ __('Reason for exclusion') }}</flux:label>
+                                <flux:textarea wire:model="scopeExclusionReason" rows="3" required />
+                                <flux:description>{{ __('Explain why this page or service is not part of the audit.') }}</flux:description>
+                                <flux:error name="scopeExclusionReason" />
+                            </flux:field>
+                        @endif
                     </div>
                 </div>
 

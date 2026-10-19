@@ -6,8 +6,10 @@ use App\Http\Requests\StoreAccessibilityReportRequest;
 use App\Models\AccessibilityProject;
 use App\Models\AccessibilityReport;
 use App\Services\PdfReportGenerator;
+use App\Services\ReportChangeSummary;
 use App\Services\ReportGenerator;
 use App\Services\ReportOptions;
+use App\Services\ReportPreflight;
 use App\Services\ReportSiteIcon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
@@ -28,14 +30,15 @@ class AccessibilityReportController extends Controller
         return view('accessibility.reports.index', compact('project', 'reports', 'shareLinksByReport'));
     }
 
-    public function create(AccessibilityProject $project)
+    public function create(AccessibilityProject $project, ReportPreflight $preflight)
     {
         $this->authorize('update', $project);
 
         $reportOptions = ReportOptions::resolve($project->report_options);
         $reportSites = ReportSiteIcon::sitesFor($project);
+        $reportPreflight = $preflight->assess($project);
 
-        return view('accessibility.reports.create', compact('project', 'reportOptions', 'reportSites'));
+        return view('accessibility.reports.create', compact('project', 'reportOptions', 'reportSites', 'reportPreflight'));
     }
 
     public function store(StoreAccessibilityReportRequest $request, AccessibilityProject $project)
@@ -45,13 +48,13 @@ class AccessibilityReportController extends Controller
         $validated = $request->validated();
 
         $generator = new ReportGenerator($project);
-        $report = $generator->generate($validated['title'], $validated['scope'] ?? null, $validated['options'] ?? null, null, $validated['site_url'] ?? '');
+        $report = $generator->generate($validated['title'], $validated['scope_notes'] ?? null, $validated['options'] ?? null, null, $validated['site_url'] ?? '');
 
         return redirect()->route('accessibility-reports.show', ['project' => $project, 'report' => $report])
             ->with('success', __('Report generated successfully.'));
     }
 
-    public function show(AccessibilityProject $project, AccessibilityReport $report)
+    public function show(AccessibilityProject $project, AccessibilityReport $report, ReportChangeSummary $changeSummary)
     {
         $this->authorize('view', $project);
 
@@ -71,8 +74,11 @@ class AccessibilityReportController extends Controller
         $shareLinks = auth()->user()->can('update', $project)
             ? $project->shareLinks()->where('report_id', $report->id)->latest()->get()
             : collect();
+        $reportChangeSummary = auth()->user()?->can('update', $project)
+            ? $changeSummary->assess($project, $report)
+            : null;
 
-        return view('accessibility.reports.show', compact('project', 'report', 'usesCurrentTemplate', 'versions', 'shareLinks'));
+        return view('accessibility.reports.show', compact('project', 'report', 'usesCurrentTemplate', 'versions', 'shareLinks', 'reportChangeSummary'));
     }
 
     public function download(AccessibilityProject $project, AccessibilityReport $report)

@@ -16,24 +16,34 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
 - **Projekt** – skapa, redigera och följa upp tillgänglighetsprojekt med
   målversion (WCAG 2.0, 2.1 eller 2.2) och målnivå. Projektets valfria
   huvudwebbplats kan ändras utan att sidornas URL:er påverkas; den visas som
-  domän och kan användas för rapportens webbplatsikon.
+  domän och kan användas för rapportens webbplatsikon. Bakgrund, granskningens
+  syfte och användarresor samt projektövergripande begränsningar hålls isär.
 - **Sidor och tjänster** – registrera både publika och inloggade resurser,
   exempelvis Mina sidor, med URL, beskrivning, åtkomstkontext och
-  granskningsomfattning. Projektöversikten visar en kompakt sammanfattning;
-  varje resurs har en separat detaljvy.
+  granskningsomfattning. Undantagna resurser kräver en motivering som visas i
+  projekt- och rapportförhandsvisningen. Projektöversikten visar en kompakt
+  sammanfattning; varje resurs har en separat detaljvy.
 - **Problem** – dokumentera tillgänglighetsproblem med allvarlighetsgrad,
-  svårighetsgrad, status, tilldelad medlem, WCAG-kriterium, separat
+  bedömd åtgärdsinsats, status, tilldelad medlem, WCAG-kriterium, separat
   användarkonsekvens i rich text, felande och korrigerad kod samt
-  bilagor/skärmbilder. WCAG-exempel kan länkas samtidigt. Mermaid-diagram
+  bilagor/skärmbilder. En valfri separat sammanfattning visas i
+  projektförhandsvisningen; den fullständiga beskrivningen visas som detalj.
+  Skalan för åtgärdsinsats skiljer liten, måttlig och omfattande ändring från
+  problemets allvarlighetsgrad. Skapa- och redigeringsformulären har samma
+  ordning: grunduppgifter, plats och klassificering, WCAG-kriterier och exempel,
+  därefter valfritt utfällbart underlag för kod, bilder, påverkan och diagram.
+  WCAG-exempel kan länkas samtidigt. Mermaid-diagram
   renderas med JavaScript vid sparande och lagras som sanerad SVG tillsammans
-  med källkoden; en omrendering krävs när källkoden ändras. Formuläret visar
-  grunduppgifter först och fördjupar med ytterligare underlag, påverkan samt
-  WCAG-kriterier och exempel. Nya problem börjar som öppna; status ändras
+  med källkoden; en omrendering krävs när källkoden ändras. Nya problem börjar
+  som öppna; status ändras
   efter sparande via åtgärden för lösning, med anteckning. Problem på sidor
   utanför granskningsomfattningen finns kvar i projektet och märks tydligt
   där, men tas inte med i rapporter. Kriterier vars WCAG-version ligger utanför
   projektets målversion märks separat som **Bra att ha**, även när ett problem
-  har kriterier från flera versioner.
+  har kriterier från flera versioner. Kriterieväljaren visar målversionen som
+  standard; andra versioner kan sökas fram och valda kriterier från äldre
+  problem bevaras. Bedömningar märkta `manual` visas som **Manuell bedömning**,
+  inte som en intern felkod.
 - **Problemhantering** – tilldela eller ändra tilldelning till en medlem i
   projektet, lösa, exportera och följa upp problem.
 - **WCAG-kunskapsbank** – sökbara framgångskriterier, exempel och relaterade
@@ -64,6 +74,18 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   sammanfattning och tekniskt appendix. Avancerade innehållsval sparas som
   projektstandard; varje rapportversion lagrar sina egna val och sin egen
   HTML-ögonblicksbild för identiskt innehåll i webb- och PDF-visning.
+  Omfattningen sammanställs från projektets granskningsmål, inkluderade och
+  undantagna resurser med skäl samt rapportunika anteckningar. En förkontroll
+  visar omfattning, inkluderade problem och varningar för saknat scope,
+  sammanfattningar, WCAG-kriterier, metodik, undantagna problem och inaktuella
+  diagram. Varningar blockerar inte skapandet och länkar tillbaka till rätt
+  formulär. Innehållsvalen är grupperade efter probleminformation, bilagor och
+  exempel samt metodik och register; val utan tillhörande data markeras.
+  Projektets aktuella förhandsvisning är markerad som osparad och visar scope,
+  metoder och redigeringsgenvägar för behöriga projektmedlemmar. Äldre
+  projektbeskrivningar flyttas inte automatiskt till de nya scope-fälten.
+  Rapportvyn jämför spårade projektuppgifter, resurser, problem/underlag och
+  metodik med den sparade versionen; äldre versioner saknar jämförelseunderlag.
   Förhandsvisningen öppnar den sparade HTML:en i en isolerad, ljus ram så
   appens mörka tema inte kan färga rapportens sidor. En uppdatering
   skapar en ny version utan att ändra tidigare rapporter. Äldre rapportmallar
@@ -76,7 +98,8 @@ laddas ner som PDF och delas via tidsbegränsade länkar.
   liksom ICO med inbäddad PNG. Inställningen sparas för nästa rapport.
   Befintliga versioner påverkas inte. Valda bilder bäddas in vid
   generering; saknade bilder eller diagram som inte matchar källkoden stoppar
-  genereringen med ett åtgärdsförslag. Rapporter behåller namn på skaparen
+  genereringen med ett åtgärdsförslag när motsvarande innehåll är valt.
+  Rapporter behåller namn på skaparen
   även om användarkontot tas bort. Vid PDF-export normaliseras
   diagrammens SVG-streckförskjutning för mPDF utan att den sparade
   rapportversionen ändras.

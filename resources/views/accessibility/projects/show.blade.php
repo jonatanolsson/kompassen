@@ -6,7 +6,10 @@
                 <flux:heading level="1">{{ $project->name }}</flux:heading>
                 <flux:text class="text-zinc-600 dark:text-zinc-400">WCAG {{ $project->target_wcag_level }} • {{ __(Str::title(str_replace(['_', '-'], ' ', $project->status))) }}</flux:text>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <flux:button href="{{ route('accessibility-projects.index') }}" variant="ghost" icon="arrow-left">
+                    {{ __('Back') }}
+                </flux:button>
                 <flux:button href="{{ route('accessibility-projects.preview', $project) }}" target="_blank" icon="eye" variant="primary">
                     {{ __('Current project preview') }}
                 </flux:button>
@@ -77,8 +80,26 @@
 
         @if ($project->description)
             <section class="rounded-2xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm shadow-zinc-950/5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-black/10 mb-8">
-                <flux:heading level="2" class="mb-3">{{ __('Description') }}</flux:heading>
+                <flux:heading level="2" class="mb-3">{{ __('Project background') }}</flux:heading>
                 <x-user-content :content="$project->description" />
+            </section>
+        @endif
+
+        @if ($project->audit_scope || $project->scope_limitations)
+            <section class="mb-8 space-y-4">
+                <flux:heading level="2">{{ __('Audit scope') }}</flux:heading>
+                @if ($project->audit_scope)
+                    <div>
+                        <flux:heading level="3" size="sm">{{ __('Purpose and included user journeys') }}</flux:heading>
+                        <flux:text class="mt-1 whitespace-pre-line text-zinc-600 dark:text-zinc-400">{{ $project->audit_scope }}</flux:text>
+                    </div>
+                @endif
+                @if ($project->scope_limitations)
+                    <div>
+                        <flux:heading level="3" size="sm">{{ __('Project limitations') }}</flux:heading>
+                        <flux:text class="mt-1 whitespace-pre-line text-zinc-600 dark:text-zinc-400">{{ $project->scope_limitations }}</flux:text>
+                    </div>
+                @endif
             </section>
         @endif
 
@@ -114,7 +135,10 @@
                                     </div>
                                 </flux:table.cell>
                                 <flux:table.cell class="whitespace-nowrap py-2 text-sm">
-                                    {{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}
+                                    <div>{{ __($page->scope === 'in_scope' ? 'In Scope' : 'Out of Scope') }}</div>
+                                    @if ($page->scope === 'out_of_scope' && $page->scope_exclusion_reason)
+                                        <div class="max-w-sm whitespace-normal text-xs text-zinc-500 dark:text-zinc-400">{{ $page->scope_exclusion_reason }}</div>
+                                    @endif
                                 </flux:table.cell>
                                 <flux:table.cell class="whitespace-nowrap py-2 text-right">
                                     <div class="inline-flex items-center justify-end gap-1">
@@ -189,7 +213,6 @@
                 <div class="max-w-full overflow-x-auto">
                 <flux:table class="w-full table-auto!">
                     <flux:table.columns>
-                        <flux:table.column></flux:table.column>
                         <flux:table.column class="hidden lg:table-cell">{{ __('ID') }}</flux:table.column>
                         <flux:table.column>{{ __('Title') }}</flux:table.column>
                         <flux:table.column>{{ __('Severity') }}</flux:table.column>
@@ -202,17 +225,13 @@
 
                     <flux:table.rows>
                     @foreach ($project->issues as $issue)
-                        <flux:table.row wire:key="project-issue-{{ $issue->id }}" data-issue-row data-issue-id="{{ $issue->id }}" data-title="{{ Str::lower(e($issue->title)) }}" data-desc="{{ Str::lower(e(strip_tags($issue->description))) }}" data-page="{{ $issue->page ? Str::lower(e($issue->page->name)) : '' }}" data-wcag="{{ $issue->wcagCriteria->pluck('number')->join(' ') }}" data-severity="{{ $issue->severity }}" data-status="{{ $issue->status }}">
-                            <flux:table.cell class="pr-2">
-                                <button type="button" onclick="toggleIssueDetails('{{ $issue->id }}', this)" aria-expanded="false" aria-controls="issue-details-{{ $issue->id }}" class="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500/30" aria-label="{{ __('Toggle details') }}">
-                                    <flux:icon icon="chevron-down" class="w-4 h-4 transition-transform duration-150" />
-                                </button>
-                            </flux:table.cell>
-
+                        <flux:table.row wire:key="project-issue-{{ $issue->id }}" data-issue-row data-title="{{ Str::lower(e($issue->title)) }}" data-desc="{{ Str::lower(e(strip_tags(($issue->summary ?? '').' '.($issue->description ?? '')))) }}" data-page="{{ $issue->page ? Str::lower(e($issue->page->name)) : '' }}" data-wcag="{{ $issue->wcagCriteria->pluck('number')->join(' ') }}" data-severity="{{ $issue->severity }}" data-status="{{ $issue->status }}">
                             <flux:table.cell class="hidden font-mono text-xs lg:table-cell">{{ Str::substr($issue->id, 0, 8) }}</flux:table.cell>
 
                             <flux:table.cell class="min-w-32 whitespace-normal">
-                                <div class="font-medium">{{ $issue->title }}</div>
+                                <flux:link href="{{ route('accessibility-issues.show', [$project, $issue]) }}" wire:navigate class="font-medium">
+                                    {{ $issue->title }}
+                                </flux:link>
                                 @if ($issue->page?->scope === 'out_of_scope')
                                     <flux:text class="mt-1 text-xs text-amber-700 dark:text-amber-300">
                                         {{ __('This page is outside the audit scope. Its issues remain in the project but are excluded from reports.') }}
@@ -270,73 +289,6 @@
                                             </flux:modal.trigger>
                                         </flux:menu>
                                     </flux:dropdown>
-                                </div>
-                            </flux:table.cell>
-                        </flux:table.row>
-
-                        <flux:table.row wire:key="project-issue-details-{{ $issue->id }}" id="issue-details-{{ $issue->id }}" data-issue-details="{{ $issue->id }}" role="region" aria-label="{{ __('Issue details') }}" class="bg-zinc-50 dark:bg-zinc-800 hidden">
-                            <flux:table.cell colspan="5" class="lg:hidden">
-                                <div class="p-4">
-                                    <x-user-content :content="$issue->description" class="mb-3 text-sm" />
-                                    @if ($issue->wcagCriteria->isNotEmpty())
-                                        <div class="mb-3">
-                                            <div class="text-xs font-semibold mb-2">{{ __('WCAG Criteria') }}</div>
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach ($issue->wcagCriteria as $c)
-                                                    <div class="flex items-center gap-2 p-2 bg-white dark:bg-zinc-700 rounded">
-                                                        <flux:badge size="sm" color="zinc">{{ $c->standard }} · {{ $c->number }}</flux:badge>
-                                                        @if ($c->isOutsideProjectTargetVersion($project->target_wcag_version))
-                                                            <flux:badge size="sm" color="amber">{{ __('Nice to have') }}</flux:badge>
-                                                        @endif
-                                                        <div class="text-sm">{{ $c->name }}</div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-                                    @if (isset($issue->relatedResources) && $issue->relatedResources->isNotEmpty())
-                                        <div>
-                                            <div class="text-xs font-semibold mb-2">{{ __('Related resources') }}</div>
-                                            <ul class="list-disc list-inside text-sm">
-                                                @foreach ($issue->relatedResources as $res)
-                                                    <li><a href="{{ $res->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600">{{ $res->title }}</a></li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
-                                </div>
-                            </flux:table.cell>
-                            <flux:table.cell colspan="9" class="hidden lg:table-cell">
-                                <div class="p-4">
-                                    <x-user-content :content="$issue->description" class="mb-3 text-sm" />
-
-                                    @if ($issue->wcagCriteria->isNotEmpty())
-                                        <div class="mb-3">
-                                            <div class="text-xs font-semibold mb-2">{{ __('WCAG Criteria') }}</div>
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach ($issue->wcagCriteria as $c)
-                                                    <div class="flex items-center gap-2 p-2 bg-white dark:bg-zinc-700 rounded">
-                                                        <flux:badge size="sm" color="zinc">{{ $c->standard }} · {{ $c->number }}</flux:badge>
-                                                        @if ($c->isOutsideProjectTargetVersion($project->target_wcag_version))
-                                                            <flux:badge size="sm" color="amber">{{ __('Nice to have') }}</flux:badge>
-                                                        @endif
-                                                        <div class="text-sm">{{ $c->name }}</div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if (isset($issue->relatedResources) && $issue->relatedResources->isNotEmpty())
-                                        <div>
-                                            <div class="text-xs font-semibold mb-2">{{ __('Related resources') }}</div>
-                                            <ul class="list-disc list-inside text-sm">
-                                                @foreach ($issue->relatedResources as $res)
-                                                    <li><a href="{{ $res->url }}" target="_blank" class="text-blue-600">{{ $res->title }}</a></li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
                                 </div>
                             </flux:table.cell>
                         </flux:table.row>
@@ -414,11 +366,6 @@
         <!-- Testing Methodology -->
         @livewire('project-methodologies', ['project' => $project])
 
-        <div class="mt-8">
-            <flux:button href="{{ route('accessibility-projects.index') }}" variant="ghost" icon="arrow-left">
-                {{ __('Back') }}
-            </flux:button>
-        </div>
     </div>
 </div>
 
@@ -482,17 +429,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const wcag = row.getAttribute('data-wcag') || '';
             const rowSeverity = row.getAttribute('data-severity') || '';
             const rowStatus = row.getAttribute('data-status') || '';
-            const id = row.getAttribute('data-issue-id');
-
             const matchesQuery = q === '' || title.includes(q) || desc.includes(q) || page.includes(q) || wcag.includes(q);
             const matchesSeverity = selectedSeverity === '' || rowSeverity === selectedSeverity;
             const matchesStatus = selectedStatus === '' || rowStatus === selectedStatus;
             const match = matchesQuery && matchesSeverity && matchesStatus;
 
             row.classList.toggle('hidden', !match);
-
-            const details = document.getElementById('issue-details-' + id);
-            details?.classList.toggle('hidden', !match);
         });
     };
 
@@ -500,20 +442,6 @@ document.addEventListener('DOMContentLoaded', function () {
     severity?.addEventListener('change', filterRows);
     status?.addEventListener('change', filterRows);
 
-    // Toggle function for expand/collapse
-    window.toggleIssueDetails = function(id, btn) {
-        const details = document.getElementById('issue-details-' + id);
-        if (!details) return;
-        const open = details.classList.toggle('hidden') ? false : true;
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-
-        // rotate icon inside button
-        const icon = btn.querySelector('svg');
-        if (icon) {
-            if (open) icon.classList.add('transform', 'rotate-180');
-            else icon.classList.remove('transform', 'rotate-180');
-        }
-    }
 });
 </script>
 

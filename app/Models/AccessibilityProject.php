@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['team_id', 'name', 'description', 'client_logo', 'target_wcag_level', 'target_wcag_version', 'audit_date', 'status', 'report_options', 'report_site_url'])]
+#[Fillable(['team_id', 'name', 'description', 'audit_scope', 'scope_limitations', 'client_logo', 'target_wcag_level', 'target_wcag_version', 'audit_date', 'status', 'report_options', 'report_site_url'])]
 class AccessibilityProject extends Model
 {
     use HasFactory;

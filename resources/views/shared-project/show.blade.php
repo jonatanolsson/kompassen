@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ $project->name }} - {{ __('Accessibility Report') }}</title>
+        <title>{{ __('Current project preview') }} - {{ $project->name }}</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <!-- Scripts -->
@@ -68,7 +68,7 @@
                     @endif
                     <div class="flex-1 min-w-0">
                         <flux:text class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 print:text-zinc-700">
-                            {{ __('Accessibility Report') }}
+                            {{ __('Current project preview') }}
                         </flux:text>
                         <flux:heading level="1" class="print:mb-2">{{ $project->name }}</flux:heading>
                         <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 print:mt-1">
@@ -98,6 +98,147 @@
 
         <!-- Main Content -->
         <main class="max-w-5xl mx-auto px-6 py-10 print:py-8">
+            <flux:callout color="zinc" icon="eye" class="mb-8 print:hidden">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <flux:callout.heading>{{ __('Current project preview') }}</flux:callout.heading>
+                        <flux:callout.text>{{ __('This preview reflects current project data. It is not a saved report version.') }}</flux:callout.text>
+                    </div>
+                    @if ($canEditProject)
+                        <flux:button href="{{ route('accessibility-reports.create', $project) }}" variant="primary" icon="document-text">
+                            {{ __('Review readiness and generate report') }}
+                        </flux:button>
+                    @endif
+                </div>
+            </flux:callout>
+
+            <section id="audit-scope" aria-labelledby="audit-scope-heading" class="mb-10 space-y-5 print:mb-8 print:page-break-inside-avoid">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <flux:heading id="audit-scope-heading" level="2">{{ __('Audit scope') }}</flux:heading>
+                        <flux:text class="mt-1 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ __('Current review target and documented resources.') }}</flux:text>
+                    </div>
+                    @if ($canEditProject)
+                        <flux:button href="{{ route('accessibility-projects.edit', $project) }}" variant="ghost" size="sm" icon="pencil" class="print:hidden">
+                            {{ __('Edit project scope') }}
+                        </flux:button>
+                    @endif
+                </div>
+
+                <dl class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Included pages and services') }}</dt>
+                        <dd class="mt-1 font-semibold">{{ $scopeSummary['included_pages']->count() }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Excluded pages and services') }}</dt>
+                        <dd class="mt-1 font-semibold">{{ $scopeSummary['excluded_pages']->count() }}</dd>
+                    </div>
+                </dl>
+
+                @if (
+                    ! $scopeSummary['scope_recorded']
+                    || $scopeSummary['included_pages']->isEmpty()
+                    || $scopeSummary['pages_without_scope_decision']->isNotEmpty()
+                    || $scopeSummary['excluded_pages_without_reason']->isNotEmpty()
+                )
+                    <div class="space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100 print:hidden" role="status">
+                        <flux:heading level="3" size="sm">{{ __('Scope needs review') }}</flux:heading>
+                        <ul class="list-disc space-y-2 pl-5">
+                            @if (! $scopeSummary['scope_recorded'])
+                                <li>
+                                    {{ __('No structured project scope is recorded. The report will still include the target WCAG version and resource list.') }}
+                                    @if ($canEditProject)
+                                        <a class="font-medium underline" href="{{ route('accessibility-projects.edit', $project) }}">{{ __('Edit project scope') }}</a>
+                                    @endif
+                                </li>
+                            @endif
+                            @if ($scopeSummary['included_pages']->isEmpty())
+                                <li>
+                                    {{ __('No pages or services are currently included; only project-wide findings appear in this preview.') }}
+                                    @if ($canEditProject)
+                                        <a class="font-medium underline" href="{{ route('accessibility-pages.create', $project) }}">{{ __('Add Page or Service') }}</a>
+                                    @endif
+                                </li>
+                            @endif
+                            @if ($scopeSummary['pages_without_scope_decision']->isNotEmpty())
+                                <li>
+                                    {{ __('Pages or services without a valid scope decision: :count.', ['count' => $scopeSummary['pages_without_scope_decision']->count()]) }}
+                                    @foreach ($scopeSummary['pages_without_scope_decision'] as $page)
+                                        @if ($canEditProject)
+                                            <a class="font-medium underline" href="{{ route('accessibility-pages.edit', [$project, $page]) }}">{{ $page->name }}</a>
+                                        @else
+                                            {{ $page->name }}
+                                        @endif
+                                        @if (! $loop->last); @endif
+                                    @endforeach
+                                </li>
+                            @endif
+                            @if ($scopeSummary['excluded_pages_without_reason']->isNotEmpty())
+                                <li>
+                                    {{ __('Excluded pages or services without an explanation: :count.', ['count' => $scopeSummary['excluded_pages_without_reason']->count()]) }}
+                                    @foreach ($scopeSummary['excluded_pages_without_reason'] as $page)
+                                        @if ($canEditProject)
+                                            <a class="font-medium underline" href="{{ route('accessibility-pages.edit', [$project, $page]) }}">{{ $page->name }}</a>
+                                        @else
+                                            {{ $page->name }}
+                                        @endif
+                                        @if (! $loop->last); @endif
+                                    @endforeach
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($project->audit_scope)
+                    <div>
+                        <flux:heading level="3" size="sm">{{ __('Purpose and included user journeys') }}</flux:heading>
+                        <flux:text class="mt-1 whitespace-pre-line text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $project->audit_scope }}</flux:text>
+                    </div>
+                @endif
+                @if ($project->scope_limitations)
+                    <div>
+                        <flux:heading level="3" size="sm">{{ __('Project limitations') }}</flux:heading>
+                        <flux:text class="mt-1 whitespace-pre-line text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $project->scope_limitations }}</flux:text>
+                    </div>
+                @endif
+            </section>
+
+            <section id="testing-methodology" aria-labelledby="testing-methodology-heading" class="mb-10 space-y-4 print:mb-8 print:page-break-inside-avoid">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <flux:heading id="testing-methodology-heading" level="2">{{ __('Testing methodologies') }}</flux:heading>
+                        <flux:text class="mt-1 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ __('Methods used for this review, with any project-specific notes.') }}</flux:text>
+                    </div>
+                    @if ($canEditProject)
+                        <flux:button href="{{ route('accessibility-projects.show', $project) }}#testing-methodology" variant="ghost" size="sm" icon="pencil" class="print:hidden">
+                            {{ __('Review testing methodologies') }}
+                        </flux:button>
+                    @endif
+                </div>
+
+                @forelse ($project->methodologies as $methodology)
+                    <article class="space-y-1 border-t border-zinc-200 pt-3 first:border-t-0 first:pt-0 dark:border-zinc-700 print:border-zinc-300">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <flux:text class="font-medium">{{ $methodology->name }}</flux:text>
+                            <flux:badge color="zinc" size="sm">{{ $methodology->category_label }}</flux:badge>
+                        </div>
+                        @if ($methodology->description)
+                            <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $methodology->description }}</flux:text>
+                        @endif
+                        @if ($methodology->pivot->notes)
+                            <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">
+                                <span class="font-medium">{{ __('Project notes') }}:</span> {{ $methodology->pivot->notes }}
+                            </flux:text>
+                        @endif
+                    </article>
+                @empty
+                    <div>
+                        <flux:text class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ __('No testing methodology is linked to this project.') }}</flux:text>
+                    </div>
+                @endforelse
+
             <!-- Executive Summary -->
             <section id="executive-summary" class="mb-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-700 dark:bg-zinc-800/60 print:border-zinc-300 print:bg-white print:page-break-inside-avoid">
                 <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -149,7 +290,7 @@
 
                     <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-white print:border print:border-zinc-300 p-4 print:p-3 rounded-lg print:rounded">
                         <div class="text-3xl font-bold text-zinc-900 dark:text-white print:text-2xl print:text-black">{{ $stats['total_pages'] }}</div>
-                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Pages & Services Tested') }}</div>
+                        <div class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700 mt-1">{{ __('Included pages and services') }}</div>
                     </div>
                 </div>
 
@@ -197,7 +338,7 @@
                         @foreach ($stats['priority_issues'] as $issue)
                             <a
                                 href="#issue-{{ $issue->id }}"
-                                @click="document.getElementById('issue-{{ $issue->id }}')?.setAttribute('open', '')"
+                                @click="document.getElementById('issue-{{ $issue->id }}').value = true"
                                 class="rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:border-accent-content hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-accent-content print:border-zinc-300 print:shadow-none"
                             >
                                 <div class="flex items-start justify-between gap-3">
@@ -221,59 +362,77 @@
                 <section id="pages-services" class="mb-12 print:mb-8">
                     <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Pages & Services') }}</flux:heading>
                     
-                    <div class="space-y-6 print:space-y-4">
+                    <div class="space-y-8 print:space-y-5">
                         @foreach ($inScopePages as $page)
                             @php
                                 $resourceType = $page->resource_type ?? 'page';
                                 $accessContext = $page->access_context ?? 'not_applicable';
                             @endphp
-                            <flux:card class="border border-zinc-200 dark:border-zinc-700 print:border-zinc-300 rounded-lg overflow-hidden print:rounded print:page-break-inside-avoid">
-                                <!-- Page Header -->
-                                <div class="bg-zinc-50 dark:bg-zinc-800 print:bg-zinc-100 p-4 print:p-3">
-                                    <div class="flex items-start justify-between gap-4 print:gap-2">
-                                        <div class="flex-1 min-w-0">
-                                            <h3 class="text-lg font-semibold text-zinc-900 dark:text-white print:text-black print:text-base truncate">{{ $page->name }}</h3>
-                                            <div class="mt-1 flex flex-wrap gap-2">
+                            <section
+                                aria-labelledby="page-title-{{ $page->id }}"
+                                class="space-y-3 print:space-y-2 print:page-break-inside-avoid"
+                            >
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                        <flux:heading
+                                            level="3"
+                                            size="xl"
+                                            id="page-title-{{ $page->id }}"
+                                            class="font-semibold text-zinc-900 dark:text-white print:text-base print:text-black"
+                                        >
+                                            {{ $page->name }}
+                                        </flux:heading>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <flux:badge color="zinc" size="sm">
+                                                {{ __($resourceType === 'service' ? 'Service' : 'Page') }}
+                                            </flux:badge>
+                                            @if ($accessContext !== 'not_applicable')
                                                 <flux:badge color="zinc" size="sm">
-                                                    {{ __($resourceType === 'service' ? 'Service' : 'Page') }}
+                                                    {{ __($accessContext === 'authenticated' ? 'Authenticated' : ($accessContext === 'mixed' ? 'Public and authenticated' : 'Public')) }}
                                                 </flux:badge>
-                                                @if ($accessContext !== 'not_applicable')
-                                                    <flux:badge color="zinc" size="sm">
-                                                        {{ __($accessContext === 'authenticated' ? 'Authenticated' : ($accessContext === 'mixed' ? 'Public and authenticated' : 'Public')) }}
-                                                    </flux:badge>
-                                                @endif
-                                            </div>
-                                            @if ($page->url)
-                                                <a href="{{ $page->url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-accent-content hover:underline print:text-blue-700 print:underline mt-1 break-all">
-                                                    {{ $page->url }}
-                                                </a>
+                                            @endif
+                                            <flux:badge :color="$page->scope === 'in_scope' ? 'emerald' : 'amber'" size="sm">
+                                                {{ __(Str::title(str_replace(['_', '-'], ' ', $page->scope))) }}
+                                            </flux:badge>
+                                            @if ($canEditProject)
+                                                <flux:button href="{{ route('accessibility-pages.edit', [$project, $page]) }}" variant="ghost" size="sm" icon="pencil" class="print:hidden">
+                                                    {{ __('Edit resource') }}
+                                                </flux:button>
                                             @endif
                                         </div>
-                                        <flux:badge :color="$page->scope === 'in_scope' ? 'emerald' : 'amber'" size="sm">
-                                            {{ __(Str::title(str_replace(['_', '-'], ' ', $page->scope))) }}
-                                        </flux:badge>
                                     </div>
+                                    @if ($page->url)
+                                        <a href="{{ $page->url }}" target="_blank" rel="noopener noreferrer" class="block break-all text-sm text-accent-content hover:underline print:text-blue-700 print:underline">
+                                            {{ $page->url }}
+                                        </a>
+                                    @endif
                                     @if ($page->description)
-                                        <x-user-content :content="$page->description" class="mt-2 print:mt-1 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700" />
+                                        <x-user-content :content="$page->description" class="text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700" />
                                     @endif
                                 </div>
 
-                                <!-- Page Issues -->
                                 @if ($page->issues->count() > 0)
-                                    <div class="pt-4 print:pt-3 border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300">
-                                        <flux:heading level="4" class="text-sm mb-3 print:mb-2">{{ __('Issues') }} ({{ $page->issues->count() }})</flux:heading>
-                                        
-                                        <div class="space-y-3 print:space-y-2">
+                                    <section aria-labelledby="page-issues-title-{{ $page->id }}" class="space-y-3 border-t border-zinc-200 pt-4 dark:border-zinc-700 print:space-y-2 print:border-zinc-300 print:pt-3">
+                                        <flux:heading level="4" id="page-issues-title-{{ $page->id }}" class="text-base font-semibold print:mb-2 print:text-sm">
+                                            {{ __('Issues') }} ({{ $page->issues->count() }})
+                                        </flux:heading>
+
+                                        <flux:accordion transition data-print-accordion class="space-y-3 print:space-y-2">
                                             @foreach ($page->issues as $issue)
-                                                <x-shared-project.issue-accordion :issue="$issue" :page-name="$page->name" :target-wcag-version="$project->target_wcag_version" />
+                                                <x-shared-project.issue-accordion
+                                                    :issue="$issue"
+                                                    :target-wcag-version="$project->target_wcag_version"
+                                                    :issue-heading-level="5"
+                                                    :section-heading-level="6"
+                                                    :edit-url="$canEditProject ? route('accessibility-issues.edit', [$project, $issue]) : null"
+                                                />
                                             @endforeach
-                                        </div>
-                                    </div>
+                                        </flux:accordion>
+                                    </section>
                                 @else
                                     <flux:text class="text-sm">{{ __('No issues on this page') }}</flux:text>
                                 @endif
-
-                            </flux:card>
+                            </section>
                         @endforeach
                     </div>
                 </section>
@@ -291,12 +450,22 @@
                             <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800 print:border-zinc-300 print:bg-white">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <h3 class="font-semibold text-zinc-900 dark:text-white print:text-black">{{ $page->name }}</h3>
-                                    <flux:badge color="amber" size="sm">{{ __('Out of Scope') }}</flux:badge>
+                                    <div class="flex items-center gap-2">
+                                        <flux:badge color="amber" size="sm">{{ __('Out of Scope') }}</flux:badge>
+                                        @if ($canEditProject)
+                                            <flux:button href="{{ route('accessibility-pages.edit', [$project, $page]) }}" variant="ghost" size="sm" icon="pencil" class="print:hidden">
+                                                {{ __('Edit resource') }}
+                                            </flux:button>
+                                        @endif
+                                    </div>
                                 </div>
                                 @if ($page->url)
                                     <a href="{{ $page->url }}" target="_blank" rel="noopener noreferrer" class="mt-1 block break-all text-sm text-accent-content underline print:text-blue-800">
                                         {{ $page->url }}
                                     </a>
+                                @endif
+                                @if ($page->scope_exclusion_reason)
+                                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 print:text-zinc-700">{{ $page->scope_exclusion_reason }}</p>
                                 @endif
                             </div>
                         @endforeach
@@ -309,11 +478,17 @@
                 <section id="project-wide-issues" class="mb-12 print:mb-8">
                     <flux:heading level="2" class="mb-6 print:mb-4 print:border-b print:border-zinc-300 print:pb-2 print:page-break-after-avoid">{{ __('Project-Wide Issues') }}</flux:heading>
                     
-                    <div class="space-y-6 print:space-y-4">
+                    <flux:accordion transition data-print-accordion class="space-y-3 print:space-y-2">
                         @foreach ($projectWideIssues as $issue)
-                            <x-shared-project.issue-accordion :issue="$issue" :target-wcag-version="$project->target_wcag_version" />
+                            <x-shared-project.issue-accordion
+                                :issue="$issue"
+                                :target-wcag-version="$project->target_wcag_version"
+                                :issue-heading-level="3"
+                                :section-heading-level="4"
+                                :edit-url="$canEditProject ? route('accessibility-issues.edit', [$project, $issue]) : null"
+                            />
                         @endforeach
-                    </div>
+                    </flux:accordion>
                 </section>
             @endif
 
@@ -386,7 +561,7 @@
         <footer class="border-t border-zinc-200 dark:border-zinc-700 print:border-zinc-300 mt-12 print:mt-8 py-6 print:py-4 text-center print:page-break-before-avoid">
             <div class="max-w-5xl mx-auto px-6">
                 <flux:text class="text-sm">
-                    {{ __('This is a shared accessibility report. Last updated: :date', ['date' => $project->updated_at->translatedFormat('j M Y H:i')]) }}
+                    {{ __('Current project preview. Data last updated: :date', ['date' => $project->updated_at->translatedFormat('j M Y H:i')]) }}
                 </flux:text>
                 <flux:button 
                     type="button"

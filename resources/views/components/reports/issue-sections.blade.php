@@ -19,6 +19,9 @@
                     @php
                         $criteria = collect($issue->wcagCriteria ?? []);
                         $severityLabel = $severityLabels[$issue->severity] ?? $issue->severity;
+                        $summary = filled($issue->summary)
+                            ? $issue->summary
+                            : ($descriptionSummaries[$issue->getKey()]['excerpt'] ?? null);
                     @endphp
                     <li id="issue-{{ $issue->getKey() }}" class="report-document__issue">
                         <h6 class="report-document__issue-heading">
@@ -37,10 +40,10 @@
                             } }}
                         </p>
 
-                        @if ($issue->description)
+                        @if (filled($summary))
                             <div class="report-document__detail">
                                 <p class="report-document__detail-title">{{ __('Summary') }}</p>
-                                <p>{{ $descriptionSummaries[$issue->getKey()]['excerpt'] }}</p>
+                                <p>{{ $summary }}</p>
                             </div>
                         @endif
 
@@ -78,7 +81,7 @@
                             </div>
                         @endif
 
-                        @if (($reportOptions['scope'] ?? false) && $issue->sample_scope)
+                        @if (($reportOptions['sample_scope'] ?? false) && $issue->sample_scope)
                             <div class="report-document__detail">
                                 <p class="report-document__detail-title">{{ __('Sample scope') }}</p>
                                 <p>{{ $sampleScopeLabels[$issue->sample_scope] ?? throw new \UnexpectedValueException('Unsupported issue sample scope') }}</p>
